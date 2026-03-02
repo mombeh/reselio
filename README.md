@@ -123,5 +123,5 @@ reselio/
 ##  Challenges Faced
 
 - Structuring a monorepo with `/apps/api` and `/apps/web`  
-- JWT authentication and secure route handling  
-- API integration and error handling  
+- JWT authentication  
+- API error handling  
