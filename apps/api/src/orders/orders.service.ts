@@ -25,4 +25,34 @@ export class OrdersService {
   async findAllByUser(userId: string) {
     return this.orderModel.find({ userId }).sort({ createdAt: -1 });
   }
+  async updateStatus(orderId: string, status: string, userId: string) {
+    const order = await this.orderModel.findOne({ _id: orderId, userId });
+    if (!order) {
+      throw new Error('Order not found or you are not authorized');
+    }
+    order.status = status;
+    return order.save();
+  }
+  async getDashboardMetrics(userId: string) {
+    const orders = await this.orderModel.find({ userId });
+
+    const totalOrders = orders.length;
+    const totalRevenue = orders.reduce((sum, o) => sum + o.sellingPrice, 0);
+    const totalProfit = orders.reduce((sum, o) => sum + o.profit, 0);
+    const pendingDeliveries = orders.filter(
+      (o) => o.status !== 'Delivered',
+    ).length;
+    const outstandingBalances = orders.reduce(
+      (sum, o) => sum + (o.balance || 0),
+      0,
+    );
+
+    return {
+      totalOrders,
+      totalRevenue,
+      totalProfit,
+      pendingDeliveries,
+      outstandingBalances,
+    };
+  }
 }
