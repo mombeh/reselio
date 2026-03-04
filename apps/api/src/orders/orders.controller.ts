@@ -7,11 +7,13 @@ import {
   Get,
   Patch,
   Param,
+  Res,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { OrdersService } from './orders.service';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { Query } from '@nestjs/common';
+import type { Response } from 'express';
 import { GetOrdersQueryDto } from './dto/get-orders-query.dto';
 
 @Controller('orders')
@@ -58,4 +60,16 @@ export class OrdersController {
   getMonthlyAnalytics(@Req() req: any) {
     return this.ordersService.getMonthlyAnalytics(req.user.userId);
   }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('export')
+  async exportOrders(
+   @Req() req: any,
+  @Res() res: Response,
+){
+  const csv = await this.ordersService.exportOrders(req.user.userId);
+
+  res.header('Content-Type', 'text/csv');
+  res.attachment('orders.csv');
+  return res.send(csv);
+}
 }

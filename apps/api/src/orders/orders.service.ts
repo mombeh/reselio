@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Parser } from 'json2csv';
 import { Order, OrderDocument } from './schemas/order.schema';
 
 @Injectable()
@@ -134,4 +135,25 @@ export class OrdersService {
       },
     ]);
   }
+
+async exportOrders(userId: string) {
+  const orders = await this.orderModel.find({ userId }).lean();
+
+  const fields = [
+    'customerName',
+    'phone',
+    'productName',
+    'size',
+    'color',
+    'costPrice',
+    'sellingPrice',
+    'balance',
+    'profit',
+    'status',
+    'createdAt',
+  ];
+
+  const parser = new Parser({ fields });
+  return parser.parse(orders);
+}
 }
