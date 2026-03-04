@@ -53,4 +53,9 @@ export class OrdersController {
   getCustomers(@Req() req: any) {
     return this.ordersService.getCustomersSummary(req.user.userId);
   }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('analytics/monthly')
+  getMonthlyAnalytics(@Req() req: any) {
+    return this.ordersService.getMonthlyAnalytics(req.user.userId);
+  }
 }

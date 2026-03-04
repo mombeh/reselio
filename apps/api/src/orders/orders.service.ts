@@ -110,4 +110,28 @@ export class OrdersService {
       { $sort: { totalSpent: -1 } },
     ]);
   }
+  async getMonthlyAnalytics(userId: string) {
+    return this.orderModel.aggregate([
+      { $match: { userId } },
+
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+          },
+          totalRevenue: { $sum: '$sellingPrice' },
+          totalProfit: { $sum: '$profit' },
+          totalOrders: { $sum: 1 },
+        },
+      },
+
+      {
+        $sort: {
+          '_id.year': 1,
+          '_id.month': 1,
+        },
+      },
+    ]);
+  }
 }
