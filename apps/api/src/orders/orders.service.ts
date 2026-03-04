@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { Parser } from 'json2csv';
 import { Order, OrderDocument } from './schemas/order.schema';
 
 @Injectable()
@@ -22,7 +23,141 @@ export class OrdersService {
 
     return order.save();
   }
-  async findAllByUser(userId: string) {
-    return this.orderModel.find({ userId }).sort({ createdAt: -1 });
+  async findAllByUser(userId: string, query: any) {
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const filter: any = { userId };
+
+    if (query.status) {
+      filter.status = query.status;
+    }
+
+    if (query.search) {
+      filter.$or = [
+        { customerName: { $regex: query.search, $options: 'i' } },
+        { phone: { $regex: query.search, $options: 'i' } },
+        { productName: { $regex: query.search, $options: 'i' } },
+      ];
+    }
+
+    const total = await this.orderModel.countDocuments(filter);
+
+    const orders = await this.orderModel
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return {
+      data: orders,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
+  async updateStatus(orderId: string, status: string, userId: string) {
+    const order = await this.orderModel.findOne({ _id: orderId, userId });
+    if (!order) {
+      throw new Error('Order not found or you are not authorized');
+    }
+    order.status = status;
+    return order.save();
+  }
+  async getDashboardMetrics(userId: string) {
+    const orders = await this.orderModel.find({ userId });
+
+    const totalOrders = orders.length;
+    const totalRevenue = orders.reduce((sum, o) => sum + o.sellingPrice, 0);
+    const totalProfit = orders.reduce((sum, o) => sum + o.profit, 0);
+    const pendingDeliveries = orders.filter(
+      (o) => o.status !== 'Delivered',
+    ).length;
+    const outstandingBalances = orders.reduce(
+      (sum, o) => sum + (o.balance || 0),
+      0,
+    );
+
+    return {
+      totalOrders,
+      totalRevenue,
+      totalProfit,
+      pendingDeliveries,
+      outstandingBalances,
+    };
+  }
+  async getCustomersSummary(userId: string) {
+    return this.orderModel.aggregate([
+      { $match: { userId } },
+
+      {
+        $group: {
+          _id: '$phone',
+          customerName: { $first: '$customerName' },
+          phone: { $first: '$phone' },
+          totalOrders: { $sum: 1 },
+          totalSpent: { $sum: '$sellingPrice' },
+          totalOutstandingBalance: { $sum: '$balance' },
+          deliveredOrders: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'Delivered'] }, 1, 0],
+            },
+          },
+        },
+      },
+
+      { $sort: { totalSpent: -1 } },
+    ]);
+  }
+  async getMonthlyAnalytics(userId: string) {
+    return this.orderModel.aggregate([
+      { $match: { userId } },
+
+      {
+        $group: {
+          _id: {
+            year: { $year: '$createdAt' },
+            month: { $month: '$createdAt' },
+          },
+          totalRevenue: { $sum: '$sellingPrice' },
+          totalProfit: { $sum: '$profit' },
+          totalOrders: { $sum: 1 },
+        },
+      },
+
+      {
+        $sort: {
+          '_id.year': 1,
+          '_id.month': 1,
+        },
+      },
+    ]);
+  }
+
+async exportOrders(userId: string): Promise<string> {
+  const orders = await this.findAllByUser(userId, {});
+
+  if (orders.data.length === 0) {
+    return '';
+  }
+
+  const fields = [
+    'customerName',
+    'phone',
+    'productName',
+    'size',
+    'color',
+    'costPrice',
+    'sellingPrice',
+    'balance',
+    'profit',
+    'status',
+    'createdAt',
+  ];
+
+  const parser = new Parser({ fields });
+  return parser.parse(orders.data);
+}
 }
