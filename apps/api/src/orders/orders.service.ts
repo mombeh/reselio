@@ -136,8 +136,12 @@ export class OrdersService {
     ]);
   }
 
-async exportOrders(userId: string) {
-  const orders = await this.orderModel.find({ userId }).lean();
+async exportOrders(userId: string): Promise<string> {
+  const orders = await this.findAllByUser(userId, {});
+
+  if (orders.data.length === 0) {
+    return '';
+  }
 
   const fields = [
     'customerName',
@@ -154,6 +158,6 @@ async exportOrders(userId: string) {
   ];
 
   const parser = new Parser({ fields });
-  return parser.parse(orders);
+  return parser.parse(orders.data);
 }
 }
