@@ -11,6 +11,9 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { OrdersService } from './orders.service';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { Query } from '@nestjs/common';
+import { GetOrdersQueryDto } from './dto/get-orders-query.dto';
+
 @Controller('orders')
 export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
@@ -23,8 +26,8 @@ export class OrdersController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  getMyOrders(@Req() req: any) {
-    return this.ordersService.findAllByUser(req.user.userId);
+  getMyOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
+    return this.ordersService.findAllByUser(req.user.userId, query);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -44,5 +47,10 @@ export class OrdersController {
   @Get('dashboard')
   getDashboard(@Req() req: any) {
     return this.ordersService.getDashboardMetrics(req.user.userId);
+  }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('customers')
+  getCustomers(@Req() req: any) {
+    return this.ordersService.getCustomersSummary(req.user.userId);
   }
 }

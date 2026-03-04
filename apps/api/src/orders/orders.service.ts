@@ -22,8 +22,40 @@ export class OrdersService {
 
     return order.save();
   }
-  async findAllByUser(userId: string) {
-    return this.orderModel.find({ userId }).sort({ createdAt: -1 });
+  async findAllByUser(userId: string, query: any) {
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const filter: any = { userId };
+
+    if (query.status) {
+      filter.status = query.status;
+    }
+
+    if (query.search) {
+      filter.$or = [
+        { customerName: { $regex: query.search, $options: 'i' } },
+        { phone: { $regex: query.search, $options: 'i' } },
+        { productName: { $regex: query.search, $options: 'i' } },
+      ];
+    }
+
+    const total = await this.orderModel.countDocuments(filter);
+
+    const orders = await this.orderModel
+      .find(filter)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return {
+      data: orders,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
   }
   async updateStatus(orderId: string, status: string, userId: string) {
     const order = await this.orderModel.findOne({ _id: orderId, userId });
@@ -54,5 +86,28 @@ export class OrdersService {
       pendingDeliveries,
       outstandingBalances,
     };
+  }
+  async getCustomersSummary(userId: string) {
+    return this.orderModel.aggregate([
+      { $match: { userId } },
+
+      {
+        $group: {
+          _id: '$phone',
+          customerName: { $first: '$customerName' },
+          phone: { $first: '$phone' },
+          totalOrders: { $sum: 1 },
+          totalSpent: { $sum: '$sellingPrice' },
+          totalOutstandingBalance: { $sum: '$balance' },
+          deliveredOrders: {
+            $sum: {
+              $cond: [{ $eq: ['$status', 'Delivered'] }, 1, 0],
+            },
+          },
+        },
+      },
+
+      { $sort: { totalSpent: -1 } },
+    ]);
   }
 }
