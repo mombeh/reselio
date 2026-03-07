@@ -48,7 +48,9 @@ export default function RegisterPage() {
           name: formData.name,
         };
         login(result.data.access_token, user);
-        router.push('/dashboard');
+        // Show success message and redirect to login
+        alert('Account created successfully! Please log in.');
+        router.push('/auth/login');
       }
     } catch (err) {
       setError('Something went wrong. Please try again.');
