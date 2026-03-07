@@ -39,4 +39,13 @@ async create(userData: CreateUserDto) {
     if (!isPasswordValid) return null;
     return user;
   }
+
+  async createWithGoogle(email: string, name: string, hashedPassword: string) {
+    const newUser = new this.userModel({
+      email,
+      name,
+      password: hashedPassword,
+    });
+    return newUser.save();
+  }
 }
