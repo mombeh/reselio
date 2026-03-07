@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api';
-import Logo from './Logo';
 
 interface Stats {
   users: number;
@@ -14,12 +13,10 @@ interface Stats {
 export default function LandingContent() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'offline'>('checking');
 
   useEffect(() => {
     async function fetchData() {
-      // Check API health
       const healthResult = await api.healthCheck();
       if (healthResult.data) {
         setApiStatus('online');
@@ -27,7 +24,6 @@ export default function LandingContent() {
         setApiStatus('offline');
       }
 
-      // Fetch stats
       try {
         const [usersResult, ordersResult] = await Promise.all([
           api.getUserCount(),
@@ -53,269 +49,321 @@ export default function LandingContent() {
   }, []);
 
   return (
-    <div className="min-h-screen">
-      {/* Navigation */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <Logo size="md" />
-            <div className="flex items-center gap-4">
-              <a
-                href="/auth/login"
-                className="text-gray-600 hover:text-gray-900 font-medium transition-colors"
-              >
-                Sign In
-              </a>
-              <a
-                href="/auth/register"
-                className="bg-gradient-to-r from-orange-500 via-red-500 to-green-500 text-white px-4 py-2 rounded-lg font-medium hover:opacity-90 transition-opacity"
-              >
-                Get Started
+    <div className="min-h-screen bg-gradient-to-b from-rose-50 via-white to-teal-50">
+      {/* Header */}
+      <header className="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-md shadow-sm">
+        <div className="max-w-6xl mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            {/* Logo */}
+            <div className="flex items-center gap-2">
+              <div className="w-10 h-10 bg-gradient-to-br from-rose-500 via-pink-500 to-teal-500 rounded-xl flex items-center justify-center">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <span className="text-xl font-bold text-gray-800">Reselio</span>
+            </div>
+            
+            <div className="flex items-center gap-3">
+              <a href="/auth/login" className="text-gray-600 hover:text-gray-900 font-medium">Sign In</a>
+              <a href="/auth/register" className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 transition">
+                Start Free
               </a>
             </div>
           </div>
         </div>
-      </nav>
+      </header>
 
-      {/* Hero Section with Gradient */}
-      <section className="relative min-h-[90vh] flex items-center justify-center overflow-hidden">
-        {/* Animated Gradient Background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-orange-100 via-red-50 to-green-100">
-          <div className="absolute inset-0 bg-gradient-to-r from-orange-500/10 via-red-500/10 to-green-500/10 animate-pulse" />
-        </div>
-        
-        {/* Decorative circles */}
-        <div className="absolute top-20 left-10 w-72 h-72 bg-orange-300/30 rounded-full blur-3xl" />
-        <div className="absolute bottom-20 right-10 w-96 h-96 bg-green-300/30 rounded-full blur-3xl" />
-        <div className="absolute top-40 right-1/4 w-64 h-64 bg-red-300/30 rounded-full blur-3xl" />
-
-        <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="mb-8">
-            <span className="inline-block px-4 py-2 bg-white/60 backdrop-blur-sm rounded-full text-sm font-medium text-gray-700 mb-6">
-              🚀 The Future of Order Management
-            </span>
+      {/* Hero Section */}
+      <section className="pt-32 pb-20 px-4">
+        <div className="max-w-5xl mx-auto text-center">
+          <div className="inline-flex items-center gap-2 bg-rose-100 text-rose-700 px-4 py-2 rounded-full text-sm font-medium mb-6">
+            <span>📱</span> Built for WhatsApp & Instagram Sellers
           </div>
           
-          <h1 className="text-5xl md:text-7xl font-bold mb-6 leading-tight">
-            <span className="bg-gradient-to-r from-orange-500 via-red-500 to-green-500 bg-clip-text text-transparent">
-              Streamline Your
-            </span>
-            <br />
-            <span className="text-gray-900">Business Operations</span>
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+            Manage Your Online
+            <span className="bg-gradient-to-r from-rose-500 via-pink-500 to-teal-500 bg-clip-text text-transparent"> Business </span>
+            Easily
           </h1>
           
-          <p className="text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
-            Reselio helps you manage orders and users seamlessly with powerful 
-            tools and real-time analytics. Built for modern businesses.
+          <p className="text-lg md:text-xl text-gray-600 mb-10 max-w-2xl mx-auto">
+            No more confusion with WhatsApp chats and handwritten notes. 
+            Track orders, customers, payments, and profits all in one place.
           </p>
           
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
-              href="/auth/register"
-              className="bg-gradient-to-r from-orange-500 via-red-500 to-green-500 text-white px-8 py-4 rounded-xl font-semibold text-lg hover:opacity-90 transition-all transform hover:scale-105 shadow-lg"
-            >
+            <a href="/auth/register" className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-8 py-4 rounded-xl font-bold text-lg hover:opacity-90 transition shadow-lg">
               Start Free Trial
             </a>
-            <a
-              href="/auth/login"
-              className="bg-white text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-gray-300 transition-all"
-            >
-              Sign In
+            <a href="/auth/login" className="bg-white text-gray-700 px-8 py-4 rounded-xl font-bold text-lg border-2 border-gray-200 hover:border-rose-300 transition">
+              I Already Have Account
             </a>
           </div>
-        </div>
 
-        {/* Scroll indicator */}
-        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 animate-bounce">
-          <div className="w-6 h-10 border-2 border-gray-400 rounded-full flex justify-center pt-2">
-            <div className="w-1 h-3 bg-gray-400 rounded-full" />
+          {/* Trust badges */}
+          <div className="mt-12 flex flex-wrap justify-center gap-6 text-sm text-gray-500">
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-teal-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              No Card Required
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-teal-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Works on Phone
+            </div>
+            <div className="flex items-center gap-2">
+              <svg className="w-5 h-5 text-teal-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+              </svg>
+              Free for Small Sellers
+            </div>
           </div>
         </div>
       </section>
 
-      {/* API Status Bar */}
-      <section className="py-4 bg-white border-b border-gray-100">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-center gap-3">
-            <span
-              className={`w-3 h-3 rounded-full ${
-                apiStatus === 'online'
-                  ? 'bg-green-500'
-                  : apiStatus === 'offline'
-                  ? 'bg-red-500'
-                  : 'bg-yellow-500 animate-pulse'
-              }`}
-            />
-            <span className="text-gray-600">
-              API Status: <span className="font-medium capitalize">{apiStatus}</span>
-            </span>
+      {/* Dashboard Preview */}
+      <section className="py-16 px-4">
+        <div className="max-w-5xl mx-auto">
+          <div className="bg-white rounded-3xl shadow-2xl p-4 md:p-8 border border-gray-100">
+            <div className="flex items-center gap-2 mb-6">
+              <div className="w-3 h-3 rounded-full bg-rose-400" />
+              <div className="w-3 h-3 rounded-full bg-yellow-400" />
+              <div className="w-3 h-3 rounded-full bg-teal-400" />
+              <span className="ml-4 text-gray-400 text-sm">Your Business Dashboard</span>
+            </div>
+            
+            {/* Stats Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+              <div className="bg-gradient-to-br from-rose-50 to-rose-100 rounded-2xl p-5">
+                <div className="text-3xl font-bold text-rose-600">
+                  {loading ? '...' : stats?.orders || 0}
+                </div>
+                <div className="text-rose-700 text-sm font-medium">Total Orders</div>
+              </div>
+              <div className="bg-gradient-to-br from-teal-50 to-teal-100 rounded-2xl p-5">
+                <div className="text-3xl font-bold text-teal-600">
+                  {loading ? '...' : stats?.users || 0}
+                </div>
+                <div className="text-teal-700 text-sm font-medium">Customers</div>
+              </div>
+              <div className="bg-gradient-to-br from-amber-50 to-amber-100 rounded-2xl p-5">
+                <div className="text-3xl font-bold text-amber-600">
+                  {loading ? '...' : stats?.pending || 0}
+                </div>
+                <div className="text-amber-700 text-sm font-medium">Pending Delivery</div>
+              </div>
+              <div className="bg-gradient-to-br from-pink-50 to-pink-100 rounded-2xl p-5">
+                <div className="text-3xl font-bold text-pink-600">
+                  {loading ? '...' : stats?.completed || 0}
+                </div>
+                <div className="text-pink-700 text-sm font-medium">Delivered</div>
+              </div>
+            </div>
+
+            {/* Recent Orders Preview */}
+            <div className="bg-gray-50 rounded-2xl p-4">
+              <h3 className="font-bold text-gray-800 mb-3">Recent Orders</h3>
+              <div className="space-y-2">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex items-center justify-between bg-white p-3 rounded-xl">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-gradient-to-br from-rose-400 to-pink-500 rounded-full flex items-center justify-center text-white font-bold">
+                        {String.fromCharCode(64 + i)}
+                      </div>
+                      <div>
+                        <div className="font-medium text-gray-800">Customer {i}</div>
+                        <div className="text-sm text-gray-500">Dress Size M • Pink</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-bold text-gray-800">₦{5000 + i * 1000}</div>
+                      <div className="text-xs text-teal-600 font-medium">Paid</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Stats Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            <span className="bg-gradient-to-r from-orange-500 via-red-500 to-green-500 bg-clip-text text-transparent">
-              Platform Statistics
-            </span>
+      {/* Features */}
+      <section className="py-20 px-4 bg-white">
+        <div className="max-w-5xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-4">
+            Everything You Need to
+            <span className="bg-gradient-to-r from-rose-500 to-teal-500 bg-clip-text text-transparent"> Grow </span>
+            Your Business
           </h2>
-          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-            Real-time data from our platform
+          <p className="text-gray-600 text-center mb-12 max-w-xl mx-auto">
+            Simple tools designed specifically for WhatsApp and Instagram sellers
           </p>
           
-          {loading ? (
-            <div className="text-center py-12">
-              <div className="inline-block w-8 h-8 border-4 border-orange-500 border-t-transparent rounded-full animate-spin" />
-              <p className="mt-4 text-gray-600">Loading statistics...</p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {/* Orders */}
+            <div className="bg-gradient-to-br from-rose-50 to-white rounded-2xl p-6 border border-rose-100">
+              <div className="w-14 h-14 bg-gradient-to-br from-rose-500 to-pink-500 rounded-2xl flex items-center justify-center mb-4">
+                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Track Orders</h3>
+              <p className="text-gray-600">
+                Add orders with customer details, product info, size, color, and payment status. Never lose track again.
+              </p>
             </div>
-          ) : error ? (
-            <div className="text-center py-12 text-red-500">{error}</div>
-          ) : stats ? (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-                <div className="text-4xl font-bold bg-gradient-to-r from-orange-500 to-red-500 bg-clip-text text-transparent">
-                  {stats.users}
-                </div>
-                <div className="text-gray-500 mt-2 font-medium">Total Users</div>
-              </div>
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-                <div className="text-4xl font-bold bg-gradient-to-r from-red-500 to-green-500 bg-clip-text text-transparent">
-                  {stats.orders}
-                </div>
-                <div className="text-gray-500 mt-2 font-medium">Total Orders</div>
-              </div>
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-                <div className="text-4xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 bg-clip-text text-transparent">
-                  {stats.pending}
-                </div>
-                <div className="text-gray-500 mt-2 font-medium">Pending Orders</div>
-              </div>
-              <div className="bg-white rounded-2xl p-6 shadow-lg border border-gray-100 hover:shadow-xl transition-shadow">
-                <div className="text-4xl font-bold bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">
-                  {stats.completed}
-                </div>
-                <div className="text-gray-500 mt-2 font-medium">Completed</div>
-              </div>
-            </div>
-          ) : (
-            <div className="text-center py-12 text-gray-500">
-              No data available yet
-            </div>
-          )}
-        </div>
-      </section>
 
-      {/* Features Section */}
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-            <span className="bg-gradient-to-r from-orange-500 via-red-500 to-green-500 bg-clip-text text-transparent">
-              Powerful Features
-            </span>
-          </h2>
-          <p className="text-gray-600 text-center mb-12 max-w-2xl mx-auto">
-            Everything you need to manage your business effectively
-          </p>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:border-orange-200 transition-colors group">
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-orange-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+            {/* Customers */}
+            <div className="bg-gradient-to-br from-pink-50 to-white rounded-2xl p-6 border border-pink-100">
+              <div className="w-14 h-14 bg-gradient-to-br from-pink-500 to-rose-500 rounded-2xl flex items-center justify-center mb-4">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">User Management</h3>
-              <p className="text-gray-600">Create and manage user accounts with secure authentication and role-based access.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Know Your Customers</h3>
+              <p className="text-gray-600">
+                See who buys from you most. Track customer history and build loyalty with repeat buyers.
+              </p>
             </div>
-            
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:border-red-200 transition-colors group">
-              <div className="w-14 h-14 bg-gradient-to-br from-red-400 to-red-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+
+            {/* Money */}
+            <div className="bg-gradient-to-br from-teal-50 to-white rounded-2xl p-6 border border-teal-100">
+              <div className="w-14 h-14 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-2xl flex items-center justify-center mb-4">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Order Tracking</h3>
-              <p className="text-gray-600">Track and manage orders in real-time with status updates and notifications.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Track Your Profit</h3>
+              <p className="text-gray-600">
+                Enter cost price and selling price. We automatically calculate your profit. Know exactly how much you earn.
+              </p>
             </div>
-            
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:border-green-200 transition-colors group">
-              <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+
+            {/* Delivery */}
+            <div className="bg-gradient-to-br from-amber-50 to-white rounded-2xl p-6 border border-amber-100">
+              <div className="w-14 h-14 bg-gradient-to-br from-amber-500 to-orange-500 rounded-2xl flex items-center justify-center mb-4">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Secure Auth</h3>
-              <p className="text-gray-600">Google OAuth and JWT-based authentication for maximum security.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Delivery Status</h3>
+              <p className="text-gray-600">
+                Update order status: Waiting → Shipped → Received → Sent → Delivered. Keep customers informed.
+              </p>
             </div>
-            
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:border-orange-200 transition-colors group">
-              <div className="w-14 h-14 bg-gradient-to-br from-orange-400 to-red-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+
+            {/* Balance */}
+            <div className="bg-gradient-to-br from-purple-50 to-white rounded-2xl p-6 border border-purple-100">
+              <div className="w-14 h-14 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mb-4">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">RESTful API</h3>
-              <p className="text-gray-600">Modern API built with NestJS for lightning fast performance.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Balance Tracking</h3>
+              <p className="text-gray-600">
+                Track advance payments and remaining balance. Know who still owes you money.
+              </p>
             </div>
-            
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:border-red-200 transition-colors group">
-              <div className="w-14 h-14 bg-gradient-to-br from-red-400 to-green-500 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+
+            {/* Simple */}
+            <div className="bg-gradient-to-br from-rose-50 to-white rounded-2xl p-6 border border-rose-100">
+              <div className="w-14 h-14 bg-gradient-to-br from-rose-400 to-teal-500 rounded-2xl flex items-center justify-center mb-4">
                 <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
               </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">Analytics</h3>
-              <p className="text-gray-600">Real-time analytics and insights to make data-driven decisions.</p>
-            </div>
-            
-            <div className="bg-white rounded-2xl p-8 shadow-lg border border-gray-100 hover:border-green-200 transition-colors group">
-              <div className="w-14 h-14 bg-gradient-to-br from-green-400 to-emerald-600 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                <svg className="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M18.364 5.636l-3.536 3.536m0 5.656l3.536 3.536M9.172 9.172L5.636 5.636m3.536 9.192l-3.536 3.536M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-5 0a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-              </div>
-              <h3 className="text-xl font-bold text-gray-900 mb-2">24/7 Support</h3>
-              <p className="text-gray-600">Round-the-clock support to help you with any issues.</p>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">Works on Phone</h3>
+              <p className="text-gray-600">
+                No app to download. Just open in your browser. Perfect for small screens. Simple to use.
+              </p>
             </div>
           </div>
         </div>
       </section>
 
-      {/* CTA Section */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-r from-orange-500 via-red-500 to-green-500" />
-        <div className="absolute inset-0 bg-black/10" />
-        
-        <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
-            Ready to Get Started?
+      {/* How It Works */}
+      <section className="py-20 px-4 bg-gradient-to-b from-rose-50 to-teal-50">
+        <div className="max-w-4xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-900 mb-12">
+            How It <span className="text-rose-500">Works</span>
           </h2>
-          <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto">
-            Join thousands of users already using Reselio to streamline their business operations.
-          </p>
-          <a
-            href="/auth/register"
-            className="inline-block bg-white text-gray-900 px-10 py-4 rounded-xl font-semibold text-lg hover:bg-gray-100 transition-colors shadow-lg"
-          >
-            Create Your Free Account
-          </a>
+          
+          <div className="space-y-6">
+            <div className="flex items-start gap-4 bg-white p-6 rounded-2xl shadow-sm">
+              <div className="w-12 h-12 bg-gradient-to-br from-rose-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                1
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Create Free Account</h3>
+                <p className="text-gray-600">Sign up with your phone number. No credit card needed.</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-4 bg-white p-6 rounded-2xl shadow-sm">
+              <div className="w-12 h-12 bg-gradient-to-br from-pink-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                2
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Add Your First Order</h3>
+                <p className="text-gray-600">Enter customer name, product details, and payment info.</p>
+              </div>
+            </div>
+            
+            <div className="flex items-start gap-4 bg-white p-6 rounded-2xl shadow-sm">
+              <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-emerald-500 rounded-full flex items-center justify-center text-white font-bold text-xl flex-shrink-0">
+                3
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-gray-900 mb-1">Track & Grow</h3>
+                <p className="text-gray-600">Update delivery status, see your profit, and grow your business.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="py-20 px-4">
+        <div className="max-w-3xl mx-auto text-center">
+          <div className="bg-gradient-to-r from-rose-500 via-pink-500 to-teal-500 rounded-3xl p-10 md:p-14">
+            <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+              Ready to Organize Your Business?
+            </h2>
+            <p className="text-white/90 text-lg mb-8">
+              Join hundreds of sellers who have stopped using WhatsApp to track orders. 
+              Start managing your business the smart way.
+            </p>
+            <a href="/auth/register" className="inline-block bg-white text-gray-900 px-10 py-4 rounded-xl font-bold text-lg hover:bg-gray-100 transition shadow-lg">
+              Start Free Now
+            </a>
+            <p className="text-white/70 text-sm mt-4">Free plan up to 20 orders per month</p>
+          </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <footer className="bg-gray-900 py-10 px-4">
+        <div className="max-w-5xl mx-auto">
           <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-            <Logo size="sm" />
-            <div className="flex gap-6 text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">Privacy</a>
-              <a href="#" className="hover:text-white transition-colors">Terms</a>
-              <a href="#" className="hover:text-white transition-colors">Contact</a>
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-gradient-to-br from-rose-500 via-pink-500 to-teal-500 rounded-lg flex items-center justify-center">
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <span className="text-white font-bold">Reselio</span>
             </div>
-            <div className="text-gray-400">
-              © 2026 Reselio. All rights reserved.
+            <div className="flex gap-6 text-gray-400 text-sm">
+              <a href="#" className="hover:text-white">Privacy</a>
+              <a href="#" className="hover:text-white">Terms</a>
+              <a href="#" className="hover:text-white">Contact</a>
+            </div>
+            <div className="text-gray-500 text-sm">
+              © 2026 Reselio. Built for African Sellers.
             </div>
           </div>
         </div>
