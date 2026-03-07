@@ -44,6 +44,15 @@ interface OrderStatsResponse {
   completed: number;
 }
 
+interface AuthResponse {
+  access_token: string;
+  user?: {
+    id: string;
+    email: string;
+    name: string;
+  };
+}
+
 // API Client methods
 export const api = {
   // Health check
@@ -65,13 +74,13 @@ export const api = {
 
   // Auth
   login: (email: string, password: string) =>
-    fetchApi<{ access_token: string }>('/auth/login', {
+    fetchApi<AuthResponse>('/auth/login', {
       method: 'POST',
       body: JSON.stringify({ email, password }),
     }),
 
   register: (email: string, password: string, name: string) =>
-    fetchApi<{ access_token: string }>('/auth/register', {
+    fetchApi<AuthResponse>('/auth/register', {
       method: 'POST',
       body: JSON.stringify({ email, password, name }),
     }),
