@@ -2,55 +2,35 @@
 
 import { useEffect } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useAuth } from '../../lib/auth-context'
 
 export default function AuthCallbackPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
+  const { login } = useAuth()
 
   useEffect(() => {
     const token = searchParams.get('token')
-    const userData = searchParams.get('user')
     const email = searchParams.get('email')
     const name = searchParams.get('name')
 
-    if (token) {
-      // Store token
-      localStorage.setItem('token', token)
-
-      // Build user object from available data
-      let user = null
-      
-      if (userData) {
-        try {
-          // Try to parse as JSON
-          user = JSON.parse(userData)
-        } catch {
-          // If not JSON, treat as name
-          user = { name: userData, email: email || '' }
-        }
-      } else if (email || name) {
-        // Use individual parameters if available
-        user = { 
-          name: name || 'Google User', 
-          email: email || '' 
-        }
-      } else {
-        // Default user data
-        user = {
-          name: 'Google User',
-          email: '',
-          avatar: ''
-        }
+    if (token && email) {
+      // Create user object from URL parameters
+      const user = {
+        id: '',
+        email: email,
+        name: name || 'Google User'
       }
 
-      localStorage.setItem('user', JSON.stringify(user))
+      // Use the auth context's login function
+      login(token, user)
 
       // Redirect to dashboard
       router.push('/dashboard')
     } else {
-      router.push('/auth')
+      router.push('/auth/login')
     }
-  }, [searchParams, router])
+  }, [searchParams, router, login])
 
   return (
     <div className="min-h-screen flex items-center justify-center">
