@@ -37,7 +37,7 @@ export class AuthService {
       
       user = await this.usersService.createWithGoogle(
         googleUser.email,
-        googleUser.firstName + ' ' + googleUser.lastName,
+        googleUser.name,
         hashedPassword,
       );
     }
