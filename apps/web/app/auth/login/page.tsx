@@ -46,6 +46,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
+    console.log('Google login clicked, redirecting to http://localhost:4000/auth/google');
     window.location.href = 'http://localhost:4000/auth/google';
   };
 

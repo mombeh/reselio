@@ -25,12 +25,27 @@ export default function AuthCallbackPage() {
           },
         })
 
-        const user = await res.json()
+        if (!res.ok) {
+          console.error('Failed to fetch user:', res.status, res.statusText)
+          router.push('/auth/login')
+          return
+        }
 
-        login(token, user)
+        const user = await res.json()
+        console.log('User fetched successfully:', user)
+
+        // Transform user object to match expected format
+        const formattedUser = {
+          id: user.userId || user.id,
+          email: user.email,
+          name: user.name || 'User',
+        }
+
+        login(token, formattedUser)
 
         router.push('/dashboard')
       } catch (error) {
+        console.error('Error in callback:', error)
         router.push('/auth/login')
       }
     }

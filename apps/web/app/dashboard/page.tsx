@@ -30,10 +30,15 @@ export default function DashboardPage() {
 
   useEffect(() => {
     async function fetchOrders() {
-      if (!token) return;
+      if (!token) {
+        console.log('No token available, skipping orders fetch')
+        return
+      }
       
       const result = await api.getOrders(token);
-      if (result.data) {
+      console.log('Orders API result:', result)
+      
+      if (result.data && Array.isArray(result.data)) {
         setOrders(result.data);
         
         // Calculate stats
@@ -42,6 +47,8 @@ export default function DashboardPage() {
         const pending = result.data.filter((o: any) => o.status === 'pending' || o.status === 'sent').length;
         
         setStats({ total, revenue, pending });
+      } else {
+        console.error('Failed to fetch orders:', result.error || 'Unknown error', result);
       }
       setLoadingOrders(false);
     }
