@@ -1,4 +1,14 @@
-import { Controller, Post, Body, UnauthorizedException, Get, UseGuards, Req, ConflictException, Res } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  UnauthorizedException,
+  Get,
+  UseGuards,
+  Req,
+  ConflictException,
+  Res,
+} from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
 import { AuthService } from './auth.service';
@@ -12,20 +22,22 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  async register(@Body() body: { email: string; password: string; name: string }) {
+  async register(
+    @Body() body: { email: string; password: string; name: string },
+  ) {
     // Check if user already exists
     const existingUser = await this.usersService.findByEmail(body.email);
     if (existingUser) {
       throw new ConflictException('Email already registered');
     }
-    
+
     // Create user
     const user = await this.usersService.create({
       email: body.email,
       password: body.password,
       name: body.name,
     });
-    
+
     // Generate token
     return this.authService.login(user);
   }
@@ -41,18 +53,22 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
-  async googleAuth() {
-  }
+  async googleAuth() {}
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
     const result = await this.authService.googleLogin(req.user);
-    
+
     // Redirect to frontend callback with token and user data
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const callbackUrl = `${frontendUrl}/auth/callback?token=${result.access_token}`;
 
     return res.redirect(callbackUrl);
+  }
+  @Get('me')
+  @UseGuards(AuthGuard('jwt'))
+  getProfile(@Req() req: any) {
+    return req.user;
   }
 }

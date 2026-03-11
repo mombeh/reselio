@@ -11,33 +11,38 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const token = searchParams.get('token')
-    const email = searchParams.get('email')
-    const name = searchParams.get('name')
 
-    if (token && email) {
-      // Create user object from URL parameters
-      const user = {
-        id: '',
-        email: email,
-        name: name || 'Google User'
-      }
-
-      // Use the auth context's login function
-      login(token, user)
-
-      // Redirect to dashboard
-      router.push('/dashboard')
-    } else {
+    if (!token) {
       router.push('/auth/login')
+      return
     }
+
+    const fetchUser = async () => {
+      try {
+        const res = await fetch('http://localhost:4000/auth/me', {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+
+        const user = await res.json()
+
+        login(token, user)
+
+        router.push('/dashboard')
+      } catch (error) {
+        router.push('/auth/login')
+      }
+    }
+
+    fetchUser()
   }, [searchParams, router, login])
 
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="text-center">
         <div className="w-16 h-16 border-4 border-green-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-        <p className="text-[var(--color-foreground)]">Authenticating...</p>
-        <p className="text-sm text-[var(--color-text-dim)] mt-2">Please wait while we verify your account</p>
+        <p>Authenticating...</p>
       </div>
     </div>
   )
