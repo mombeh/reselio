@@ -6,7 +6,7 @@ export class GoogleAuthGuard extends AuthGuard('google') {
   getAuthenticateOptions() {
     return {
       scope: ['email', 'profile'],
-      prompt: 'select_account',
+      prompt: 'consent select_account',
     };
   }
 }
