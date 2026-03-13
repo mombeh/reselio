@@ -7,6 +7,34 @@ import api from '../../lib/api';
 import { useAuth } from '../../lib/auth-context';
 import Logo from '../../components/Logo';
 
+// Email validation regex
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  return emailRegex.test(email);
+};
+
+// Password strength checker
+interface PasswordStrength {
+  score: number;
+  label: string;
+  color: string;
+}
+
+const checkPasswordStrength = (password: string): PasswordStrength => {
+  let score = 0;
+  
+  if (password.length >= 8) score++;
+  if (password.length >= 12) score++;
+  if (/[a-z]/.test(password)) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/\d/.test(password)) score++;
+  if (/[@$!%*?&]/.test(password)) score++;
+
+  if (score <= 2) return { score, label: 'Weak', color: 'bg-red-500' };
+  if (score <= 4) return { score, label: 'Medium', color: 'bg-yellow-500' };
+  return { score, label: 'Strong', color: 'bg-green-500' };
+};
+
 export default function RegisterPage() {
   const router = useRouter();
   const { login } = useAuth();
@@ -17,13 +45,45 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [passwordStrength, setPasswordStrength] = useState<PasswordStrength>({ score: 0, label: '', color: '' });
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const email = e.target.value;
+    setFormData({ ...formData, email });
+    
+    if (email && !isValidEmail(email)) {
+      setEmailError('Please enter a valid email address');
+    } else {
+      setEmailError('');
+    }
+  };
+
+  const handlePasswordChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const password = e.target.value;
+    setFormData({ ...formData, password });
+    setPasswordStrength(checkPasswordStrength(password));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
 
-    if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+    // Validate email
+    if (!isValidEmail(formData.email)) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    // Validate password strength
+    if (passwordStrength.score < 4) {
+      setError('Password is too weak. Use at least 8 characters with uppercase, lowercase, numbers, and special characters');
+      return;
+    }
+
+    // Additional minimum length check
+    if (formData.password.length < 8) {
+      setError('Password must be at least 8 characters');
       return;
     }
 
@@ -123,11 +183,16 @@ export default function RegisterPage() {
                   type="text"
                   required
                   value={formData.email}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  className="w-full px-4 py-3 text-base rounded-lg border border-gray-300 focus:border-rose-400 focus:outline-none"
-                  placeholder="e.g., 237612345678"
+                  onChange={handleEmailChange}
+                  className={`w-full px-4 py-3 text-base rounded-lg border focus:outline-none ${
+                    emailError ? 'border-red-500 focus:border-red-500' : 'border-gray-300 focus:border-rose-400'
+                  }`}
+                  placeholder="e.g., 237612345678 or email@example.com"
                   style={{ color: '#111' }}
                 />
+                {emailError && (
+                  <p className="text-red-500 text-xs mt-1">{emailError}</p>
+                )}
               </div>
 
               <div>
@@ -138,11 +203,32 @@ export default function RegisterPage() {
                   type="password"
                   required
                   value={formData.password}
-                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  onChange={handlePasswordChange}
                   className="w-full px-4 py-3 text-base rounded-lg border border-gray-300 focus:border-rose-400 focus:outline-none"
-                  placeholder="At least 6 characters"
+                  placeholder="At least 8 characters"
                   style={{ color: '#111' }}
                 />
+                {formData.password && (
+                  <div className="mt-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full ${passwordStrength.color} transition-all duration-300`}
+                          style={{ width: `${(passwordStrength.score / 6) * 100}%` }}
+                        />
+                      </div>
+                      <span className={`text-xs font-medium ${
+                        passwordStrength.label === 'Weak' ? 'text-red-500' :
+                        passwordStrength.label === 'Medium' ? 'text-yellow-500' : 'text-green-500'
+                      }`}>
+                        {passwordStrength.label}
+                      </span>
+                    </div>
+                    <p className="text-xs text-gray-500">
+                      Must have uppercase, lowercase, number, and special character (@$!%*?&)
+                    </p>
+                  </div>
+                )}
               </div>
 
               <button
