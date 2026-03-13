@@ -5,15 +5,14 @@ import { UsersModule } from '../users/users.module';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { JwtStrategy } from './jwt.strategy';
-import { GoogleStrategy } from './google.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Module({
   imports: [
     UsersModule,
-    PassportModule,
+    PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.register({
-      secret: process.env.JWT_SECRET || 'resilioSecret', // change in production
-      signOptions: { expiresIn: '1d' },
+      secret: process.env.JWT_SECRET || 'resilioSecret',
     }),
   ],
   providers: [AuthService, JwtStrategy, GoogleStrategy],

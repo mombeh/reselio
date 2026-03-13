@@ -18,6 +18,11 @@ export class AuthService {
     const payload = { email: user.email, sub: user._id };
     return {
       access_token: this.jwtService.sign(payload),
+      user: {
+        id: user._id,
+        email: user.email,
+        name: user.name,
+      },
     };
   }
 
@@ -32,7 +37,7 @@ export class AuthService {
       
       user = await this.usersService.createWithGoogle(
         googleUser.email,
-        googleUser.firstName + ' ' + googleUser.lastName,
+        googleUser.name,
         hashedPassword,
       );
     }
