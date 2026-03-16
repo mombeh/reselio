@@ -8,6 +8,7 @@ import {
   Patch,
   Param,
   Res,
+  Delete,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { OrdersService } from './orders.service';
@@ -15,6 +16,7 @@ import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { Query } from '@nestjs/common';
 import type { Response } from 'express';
 import { GetOrdersQueryDto } from './dto/get-orders-query.dto';
+import { CreateCustomerDto } from './dto/create-customer.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -72,4 +74,39 @@ export class OrdersController {
   res.attachment('orders.csv');
   return res.send(csv);
 }
+
+  // Customer endpoints
+  @UseGuards(AuthGuard('jwt'))
+  @Post('customers')
+  createCustomer(@Body() body: CreateCustomerDto, @Req() req: any) {
+    return this.ordersService.createCustomer(body, req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('customers/list')
+  getAllCustomers(@Req() req: any) {
+    return this.ordersService.findAllCustomers(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('customers/:id')
+  getCustomerById(@Param('id') id: string, @Req() req: any) {
+    return this.ordersService.findCustomerById(id, req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Patch('customers/:id')
+  updateCustomer(
+    @Param('id') id: string,
+    @Body() body: CreateCustomerDto,
+    @Req() req: any,
+  ) {
+    return this.ordersService.updateCustomer(id, body, req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete('customers/:id')
+  deleteCustomer(@Param('id') id: string, @Req() req: any) {
+    return this.ordersService.deleteCustomer(id, req.user.userId);
+  }
 }

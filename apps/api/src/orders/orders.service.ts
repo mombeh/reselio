@@ -3,11 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Parser } from 'json2csv';
 import { Order, OrderDocument } from './schemas/order.schema';
+import { Customer, CustomerDocument } from './schemas/customer.schema';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+    @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
   ) {}
 
   async create(orderData: any, userId: string) {
@@ -159,5 +161,39 @@ async exportOrders(userId: string): Promise<string> {
 
   const parser = new Parser({ fields });
   return parser.parse(orders.data);
+}
+
+// Customer methods
+async createCustomer(customerData: any, userId: string) {
+  const customer = new this.customerModel({
+    ...customerData,
+    userId,
+  });
+  return customer.save();
+}
+
+async findAllCustomers(userId: string) {
+  return this.customerModel.find({ userId }).sort({ createdAt: -1 });
+}
+
+async findCustomerById(customerId: string, userId: string) {
+  return this.customerModel.findOne({ _id: customerId, userId });
+}
+
+async updateCustomer(customerId: string, customerData: any, userId: string) {
+  const customer = await this.customerModel.findOne({ _id: customerId, userId });
+  if (!customer) {
+    throw new Error('Customer not found or you are not authorized');
+  }
+  Object.assign(customer, customerData);
+  return customer.save();
+}
+
+async deleteCustomer(customerId: string, userId: string) {
+  const customer = await this.customerModel.findOne({ _id: customerId, userId });
+  if (!customer) {
+    throw new Error('Customer not found or you are not authorized');
+  }
+  return customer.deleteOne();
 }
 }

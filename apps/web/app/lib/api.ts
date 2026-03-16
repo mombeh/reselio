@@ -56,6 +56,18 @@ interface CustomerSummary {
   deliveredOrders: number;
 }
 
+interface Customer {
+  _id: string;
+  userId: string;
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 interface MonthlyAnalytics {
   _id: {
     year: number;
@@ -176,6 +188,55 @@ export const api = {
 
   exportOrders: (token: string) =>
     fetchApi<string>('/orders/export', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  // Customers (dedicated customer management)
+  createCustomer: (token: string, customerData: {
+    name: string;
+    phone: string;
+    email?: string;
+    address?: string;
+    notes?: string;
+  }) =>
+    fetchApi<Customer>('/orders/customers', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(customerData),
+    }),
+
+  getAllCustomers: (token: string) =>
+    fetchApi<Customer[]>('/orders/customers/list', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getCustomer: (token: string, customerId: string) =>
+    fetchApi<Customer>(`/orders/customers/${customerId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  updateCustomer: (token: string, customerId: string, customerData: {
+    name: string;
+    phone: string;
+    email?: string;
+    address?: string;
+    notes?: string;
+  }) =>
+    fetchApi<Customer>(`/orders/customers/${customerId}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify(customerData),
+    }),
+
+  deleteCustomer: (token: string, customerId: string) =>
+    fetchApi<void>(`/orders/customers/${customerId}`, {
+      method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     }),
 };

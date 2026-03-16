@@ -39,7 +39,20 @@ interface DashboardMetrics {
   outstandingBalances: number;
 }
 
-interface Customer {
+// Customer types - dedicated customer management
+interface DedicatedCustomer {
+  _id: string;
+  userId: string;
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  notes?: string;
+  createdAt: string;
+}
+
+// Legacy customer from orders
+interface OrderCustomer {
   _id: string;
   customerName: string;
   phone: string;
@@ -48,6 +61,9 @@ interface Customer {
   totalOutstandingBalance: number;
   deliveredOrders: number;
 }
+
+// Use dedicated customer type
+type Customer = DedicatedCustomer;
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -63,6 +79,8 @@ export default function DashboardPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
   const [showNewOrderModal, setShowNewOrderModal] = useState(false);
+  const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
+  const [submittingCustomer, setSubmittingCustomer] = useState(false);
 
   // New order form state
   const [newOrder, setNewOrder] = useState({
@@ -74,6 +92,15 @@ export default function DashboardPage() {
     costPrice: 0,
     sellingPrice: 0,
     advancePaid: 0,
+  });
+
+  // New customer form state
+  const [newCustomer, setNewCustomer] = useState({
+    name: '',
+    phone: '',
+    email: '',
+    address: '',
+    notes: '',
   });
   const [submittingOrder, setSubmittingOrder] = useState(false);
 
@@ -103,7 +130,7 @@ export default function DashboardPage() {
       }
 
       // Fetch customers
-      const customersResult = await api.getCustomers(token);
+      const customersResult = await api.getAllCustomers(token);
       if (customersResult.data && !customersResult.error) {
         setCustomers(customersResult.data);
       }
@@ -177,6 +204,47 @@ export default function DashboardPage() {
       alert(result.error || 'Failed to create order');
     }
     setSubmittingOrder(false);
+  };
+
+  const handleCreateCustomer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!token) return;
+
+    if (!newCustomer.name || !newCustomer.phone) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    setSubmittingCustomer(true);
+    
+    const customerPayload = {
+      name: newCustomer.name,
+      phone: newCustomer.phone,
+      email: newCustomer.email || undefined,
+      address: newCustomer.address || undefined,
+      notes: newCustomer.notes || undefined,
+    };
+    
+    const result = await api.createCustomer(token, customerPayload);
+
+    if (result.data && !result.error) {
+      // Refresh customers
+      const customersResult = await api.getAllCustomers(token);
+      if (customersResult.data && !customersResult.error) {
+        setCustomers(customersResult.data);
+      }
+      setShowAddCustomerModal(false);
+      setNewCustomer({
+        name: '',
+        phone: '',
+        email: '',
+        address: '',
+        notes: '',
+      });
+    } else {
+      alert(result.error || 'Failed to create customer');
+    }
+    setSubmittingCustomer(false);
   };
 
   const getStatusColor = (status: string) => {
@@ -263,7 +331,10 @@ export default function DashboardPage() {
           >
             + New Order
           </button>
-          <button className="bg-white text-gray-700 p-4 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 transition">
+          <button 
+            onClick={() => setShowAddCustomerModal(true)}
+            className="bg-white text-gray-700 p-4 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 transition"
+          >
             Add Customer
           </button>
           <button className="bg-white text-gray-700 p-4 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 transition">
@@ -328,12 +399,12 @@ export default function DashboardPage() {
               {customers.slice(0, 5).map((customer) => (
                 <div key={customer._id} className="p-4 flex items-center justify-between hover:bg-gray-50">
                   <div>
-                    <div className="font-medium text-gray-900">{customer.customerName}</div>
+                    <div className="font-medium text-gray-900">{customer.name}</div>
                     <div className="text-sm text-gray-500">{customer.phone}</div>
+                    {customer.email && <div className="text-xs text-gray-400">{customer.email}</div>}
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-gray-900">CFA {customer.totalSpent?.toLocaleString() || 0}</div>
-                    <div className="text-xs text-gray-500">{customer.totalOrders} orders</div>
+                    {customer.address && <div className="text-xs text-gray-500">{customer.address}</div>}
                   </div>
                 </div>
               ))}
@@ -341,6 +412,100 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+
+      {/* Add Customer Modal */}
+      {showAddCustomerModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-gray-900">Add New Customer</h2>
+              <button
+                onClick={() => setShowAddCustomerModal(false)}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateCustomer} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Name *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={newCustomer.name}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
+                  placeholder="Enter customer name"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Phone Number *
+                </label>
+                <input
+                  type="tel"
+                  required
+                  value={newCustomer.phone}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
+                  placeholder="Enter phone number"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={newCustomer.email}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
+                  placeholder="Enter email (optional)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  value={newCustomer.address}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, address: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
+                  placeholder="Enter address (optional)"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Notes
+                </label>
+                <textarea
+                  value={newCustomer.notes}
+                  onChange={(e) => setNewCustomer({ ...newCustomer, notes: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
+                  placeholder="Add notes (optional)"
+                  rows={3}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={submittingCustomer}
+                className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-2 px-4 rounded-lg font-semibold hover:from-rose-600 hover:to-pink-600 transition disabled:opacity-50"
+              >
+                {submittingCustomer ? 'Adding...' : 'Add Customer'}
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* New Order Modal */}
       {showNewOrderModal && (
