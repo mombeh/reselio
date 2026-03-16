@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
-import { ConflictException } from '@nestjs/common';
+import { ConflictException, UnauthorizedException } from '@nestjs/common';
 
 @Injectable()
 export class UsersService {
@@ -47,5 +47,34 @@ async create(userData: CreateUserDto) {
       password: hashedPassword,
     });
     return newUser.save();
+  }
+
+  async updateProfile(userId: string, data: { name?: string; email?: string; businessName?: string; phone?: string }) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    
+    if (data.name) user.name = data.name;
+    if (data.email) user.email = data.email;
+    if ((user as any).businessName !== undefined) (user as any).businessName = data.businessName;
+    if ((user as any).phone !== undefined) (user as any).phone = data.phone;
+    
+    return user.save();
+  }
+
+  async updatePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Current password is incorrect');
+    }
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    return user.save();
   }
 }
