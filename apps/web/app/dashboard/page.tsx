@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useAuth } from '../lib/auth-context';
 import api from '../lib/api';
 import Logo from '../components/Logo';
+import PhoneInput from '../components/PhoneInput';
 
 // Order status values from backend
 const ORDER_STATUSES = [
@@ -468,16 +469,12 @@ export default function DashboardPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  required
+                <PhoneInput
+                  label="Phone Number"
                   value={newCustomer.phone}
-                  onChange={(e) => setNewCustomer({ ...newCustomer, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
+                  onChange={(phone) => setNewCustomer({ ...newCustomer, phone })}
                   placeholder="Enter phone number"
+                  required
                 />
               </div>
 
@@ -562,16 +559,12 @@ export default function DashboardPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number *
-                </label>
-                <input
-                  type="tel"
-                  required
+                <PhoneInput
+                  label="Phone Number"
                   value={newOrder.phone}
-                  onChange={(e) => setNewOrder({ ...newOrder, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
+                  onChange={(phone) => setNewOrder({ ...newOrder, phone })}
                   placeholder="Enter phone number"
+                  required
                 />
               </div>
 
