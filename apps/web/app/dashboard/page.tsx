@@ -238,11 +238,11 @@ export default function DashboardPage() {
             <div className="text-gray-600">Total Orders</div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <div className="text-3xl font-bold text-teal-500">₦{metrics.totalRevenue.toLocaleString()}</div>
+            <div className="text-3xl font-bold text-teal-500">CFA {metrics.totalRevenue.toLocaleString()}</div>
             <div className="text-gray-600">Total Revenue</div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <div className="text-3xl font-bold text-green-500">₦{metrics.totalProfit.toLocaleString()}</div>
+            <div className="text-3xl font-bold text-green-500">CFA {metrics.totalProfit.toLocaleString()}</div>
             <div className="text-gray-600">Total Profit</div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-sm">
@@ -250,7 +250,7 @@ export default function DashboardPage() {
             <div className="text-gray-600">Pending Delivery</div>
           </div>
           <div className="bg-white rounded-2xl p-6 shadow-sm">
-            <div className="text-3xl font-bold text-red-500">₦{metrics.outstandingBalances.toLocaleString()}</div>
+            <div className="text-3xl font-bold text-red-500">CFA {metrics.outstandingBalances.toLocaleString()}</div>
             <div className="text-gray-600">Outstanding Balance</div>
           </div>
         </div>
@@ -298,7 +298,7 @@ export default function DashboardPage() {
                     {order.size && <div className="text-xs text-gray-400">Size: {order.size} {order.color ? `/ ${order.color}` : ''}</div>}
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-gray-900">₦{order.sellingPrice?.toLocaleString() || 0}</div>
+                    <div className="font-bold text-gray-900">CFA {order.sellingPrice?.toLocaleString() || 0}</div>
                     <div className={`text-xs px-2 py-1 rounded-full ${getStatusColor(order.status)}`}>
                       {order.status || 'Waiting for Supplier'}
                     </div>
@@ -332,7 +332,7 @@ export default function DashboardPage() {
                     <div className="text-sm text-gray-500">{customer.phone}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-bold text-gray-900">₦{customer.totalSpent?.toLocaleString() || 0}</div>
+                    <div className="font-bold text-gray-900">CFA {customer.totalSpent?.toLocaleString() || 0}</div>
                     <div className="text-xs text-gray-500">{customer.totalOrders} orders</div>
                   </div>
                 </div>
@@ -366,7 +366,7 @@ export default function DashboardPage() {
                   required
                   value={newOrder.customerName}
                   onChange={(e) => setNewOrder({ ...newOrder, customerName: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
                   placeholder="Enter customer name"
                 />
               </div>
@@ -380,7 +380,7 @@ export default function DashboardPage() {
                   required
                   value={newOrder.phone}
                   onChange={(e) => setNewOrder({ ...newOrder, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
                   placeholder="Enter phone number"
                 />
               </div>
@@ -394,7 +394,7 @@ export default function DashboardPage() {
                   required
                   value={newOrder.productName}
                   onChange={(e) => setNewOrder({ ...newOrder, productName: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
                   placeholder="Enter product name"
                 />
               </div>
@@ -408,7 +408,7 @@ export default function DashboardPage() {
                     type="text"
                     value={newOrder.size}
                     onChange={(e) => setNewOrder({ ...newOrder, size: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
                     placeholder="e.g., M, L, XL"
                   />
                 </div>
@@ -420,7 +420,7 @@ export default function DashboardPage() {
                     type="text"
                     value={newOrder.color}
                     onChange={(e) => setNewOrder({ ...newOrder, color: e.target.value })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
                     placeholder="e.g., Red, Blue"
                   />
                 </div>
@@ -437,7 +437,7 @@ export default function DashboardPage() {
                     min="0"
                     value={newOrder.costPrice}
                     onChange={(e) => setNewOrder({ ...newOrder, costPrice: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
                     placeholder="0"
                   />
                 </div>
@@ -451,7 +451,7 @@ export default function DashboardPage() {
                     min="0"
                     value={newOrder.sellingPrice}
                     onChange={(e) => setNewOrder({ ...newOrder, sellingPrice: Number(e.target.value) })}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
                     placeholder="0"
                   />
                 </div>
@@ -466,7 +466,7 @@ export default function DashboardPage() {
                   min="0"
                   value={newOrder.advancePaid}
                   onChange={(e) => setNewOrder({ ...newOrder, advancePaid: Number(e.target.value) })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
                   placeholder="0"
                 />
               </div>
@@ -475,11 +475,11 @@ export default function DashboardPage() {
               {newOrder.sellingPrice > 0 && newOrder.costPrice > 0 && (
                 <div className="bg-gray-50 p-3 rounded-lg">
                   <div className="text-sm text-gray-600">
-                    Profit: <span className="font-bold text-green-600">₦{(newOrder.sellingPrice - newOrder.costPrice).toLocaleString()}</span>
+                    Profit: <span className="font-bold text-green-600">CFA {(newOrder.sellingPrice - newOrder.costPrice).toLocaleString()}</span>
                   </div>
                   {newOrder.advancePaid > 0 && (
                     <div className="text-sm text-gray-600">
-                      Balance: <span className="font-bold text-amber-600">₦((newOrder.sellingPrice - newOrder.advancePaid)).toLocaleString()</span>
+                      Balance: <span className="font-bold text-amber-600">CFA ((newOrder.sellingPrice - newOrder.advancePaid)).toLocaleString()</span>
                     </div>
                   )}
                 </div>

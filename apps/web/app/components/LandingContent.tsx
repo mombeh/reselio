@@ -180,7 +180,7 @@ export default function LandingContent() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-bold text-gray-800">₦{5000 + i * 1000}</div>
+                      <div className="font-bold text-gray-800">CFA {5000 + i * 1000}</div>
                       <div className="text-xs text-teal-600 font-medium">Paid</div>
                     </div>
                   </div>
