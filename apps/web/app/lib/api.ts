@@ -160,7 +160,10 @@ export const api = {
   createOrder: (token: string, orderData: CreateOrderDto) =>
     fetchApi<Order>('/orders', {
       method: 'POST',
-      headers: { Authorization: `Bearer ${token}` },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${token}`
+      },
       body: JSON.stringify(orderData),
     }),
 

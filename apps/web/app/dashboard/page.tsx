@@ -123,11 +123,33 @@ export default function DashboardPage() {
     e.preventDefault();
     if (!token) return;
 
+    // Validate required fields
+    if (!newOrder.customerName || !newOrder.phone || !newOrder.productName) {
+      alert('Please fill in all required fields');
+      return;
+    }
+
+    if (newOrder.costPrice <= 0 || newOrder.sellingPrice <= 0) {
+      alert('Please enter valid cost and selling prices');
+      return;
+    }
+
     setSubmittingOrder(true);
-    const result = await api.createOrder(token, {
-      ...newOrder,
-      advancePaid: newOrder.advancePaid || 0,
-    });
+    
+    const orderPayload = {
+      customerName: newOrder.customerName,
+      phone: newOrder.phone,
+      productName: newOrder.productName,
+      size: newOrder.size || undefined,
+      color: newOrder.color || undefined,
+      costPrice: Number(newOrder.costPrice),
+      sellingPrice: Number(newOrder.sellingPrice),
+      advancePaid: Number(newOrder.advancePaid) || 0,
+    };
+    
+    console.log('Creating order with payload:', orderPayload);
+    
+    const result = await api.createOrder(token, orderPayload);
 
     if (result.data && !result.error) {
       // Refresh orders
