@@ -138,6 +138,80 @@ export class OrdersService {
     ]);
   }
 
+  async getStatusBreakdown(userId: string) {
+    return this.orderModel.aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          totalRevenue: { $sum: '$sellingPrice' },
+          totalProfit: { $sum: '$profit' },
+        },
+      },
+    ]);
+  }
+
+  async getTopProducts(userId: string, limit: number = 10) {
+    return this.orderModel.aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: '$productName',
+          totalOrders: { $sum: 1 },
+          totalRevenue: { $sum: '$sellingPrice' },
+          totalProfit: { $sum: '$profit' },
+        },
+      },
+      { $sort: { totalRevenue: -1 } },
+      { $limit: limit },
+    ]);
+  }
+
+  async getDailySales(userId: string, days: number = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    return this.orderModel.aggregate([
+      { 
+        $match: { 
+          userId,
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }
+          },
+          totalOrders: { $sum: 1 },
+          totalRevenue: { $sum: '$sellingPrice' },
+          totalProfit: { $sum: '$profit' },
+        },
+      },
+      {
+        $sort: { '_id': 1 },
+      },
+    ]);
+  }
+
+  async getYearlyAnalytics(userId: string) {
+    return this.orderModel.aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: { $year: '$createdAt' },
+          totalRevenue: { $sum: '$sellingPrice' },
+          totalProfit: { $sum: '$profit' },
+          totalOrders: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { '_id': 1 },
+      },
+    ]);
+  }
+
 async exportOrders(userId: string): Promise<string> {
   const orders = await this.findAllByUser(userId, {});
 

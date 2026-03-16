@@ -239,6 +239,27 @@ export const api = {
       method: 'DELETE',
       headers: { Authorization: `Bearer ${token}` },
     }),
+
+  // Analytics
+  getStatusBreakdown: (token: string) =>
+    fetchApi<any[]>('/orders/analytics/status', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getTopProducts: (token: string) =>
+    fetchApi<any[]>('/orders/analytics/products', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getDailySales: (token: string) =>
+    fetchApi<any[]>('/orders/analytics/daily', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
+
+  getYearlyAnalytics: (token: string) =>
+    fetchApi<any[]>('/orders/analytics/yearly', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
 };
 
 export default api;

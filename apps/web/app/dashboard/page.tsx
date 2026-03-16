@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { useAuth } from '../lib/auth-context';
 import api from '../lib/api';
 import Logo from '../components/Logo';
@@ -337,9 +338,9 @@ export default function DashboardPage() {
           >
             Add Customer
           </button>
-          <button className="bg-white text-gray-700 p-4 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 transition">
+          <Link href="/dashboard/reports" className="bg-white text-gray-700 p-4 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 transition text-center">
             View Reports
-          </button>
+          </Link>
           <button className="bg-white text-gray-700 p-4 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 transition">
             Settings
           </button>

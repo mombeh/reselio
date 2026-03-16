@@ -63,6 +63,26 @@ export class OrdersController {
     return this.ordersService.getMonthlyAnalytics(req.user.userId);
   }
   @UseGuards(AuthGuard('jwt'))
+  @Get('analytics/status')
+  getStatusBreakdown(@Req() req: any) {
+    return this.ordersService.getStatusBreakdown(req.user.userId);
+  }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('analytics/products')
+  getTopProducts(@Req() req: any) {
+    return this.ordersService.getTopProducts(req.user.userId);
+  }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('analytics/daily')
+  getDailySales(@Req() req: any) {
+    return this.ordersService.getDailySales(req.user.userId);
+  }
+  @UseGuards(AuthGuard('jwt'))
+  @Get('analytics/yearly')
+  getYearlyAnalytics(@Req() req: any) {
+    return this.ordersService.getYearlyAnalytics(req.user.userId);
+  }
+  @UseGuards(AuthGuard('jwt'))
   @Get('export')
   async exportOrders(
    @Req() req: any,
