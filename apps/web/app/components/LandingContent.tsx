@@ -27,15 +27,15 @@ export default function LandingContent() {
       try {
         const [usersResult, ordersResult] = await Promise.all([
           api.getUserCount(),
-          api.getOrderStats(),
+          api.getDashboardMetrics(),
         ]);
 
         if (usersResult.data || ordersResult.data) {
           setStats({
             users: usersResult.data?.count || 0,
-            orders: ordersResult.data?.total || 0,
-            pending: ordersResult.data?.pending || 0,
-            completed: ordersResult.data?.completed || 0,
+            orders: ordersResult.data?.totalOrders || 0,
+            pending: ordersResult.data?.pendingDeliveries || 0,
+            completed: (ordersResult.data?.totalOrders || 0) - (ordersResult.data?.pendingDeliveries || 0),
           });
         }
       } catch (err) {

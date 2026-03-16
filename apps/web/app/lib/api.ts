@@ -39,9 +39,31 @@ interface UserCountResponse {
 }
 
 interface OrderStatsResponse {
-  total: number;
-  pending: number;
-  completed: number;
+  totalOrders: number;
+  totalRevenue: number;
+  totalProfit: number;
+  pendingDeliveries: number;
+  outstandingBalances: number;
+}
+
+interface CustomerSummary {
+  _id: string;
+  customerName: string;
+  phone: string;
+  totalOrders: number;
+  totalSpent: number;
+  totalOutstandingBalance: number;
+  deliveredOrders: number;
+}
+
+interface MonthlyAnalytics {
+  _id: {
+    year: number;
+    month: number;
+  };
+  totalRevenue: number;
+  totalProfit: number;
+  totalOrders: number;
 }
 
 interface AuthResponse {
@@ -51,6 +73,35 @@ interface AuthResponse {
     email: string;
     name: string;
   };
+}
+
+interface Order {
+  _id: string;
+  userId: string;
+  customerName: string;
+  phone: string;
+  productName: string;
+  size?: string;
+  color?: string;
+  costPrice: number;
+  sellingPrice: number;
+  advancePaid: number;
+  balance: number;
+  profit: number;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CreateOrderDto {
+  customerName: string;
+  phone: string;
+  productName: string;
+  size?: string;
+  color?: string;
+  costPrice: number;
+  sellingPrice: number;
+  advancePaid?: number;
 }
 
 // API Client methods
@@ -87,27 +138,43 @@ export const api = {
 
   // Orders
   getOrders: (token?: string) =>
-    fetchApi<any[]>('/orders', {
+    fetchApi<{ data: Order[]; total: number; page: number; limit: number; totalPages: number }>('/orders', {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     }),
 
-  getOrderStats: async (token?: string): Promise<ApiResponse<OrderStatsResponse>> => {
-    const result = await fetchApi<any[]>('/orders', {
+  getDashboardMetrics: (token?: string) =>
+    fetchApi<OrderStatsResponse>('/orders/dashboard', {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
-    });
-    
-    if (result.data && !result.error) {
-      const orders = result.data;
-      const total = orders.length;
-      const pending = orders.filter((o: any) => o.status === 'pending').length;
-      const completed = orders.filter((o: any) => o.status === 'completed').length;
-      return { data: { total, pending, completed } };
-    }
-    if (result.error) {
-      return { error: result.error };
-    }
-    return { data: { total: 0, pending: 0, completed: 0 } };
-  },
+    }),
+
+  getCustomers: (token?: string) =>
+    fetchApi<CustomerSummary[]>('/orders/customers', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }),
+
+  getMonthlyAnalytics: (token?: string) =>
+    fetchApi<MonthlyAnalytics[]>('/orders/analytics/monthly', {
+      headers: token ? { Authorization: `Bearer ${token}` } : {},
+    }),
+
+  createOrder: (token: string, orderData: CreateOrderDto) =>
+    fetchApi<Order>('/orders', {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify(orderData),
+    }),
+
+  updateOrderStatus: (token: string, orderId: string, status: string) =>
+    fetchApi<Order>(`/orders/${orderId}/status`, {
+      method: 'PATCH',
+      headers: { Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ status }),
+    }),
+
+  exportOrders: (token: string) =>
+    fetchApi<string>('/orders/export', {
+      headers: { Authorization: `Bearer ${token}` },
+    }),
 };
 
 export default api;
