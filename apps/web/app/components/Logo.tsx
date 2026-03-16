@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Logo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   const sizeClasses = {
     sm: 'text-lg',
@@ -6,7 +8,7 @@ export default function Logo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
   };
 
   return (
-    <div className={`font-bold ${sizeClasses[size]} flex items-center gap-2`}>
+    <Link href="/" className={`font-bold ${sizeClasses[size]} flex items-center gap-2 hover:opacity-80 transition-opacity`}>
       <div className="relative w-8 h-8 md:w-9 md:h-9">
         <svg
           viewBox="0 0 36 36"
@@ -32,6 +34,6 @@ export default function Logo({ size = 'md' }: { size?: 'sm' | 'md' | 'lg' }) {
         </svg>
       </div>
       <span className="text-gray-800">Reselio</span>
-    </div>
+    </Link>
   );
 }
