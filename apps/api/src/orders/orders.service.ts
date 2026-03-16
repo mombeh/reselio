@@ -3,11 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Parser } from 'json2csv';
 import { Order, OrderDocument } from './schemas/order.schema';
+import { Customer, CustomerDocument } from './schemas/customer.schema';
 
 @Injectable()
 export class OrdersService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
+    @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
   ) {}
 
   async create(orderData: any, userId: string) {
@@ -136,6 +138,80 @@ export class OrdersService {
     ]);
   }
 
+  async getStatusBreakdown(userId: string) {
+    return this.orderModel.aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          totalRevenue: { $sum: '$sellingPrice' },
+          totalProfit: { $sum: '$profit' },
+        },
+      },
+    ]);
+  }
+
+  async getTopProducts(userId: string, limit: number = 10) {
+    return this.orderModel.aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: '$productName',
+          totalOrders: { $sum: 1 },
+          totalRevenue: { $sum: '$sellingPrice' },
+          totalProfit: { $sum: '$profit' },
+        },
+      },
+      { $sort: { totalRevenue: -1 } },
+      { $limit: limit },
+    ]);
+  }
+
+  async getDailySales(userId: string, days: number = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    return this.orderModel.aggregate([
+      { 
+        $match: { 
+          userId,
+          createdAt: { $gte: startDate }
+        }
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }
+          },
+          totalOrders: { $sum: 1 },
+          totalRevenue: { $sum: '$sellingPrice' },
+          totalProfit: { $sum: '$profit' },
+        },
+      },
+      {
+        $sort: { '_id': 1 },
+      },
+    ]);
+  }
+
+  async getYearlyAnalytics(userId: string) {
+    return this.orderModel.aggregate([
+      { $match: { userId } },
+      {
+        $group: {
+          _id: { $year: '$createdAt' },
+          totalRevenue: { $sum: '$sellingPrice' },
+          totalProfit: { $sum: '$profit' },
+          totalOrders: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { '_id': 1 },
+      },
+    ]);
+  }
+
 async exportOrders(userId: string): Promise<string> {
   const orders = await this.findAllByUser(userId, {});
 
@@ -159,5 +235,39 @@ async exportOrders(userId: string): Promise<string> {
 
   const parser = new Parser({ fields });
   return parser.parse(orders.data);
+}
+
+// Customer methods
+async createCustomer(customerData: any, userId: string) {
+  const customer = new this.customerModel({
+    ...customerData,
+    userId,
+  });
+  return customer.save();
+}
+
+async findAllCustomers(userId: string) {
+  return this.customerModel.find({ userId }).sort({ createdAt: -1 });
+}
+
+async findCustomerById(customerId: string, userId: string) {
+  return this.customerModel.findOne({ _id: customerId, userId });
+}
+
+async updateCustomer(customerId: string, customerData: any, userId: string) {
+  const customer = await this.customerModel.findOne({ _id: customerId, userId });
+  if (!customer) {
+    throw new Error('Customer not found or you are not authorized');
+  }
+  Object.assign(customer, customerData);
+  return customer.save();
+}
+
+async deleteCustomer(customerId: string, userId: string) {
+  const customer = await this.customerModel.findOne({ _id: customerId, userId });
+  if (!customer) {
+    throw new Error('Customer not found or you are not authorized');
+  }
+  return customer.deleteOne();
 }
 }
