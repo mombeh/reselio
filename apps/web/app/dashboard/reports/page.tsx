@@ -243,8 +243,8 @@ export default function ReportsPage() {
                       <tbody>
                         {yearlyData.map((year) => (
                           <tr key={year._id} className="border-b border-gray-100">
-                            <td className="py-3 px-4 font-medium">{year._id}</td>
-                            <td className="text-right py-3 px-4">{year.totalOrders}</td>
+                            <td className="py-3 px-4 font-medium text-gray-900">{year._id}</td>
+                            <td className="text-right py-3 px-4 text-gray-900">{year.totalOrders}</td>
                             <td className="text-right py-3 px-4 font-bold text-teal-600">CFA {year.totalRevenue.toLocaleString()}</td>
                             <td className="text-right py-3 px-4 font-bold text-green-600">CFA {year.totalProfit.toLocaleString()}</td>
                           </tr>
@@ -273,10 +273,10 @@ export default function ReportsPage() {
                     <tbody>
                       {monthlyData.map((month) => (
                         <tr key={`${month._id.year}-${month._id.month}`} className="border-b border-gray-100">
-                          <td className="py-3 px-4 font-medium">
+                          <td className="py-3 px-4 font-medium text-gray-900">
                             {getMonthName(month._id.month)} {month._id.year}
                           </td>
-                          <td className="text-right py-3 px-4">{month.totalOrders}</td>
+                          <td className="text-right py-3 px-4 text-gray-900">{month.totalOrders}</td>
                           <td className="text-right py-3 px-4 font-bold text-teal-600">CFA {month.totalRevenue.toLocaleString()}</td>
                           <td className="text-right py-3 px-4 font-bold text-green-600">CFA {month.totalProfit.toLocaleString()}</td>
                         </tr>
@@ -304,8 +304,8 @@ export default function ReportsPage() {
                     <tbody>
                       {productData.map((product) => (
                         <tr key={product._id} className="border-b border-gray-100">
-                          <td className="py-3 px-4 font-medium">{product._id}</td>
-                          <td className="text-right py-3 px-4">{product.totalOrders}</td>
+                          <td className="py-3 px-4 font-medium text-gray-900">{product._id}</td>
+                          <td className="text-right py-3 px-4 text-gray-900">{product.totalOrders}</td>
                           <td className="text-right py-3 px-4 font-bold text-teal-600">CFA {product.totalRevenue.toLocaleString()}</td>
                           <td className="text-right py-3 px-4 font-bold text-green-600">CFA {product.totalProfit.toLocaleString()}</td>
                         </tr>
@@ -333,8 +333,8 @@ export default function ReportsPage() {
                     <tbody>
                       {dailyData.map((day) => (
                         <tr key={day._id} className="border-b border-gray-100">
-                          <td className="py-3 px-4 font-medium">{day._id}</td>
-                          <td className="text-right py-3 px-4">{day.totalOrders}</td>
+                          <td className="py-3 px-4 font-medium text-gray-900">{day._id}</td>
+                          <td className="text-right py-3 px-4 text-gray-900">{day.totalOrders}</td>
                           <td className="text-right py-3 px-4 font-bold text-teal-600">CFA {day.totalRevenue.toLocaleString()}</td>
                           <td className="text-right py-3 px-4 font-bold text-green-600">CFA {day.totalProfit.toLocaleString()}</td>
                         </tr>

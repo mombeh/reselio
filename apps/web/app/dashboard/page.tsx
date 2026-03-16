@@ -341,9 +341,9 @@ export default function DashboardPage() {
           <Link href="/dashboard/reports" className="bg-white text-gray-700 p-4 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 transition text-center">
             View Reports
           </Link>
-          <button className="bg-white text-gray-700 p-4 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 transition">
+          <Link href="/dashboard/settings" className="bg-white text-gray-700 p-4 rounded-xl font-semibold border-2 border-gray-200 hover:border-gray-300 transition text-center">
             Settings
-          </button>
+          </Link>
         </div>
 
         {/* Recent Orders */}
