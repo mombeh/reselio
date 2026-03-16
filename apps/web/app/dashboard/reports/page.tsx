@@ -138,9 +138,6 @@ export default function ReportsPage() {
         <div className="max-w-6xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link href="/">
-                <Logo size="md" />
-              </Link>
               <button
                 onClick={() => router.push('/dashboard')}
                 className="text-gray-600 hover:text-gray-900"
