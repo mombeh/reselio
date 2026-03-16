@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { api } from '../lib/api';
+import { useAuth } from '../lib/auth-context';
 
 interface Stats {
   users: number;
@@ -14,6 +16,8 @@ export default function LandingContent() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [loading, setLoading] = useState(true);
   const [apiStatus, setApiStatus] = useState<'checking' | 'online' | 'offline'>('checking');
+  const { user, token } = useAuth();
+  const isAuthenticated = !!token;
 
   useEffect(() => {
     async function fetchData() {
@@ -65,10 +69,20 @@ export default function LandingContent() {
             </div>
             
             <div className="flex items-center gap-3">
-              <a href="/auth/login" className="text-gray-600 hover:text-gray-900 font-medium">Sign In</a>
-              <a href="/auth/register" className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 transition">
-                Start Free
-              </a>
+              {isAuthenticated ? (
+                <Link href="/dashboard" className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 transition">
+                  Dashboard
+                </Link>
+              ) : (
+                <>
+                  <Link href="/auth/login" className="text-gray-600 hover:text-gray-900 font-medium">
+                    Sign In
+                  </Link>
+                  <Link href="/auth/register" className="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-5 py-2.5 rounded-lg font-semibold hover:opacity-90 transition">
+                    Start Free
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>

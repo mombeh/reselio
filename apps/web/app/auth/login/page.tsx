@@ -137,7 +137,7 @@ export default function LoginPage() {
                 disabled={loading}
                 className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 rounded-lg font-semibold text-base hover:opacity-90 disabled:opacity-50"
               >
-                {loading ? 'Signing in...' : 'Sign In'}
+                {loading ? 'Signing in...' : 'Dashboard'}
               </button>
             </form>
 
