@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '../../lib/auth-context';
 import Logo from '../../components/Logo';
+import PhoneInput from '../../components/PhoneInput';
 
 interface UserProfile {
   id: string;
@@ -320,15 +321,11 @@ export default function SettingsPage() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Phone Number
-                </label>
-                <input
-                  type="tel"
+                <PhoneInput
+                  label="Phone Number"
                   value={businessForm.phone}
-                  onChange={(e) => setBusinessForm({ ...businessForm, phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-rose-500 focus:border-transparent text-gray-900 bg-white"
-                  placeholder="+237 XXX XXX XXX"
+                  onChange={(phone) => setBusinessForm({ ...businessForm, phone })}
+                  placeholder="Enter phone number"
                 />
               </div>
 
