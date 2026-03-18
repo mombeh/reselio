@@ -15,7 +15,7 @@ async function bootstrap() {
     }),
   );
   app.enableCors({
-    origin: ['https://reselio-web.vercel.app/', 'https://reselio.onrender.com'],
+    origin: process.env.FRONTEND_URL,
     credentials: true,
   });
   await app.listen(process.env.PORT ?? 4000);
