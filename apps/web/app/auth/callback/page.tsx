@@ -34,7 +34,6 @@ function AuthCallbackContent() {
         const user = await res.json()
         console.log('User fetched successfully:', user)
 
-        // Transform user object to match expected format
         const formattedUser = {
           id: user.userId || user.id,
           email: user.email,
