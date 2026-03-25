@@ -64,7 +64,6 @@ export class AuthController {
     // Redirect to frontend callback with token and user data
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const callbackUrl = `${frontendUrl}/auth/callback?token=${encodeURIComponent(result.access_token)}`;
-    
     return res.redirect(callbackUrl);
   }
   @Get('me')
