@@ -19,32 +19,18 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     _refreshToken: string,
     profile: any,
     done: VerifyCallback,
-  ): Promise<GoogleUser | undefined> {
-    try {
-      console.log('Google validate - profile id:', profile?.id);
-      const { id, displayName, emails, photos } = profile;
+  ): Promise<GoogleUser> {
+    const { id, displayName, emails, photos } = profile;
 
-      if (!emails || !emails[0]?.value) {
-        console.error('Google validate - no email found in profile');
-        done(new Error('No email found in Google profile'));
-        return undefined;
-      }
+    const user: GoogleUser = {
+      googleId: id,
+      email: emails?.[0]?.value || '',
+      name: displayName || '',
+      picture: photos?.[0]?.value || '',
+      accessToken,
+    };
 
-      const user: GoogleUser = {
-        googleId: id,
-        email: emails[0].value,
-        name: displayName || '',
-        picture: photos?.[0]?.value || '',
-        accessToken,
-      };
-
-      console.log('Google validate - user email:', user.email);
-      done(null, user);
-      return user;
-    } catch (error) {
-      console.error('Google validate error:', error);
-      done(error);
-      return undefined;
-    }
+    done(null, user);
+    return user;
   }
 }

@@ -19,9 +19,4 @@ import { GoogleStrategy } from './strategies/google.strategy';
   providers: [AuthService, JwtStrategy, GoogleStrategy],
   controllers: [AuthController],
 })
-export class AuthModule {
-  constructor() {
-    console.log('AuthModule loaded, JWT_SECRET:', process.env.JWT_SECRET ? 'set' : 'not set');
-    console.log('AuthModule loaded, GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID ? 'set' : 'not set');
-  }
-}
+export class AuthModule {}
