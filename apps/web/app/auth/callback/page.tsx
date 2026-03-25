@@ -19,8 +19,7 @@ function AuthCallbackContent() {
 
     const fetchUser = async () => {
       try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://reselio.onrender.com';
-        const res = await fetch(`${apiUrl}/auth/me`, {
+        const res = await fetch('http://localhost:4000/auth/me', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
