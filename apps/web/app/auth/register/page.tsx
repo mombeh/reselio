@@ -117,9 +117,7 @@ export default function RegisterPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-teal-50 flex flex-col">
       <header className="p-3">
-        <Link href="/">
-          <Logo size="sm" />
-        </Link>
+        <Logo size="sm" />
       </header>
 
       <div className="flex-1 flex items-center justify-center px-4 py-8">
