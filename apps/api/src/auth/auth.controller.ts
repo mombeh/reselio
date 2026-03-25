@@ -59,16 +59,22 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
+    console.log('Google callback received, user:', req.user?.email);
+    
     const result = await this.authService.googleLogin(req.user);
+    console.log('Google login result, token present:', !!result.access_token);
 
     // Redirect to frontend callback with token and user data
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
     const callbackUrl = `${frontendUrl}/auth/callback?token=${encodeURIComponent(result.access_token)}`;
+    console.log('Redirecting to:', callbackUrl);
+    
     return res.redirect(callbackUrl);
   }
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   getProfile(@Req() req: any) {
+    console.log('/auth/me called, user:', req.user);
     return req.user;
   }
 }
