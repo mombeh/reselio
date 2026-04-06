@@ -4,6 +4,8 @@ import { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useAuth } from '../../lib/auth-context'
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://reselio.onrender.com';
+
 function AuthCallbackContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -19,7 +21,7 @@ function AuthCallbackContent() {
 
     const fetchUser = async () => {
       try {
-        const res = await fetch('http://localhost:4000/auth/me', {
+        const res = await fetch(`${API_BASE_URL}/auth/me`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
