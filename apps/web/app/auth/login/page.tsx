@@ -46,7 +46,7 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://reselio.onrender.com';
     console.log('Google login clicked, redirecting to ' + apiUrl + '/auth/google');
     window.location.href = apiUrl + '/auth/google';
   };

@@ -136,7 +136,7 @@ export default function SettingsPage() {
     setLoading(true);
 
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000'}/users/password`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'https://reselio.onrender.com'}/users/password`, {
         method: 'PATCH',
         headers: {
           'Content-Type': 'application/json',

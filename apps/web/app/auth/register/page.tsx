@@ -111,7 +111,7 @@ export default function RegisterPage() {
   };
 
   const handleGoogleLogin = () => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://reselio.onrender.com';
     window.location.href = apiUrl + '/auth/google';
   };
 

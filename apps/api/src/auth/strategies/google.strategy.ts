@@ -7,29 +7,18 @@ import { GoogleUser } from '../interfaces/google-user.interface';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(configService: ConfigService) {
-    // Debug logging to help identify issues
-    const appUrl = configService.get<string>('APP_URL') || '';
-    const frontendUrl = configService.get<string>('FRONTEND_URL') || '';
+    // Simply use the redirect URI that matches the current environment
+    // The GOOGLE_REDIRECT_URI is set to the production callback for deployed
+    // The GOOGLE_REDIRECT_URI_LOCAL is set to localhost for local dev
+    const redirectUri = configService.get<string>('GOOGLE_REDIRECT_URI') || 
+                       configService.get<string>('GOOGLE_REDIRECT_URI_LOCAL') || '';
     
-    console.log('[GoogleStrategy] APP_URL:', appUrl);
-    console.log('[GoogleStrategy] FRONTEND_URL:', frontendUrl);
-    
-    // Use production redirect URI when APP_URL is set to production domain
-    // Use localhost redirect only when running truly locally (no APP_URL or localhost in APP_URL)
-    const isProduction = appUrl && !appUrl.includes('localhost') && appUrl.includes('render.com');
-    
-    // Use appropriate redirect URI based on environment
-    const redirectUri = isProduction 
-      ? configService.get<string>('GOOGLE_REDIRECT_URI')
-      : configService.get<string>('GOOGLE_REDIRECT_URI_LOCAL');
-    
-    console.log('[GoogleStrategy] isProduction:', isProduction);
-    console.log('[GoogleStrategy] redirectUri (actual):', redirectUri);
+    console.log('[GoogleStrategy] Using redirectUri:', redirectUri);
     
     super({
       clientID: configService.get<string>('GOOGLE_CLIENT_ID') || '',
       clientSecret: configService.get<string>('GOOGLE_CLIENT_SECRET') || '',
-      callbackURL: redirectUri || '',
+      callbackURL: redirectUri,
       scope: ['email', 'profile'],
     });
   }
