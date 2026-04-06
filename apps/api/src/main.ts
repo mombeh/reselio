@@ -14,9 +14,18 @@ async function bootstrap() {
       },
     }),
   );
+  // Allow multiple origins - both local development and production
+  const allowedOrigins = [
+    'http://localhost:3000',
+    'https://reselio-web.vercel.app',
+    process.env.FRONTEND_URL,
+  ].filter(Boolean);
+  
   app.enableCors({
-    origin: process.env.FRONTEND_URL,
+    origin: allowedOrigins,
     credentials: true,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type,Authorization,Accept,Origin',
   });
   await app.listen(process.env.PORT ?? 4000);
 }
