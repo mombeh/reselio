@@ -8,6 +8,7 @@ import {
   Req,
   ConflictException,
   Res,
+  Logger,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
@@ -17,6 +18,8 @@ import { GoogleAuthGuard } from './guards/google-auth.guard';
 
 @Controller('auth')
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
+
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
@@ -59,12 +62,27 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
-    const result = await this.authService.googleLogin(req.user);
+    try {
+      this.logger.log('Google callback received, user:', req.user);
+      
+      if (!req.user || !req.user.email) {
+        this.logger.error('No user data from Google OAuth');
+        const frontendUrl = process.env.FRONTEND_URL || 'https://reselio-web.vercel.app';
+        return res.redirect(`${frontendUrl}/auth/login?error=no_user_data`);
+      }
 
-    // Redirect to frontend callback with token and user data
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:3000';
-    const callbackUrl = `${frontendUrl}/auth/callback?token=${encodeURIComponent(result.access_token)}`;
-    return res.redirect(callbackUrl);
+      const result = await this.authService.googleLogin(req.user);
+      this.logger.log('Google login successful, redirecting');
+
+      // Redirect to frontend callback with token and user data
+      const frontendUrl = process.env.FRONTEND_URL || 'https://reselio-web.vercel.app';
+      const callbackUrl = `${frontendUrl}/auth/callback?token=${encodeURIComponent(result.access_token)}`;
+      return res.redirect(callbackUrl);
+    } catch (error) {
+      this.logger.error('Google callback error:', error);
+      const frontendUrl = process.env.FRONTEND_URL || 'https://reselio-web.vercel.app';
+      return res.redirect(`${frontendUrl}/auth/login?error=auth_failed`);
+    }
   }
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
