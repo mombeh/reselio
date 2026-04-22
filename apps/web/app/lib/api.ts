@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:4000';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://reselio.onrender.com';
 
 export interface ApiResponse<T> {
   data?: T;
@@ -10,6 +10,8 @@ async function fetchApi<T>(
   options?: RequestInit
 ): Promise<ApiResponse<T>> {
   try {
+    console.log("API CALL:", `${API_BASE_URL}${endpoint}`);
+
     const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       headers: {
         'Content-Type': 'application/json',
@@ -18,18 +20,24 @@ async function fetchApi<T>(
       ...options,
     });
 
+    console.log("RESPONSE STATUS:", response.status);
+
+    const text = await response.text();
+    console.log("RAW RESPONSE:", text);
+
+    const data = text ? JSON.parse(text) : {};
+
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
       return {
-        error: errorData.message || `HTTP error! status: ${response.status}`,
+        error: data.message || `HTTP error! status: ${response.status}`,
       };
     }
 
-    const data = await response.json();
-    return { data: data as T };
+    return { data };
   } catch (error) {
+    console.error("FETCH ERROR FULL:", error);
     return {
-      error: error instanceof Error ? error.message : 'An unexpected error occurred',
+      error: error instanceof Error ? error.message : 'Fetch failed',
     };
   }
 }

@@ -46,16 +46,15 @@ export default function LoginPage() {
   };
 
   const handleGoogleLogin = () => {
-    console.log('Google login clicked, redirecting to http://localhost:4000/auth/google');
-    window.location.href = 'http://localhost:4000/auth/google';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://reselio.onrender.com';
+    console.log('Google login clicked, redirecting to ' + apiUrl + '/auth/google');
+    window.location.href = apiUrl + '/auth/google';
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-rose-50 via-pink-50 to-teal-50 flex flex-col">
       <header className="p-3">
-        <Link href="/">
-          <Logo size="sm" />
-        </Link>
+        <Logo size="sm" />
       </header>
 
       <div className="flex-1 flex items-center justify-center px-4 py-8">
