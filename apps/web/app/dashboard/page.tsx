@@ -7,6 +7,7 @@ import { useAuth } from '../lib/auth-context';
 import api from '../lib/api';
 import Logo from '../components/Logo';
 import PhoneInput from '../components/PhoneInput';
+import Sidebar from './components/Sidebar';
 
 // Order status values from backend
 const ORDER_STATUSES = [
