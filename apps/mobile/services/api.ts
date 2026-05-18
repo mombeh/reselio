@@ -1,5 +1,5 @@
 const API_URL = __DEV__
-  ? 'http://localhost:3000'
+  ? 'http://192.168.1.56:3000'
   : 'https://api.reselio.com';
 
 type FetchOptions = {
