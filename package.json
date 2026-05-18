@@ -17,12 +17,17 @@
     "node": ">=18"
   },
   "overrides": {
-  "react": "19.2.5",
-  "react-dom": "19.2.5"
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
   },
   "packageManager": "npm@10.9.4",
   "workspaces": [
     "apps/*",
     "packages/*"
-  ]
+  ],
+  "dependencies": {
+    "@urql/core": "^5.2.0",
+    "debug": "^4.4.3",
+    "wonka": "^6.3.6"
+  }
 }
