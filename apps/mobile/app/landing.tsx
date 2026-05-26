@@ -1,35 +1,62 @@
-import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  ScrollView,
+  TouchableOpacity,
+  Dimensions,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import Animated, {
+  FadeInDown,
+  FadeInUp,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withSequence,
+  withTiming,
+} from 'react-native-reanimated';
+import {
+  ShoppingBag,
+  TrendingUp,
+  Users,
+  Truck,
+  ArrowRight,
+  Package,
+} from 'lucide-react-native';
+import { useEffect } from 'react';
 
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, Fonts } from '@/constants/theme';
 
+const { width } = Dimensions.get('window');
+
 const features = [
   {
-    icon: '📦',
-    title: 'Track every customer order',
+    icon: ShoppingBag,
+    title: 'Track Every Order',
     description:
-      'Follow orders from supplier to delivery without losing details in WhatsApp chats.',
+      'Manage customer orders from supplier to delivery without WhatsApp confusion.',
   },
   {
-    icon: '💰',
-    title: 'Know your real profit',
+    icon: TrendingUp,
+    title: 'Know Your Profit',
     description:
-      'Automatically calculate balances, revenue, and profit for every sale.',
+      'Automatically calculate profit, balances, and total revenue in real time.',
   },
   {
-    icon: '🚚',
-    title: 'Manage deliveries easily',
+    icon: Users,
+    title: 'Customer History',
     description:
-      'Track delivery progress and know exactly which orders are pending.',
+      'See repeat buyers, order history, and outstanding balances instantly.',
   },
   {
-    icon: '👥',
-    title: 'Build customer loyalty',
+    icon: Truck,
+    title: 'Delivery Tracking',
     description:
-      'Keep customer history, repeat orders, and payment records in one place.',
+      'Track every order stage from supplier shipment to customer delivery.',
   },
 ];
 
@@ -41,163 +68,207 @@ export default function LandingScreen() {
   const isDark = colorScheme === 'dark';
   const router = useRouter();
 
+  const floating = useSharedValue(0);
+
+  useEffect(() => {
+    floating.value = withRepeat(
+      withSequence(
+        withTiming(-12, { duration: 2000 }),
+        withTiming(0, { duration: 2000 })
+      ),
+      -1,
+      true
+    );
+  }, []);
+
+  const animatedPhoneStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ translateY: floating.value }],
+    };
+  });
+
   return (
     <ScrollView
-      showsVerticalScrollIndicator={false}
       style={[styles.container, { backgroundColor: colors.background }]}
+      showsVerticalScrollIndicator={false}
     >
-      {/* HERO */}
-      <ThemedView
-        style={[
-          styles.hero,
-          {
-            backgroundColor: isDark ? '#0C2D3F' : '#0A7EA4',
-          },
-        ]}
+      {/* HERO SECTION */}
+      <LinearGradient
+        colors={isDark ? ['#07141D', '#0A7EA4'] : ['#0A7EA4', '#11A8D8']}
+        style={styles.hero}
       >
-        <View style={styles.heroTop}>
-          <View style={styles.logoCircle}>
-            <ThemedText style={styles.logoText}>R</ThemedText>
+        {/* Logo */}
+        <Animated.View entering={FadeInUp.duration(700)} style={styles.logoRow}>
+          <View style={styles.logoBox}>
+            <Package color="#fff" size={20} strokeWidth={2.5} />
           </View>
 
           <ThemedText style={styles.brandName}>Reselio</ThemedText>
-        </View>
+        </Animated.View>
 
-        <ThemedText style={styles.heroTitle}>
-          Track orders, profits, and deliveries in one place.
-        </ThemedText>
+        {/* Headline */}
+        <Animated.View entering={FadeInDown.duration(900)}>
+          <ThemedText style={styles.headline}>
+            Stop managing your business in WhatsApp chats.
+          </ThemedText>
 
-        <ThemedText style={styles.heroDescription}>
-          Built for WhatsApp and Instagram sellers who want to run their
-          business in a simpler and more organized way.
-        </ThemedText>
+          <ThemedText style={styles.subHeadline}>
+            Reselio helps social-commerce sellers track orders, profits,
+            deliveries, and customers in one simple workspace.
+          </ThemedText>
+        </Animated.View>
 
-        {/* MINI STATS */}
-        <View style={styles.statsContainer}>
-          <View
-            style={[
-              styles.statCard,
-              { backgroundColor: 'rgba(255,255,255,0.12)' },
-            ]}
+        {/* CTA */}
+        <Animated.View
+          entering={FadeInDown.delay(200).duration(900)}
+          style={styles.heroButtons}
+        >
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={styles.primaryBtn}
+            onPress={() => router.push('/register')}
           >
-            <ThemedText style={styles.statNumber}>24</ThemedText>
-            <ThemedText style={styles.statLabel}>Orders</ThemedText>
-          </View>
+            <ThemedText style={styles.primaryBtnText}>
+              Start Free
+            </ThemedText>
 
-          <View
-            style={[
-              styles.statCard,
-              { backgroundColor: 'rgba(255,255,255,0.12)' },
-            ]}
+            <ArrowRight size={18} color="#fff" />
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            activeOpacity={0.9}
+            style={styles.secondaryBtn}
+            onPress={() => router.push('/login')}
           >
-            <ThemedText style={styles.statNumber}>120K</ThemedText>
-            <ThemedText style={styles.statLabel}>Profit</ThemedText>
+            <ThemedText style={styles.secondaryBtnText}>
+              Sign In
+            </ThemedText>
+          </TouchableOpacity>
+        </Animated.View>
+
+        {/* PHONE MOCKUP */}
+        <Animated.View
+          style={[styles.phoneWrapper, animatedPhoneStyle]}
+          entering={FadeInUp.delay(300).duration(1000)}
+        >
+          <View style={styles.phoneMockup}>
+            <View style={styles.phoneHeader}>
+              <View>
+                <ThemedText style={styles.phoneTitle}>
+                  Dashboard
+                </ThemedText>
+
+                <ThemedText style={styles.phoneSubtitle}>
+                  Welcome back 👋
+                </ThemedText>
+              </View>
+
+              <View style={styles.greenDot} />
+            </View>
+
+            <View style={styles.metricCard}>
+              <ThemedText style={styles.metricLabel}>
+                Total Revenue
+              </ThemedText>
+
+              <ThemedText style={styles.metricValue}>
+                1,240,000 FCFA
+              </ThemedText>
+            </View>
+
+            <View style={styles.smallCardsRow}>
+              <View style={styles.smallCard}>
+                <ThemedText style={styles.smallCardNumber}>42</ThemedText>
+                <ThemedText style={styles.smallCardLabel}>
+                  Orders
+                </ThemedText>
+              </View>
+
+              <View style={styles.smallCard}>
+                <ThemedText style={styles.smallCardNumber}>18</ThemedText>
+                <ThemedText style={styles.smallCardLabel}>
+                  Deliveries
+                </ThemedText>
+              </View>
+            </View>
           </View>
-
-          <View
-            style={[
-              styles.statCard,
-              { backgroundColor: 'rgba(255,255,255,0.12)' },
-            ]}
-          >
-            <ThemedText style={styles.statNumber}>5</ThemedText>
-            <ThemedText style={styles.statLabel}>Pending</ThemedText>
-          </View>
-        </View>
-      </ThemedView>
-
-      {/* PAIN POINT */}
-      <ThemedView style={styles.problemSection}>
-        <ThemedText style={styles.problemTitle}>
-          Still managing orders inside WhatsApp chats?
-        </ThemedText>
-
-        <ThemedText style={styles.problemText}>
-          Reselio helps you organize customer orders, balances, deliveries,
-          and profits without notebooks or spreadsheets.
-        </ThemedText>
-      </ThemedView>
+        </Animated.View>
+      </LinearGradient>
 
       {/* FEATURES */}
       <ThemedView style={styles.featuresSection}>
-        <ThemedText type="subtitle" style={styles.sectionTitle}>
-          Everything you need to manage your reseller business
+        <ThemedText style={styles.sectionBadge}>
+          WHY RESELIO
         </ThemedText>
 
-        {features.map((feature, index) => (
-          <ThemedView
-            key={index}
-            style={[
-              styles.featureCard,
-              {
-                backgroundColor: isDark ? '#182229' : '#F5FAFE',
-              },
-            ]}
-          >
-            <ThemedText style={styles.featureIcon}>
-              {feature.icon}
-            </ThemedText>
+        <ThemedText style={styles.sectionTitle}>
+          Everything a reseller needs to stay organized.
+        </ThemedText>
 
-            <View style={styles.featureBody}>
-              <ThemedText
-                type="defaultSemiBold"
-                style={styles.featureTitle}
+        {features.map((feature, index) => {
+          const Icon = feature.icon;
+
+          return (
+            <Animated.View
+              entering={FadeInUp.delay(index * 120).duration(700)}
+              key={feature.title}
+            >
+              <ThemedView
+                style={[
+                  styles.featureCard,
+                  {
+                    backgroundColor: isDark ? '#111C24' : '#FFFFFF',
+                  },
+                ]}
               >
-                {feature.title}
-              </ThemedText>
+                <View style={styles.iconContainer}>
+                  <Icon color="#0A7EA4" size={24} strokeWidth={2.3} />
+                </View>
 
-              <ThemedText style={styles.featureDescription}>
-                {feature.description}
-              </ThemedText>
-            </View>
-          </ThemedView>
-        ))}
+                <View style={styles.featureContent}>
+                  <ThemedText style={styles.featureTitle}>
+                    {feature.title}
+                  </ThemedText>
+
+                  <ThemedText style={styles.featureDescription}>
+                    {feature.description}
+                  </ThemedText>
+                </View>
+              </ThemedView>
+            </Animated.View>
+          );
+        })}
       </ThemedView>
 
-      {/* CTA */}
-      <ThemedView style={styles.ctaSection}>
+      {/* FINAL CTA */}
+      <LinearGradient
+        colors={isDark ? ['#0E1A22', '#102C39'] : ['#F5FBFF', '#E7F7FF']}
+        style={styles.bottomCTA}
+      >
+        <ThemedText style={styles.bottomTitle}>
+          Built for WhatsApp & Instagram sellers.
+        </ThemedText>
+
+        <ThemedText style={styles.bottomDescription}>
+          No spreadsheets. No notebooks. No confusing accounting software.
+          Just simple business management.
+        </ThemedText>
+
         <TouchableOpacity
-          onPress={() => router.push('/register')}
           activeOpacity={0.9}
-          style={[
-            styles.primaryBtn,
-            {
-              backgroundColor: colors.tint,
-            },
-          ]}
+          style={[styles.primaryBtn, { marginTop: 18 }]}
+          onPress={() => router.push('/register')}
         >
           <ThemedText style={styles.primaryBtnText}>
-            Start organizing your business
+            Create Free Account
           </ThemedText>
         </TouchableOpacity>
-
-        <TouchableOpacity
-          onPress={() => router.push('/login')}
-          activeOpacity={0.85}
-          style={[
-            styles.secondaryBtn,
-            {
-              borderColor: isDark ? '#3A4046' : '#D0D7DE',
-            },
-          ]}
-        >
-          <ThemedText
-            style={[
-              styles.secondaryBtnText,
-              {
-                color: colors.text,
-              },
-            ]}
-          >
-            I already have an account
-          </ThemedText>
-        </TouchableOpacity>
-      </ThemedView>
+      </LinearGradient>
 
       {/* FOOTER */}
       <ThemedView style={styles.footer}>
         <ThemedText style={styles.footerText}>
-          Built for modern WhatsApp & Instagram resellers.
+          Reselio · Business management for modern resellers
         </ThemedText>
       </ThemedView>
     </ScrollView>
@@ -210,181 +281,267 @@ const styles = StyleSheet.create({
   },
 
   hero: {
-    paddingTop: 78,
-    paddingBottom: 44,
+    paddingTop: 72,
     paddingHorizontal: 24,
-    borderBottomLeftRadius: 34,
-    borderBottomRightRadius: 34,
+    paddingBottom: 60,
+    borderBottomLeftRadius: 36,
+    borderBottomRightRadius: 36,
   },
 
-  heroTop: {
+  logoRow: {
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 28,
   },
 
-  logoCircle: {
+  logoBox: {
     width: 42,
     height: 42,
-    borderRadius: 21,
-    backgroundColor: '#fff',
+    borderRadius: 14,
+    backgroundColor: 'rgba(255,255,255,0.16)',
     justifyContent: 'center',
     alignItems: 'center',
     marginRight: 12,
   },
 
-  logoText: {
-    fontSize: 20,
-    fontWeight: '800',
-    color: '#0A7EA4',
-  },
-
   brandName: {
     fontSize: 28,
-    fontFamily: Fonts.rounded,
-    fontWeight: '700',
     color: '#fff',
+    fontFamily: Fonts.rounded,
+    fontWeight: '800',
   },
 
-  heroTitle: {
-    fontSize: 34,
-    lineHeight: 42,
+  headline: {
+    fontSize: 38,
+    lineHeight: 48,
     color: '#fff',
     fontWeight: '800',
     marginBottom: 16,
   },
 
-  heroDescription: {
+  subHeadline: {
     fontSize: 16,
-    lineHeight: 26,
-    color: 'rgba(255,255,255,0.88)',
+    lineHeight: 28,
+    color: 'rgba(255,255,255,0.85)',
+    maxWidth: width * 0.9,
   },
 
-  statsContainer: {
+  heroButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    marginTop: 30,
+  },
+
+  primaryBtn: {
+    backgroundColor: '#11181C',
+    paddingVertical: 15,
+    paddingHorizontal: 22,
+    borderRadius: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+  },
+
+  primaryBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 15,
+  },
+
+  secondaryBtn: {
+    borderWidth: 1.4,
+    borderColor: 'rgba(255,255,255,0.4)',
+    paddingVertical: 15,
+    paddingHorizontal: 22,
+    borderRadius: 16,
+  },
+
+  secondaryBtnText: {
+    color: '#fff',
+    fontWeight: '600',
+    fontSize: 15,
+  },
+
+  phoneWrapper: {
+    alignItems: 'center',
+    marginTop: 44,
+  },
+
+  phoneMockup: {
+    width: width * 0.72,
+    backgroundColor: '#fff',
+    borderRadius: 34,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOpacity: 0.2,
+    shadowRadius: 18,
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    elevation: 10,
+  },
+
+  phoneHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 32,
-    gap: 10,
+    alignItems: 'center',
+    marginBottom: 18,
   },
 
-  statCard: {
+  phoneTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#11181C',
+  },
+
+  phoneSubtitle: {
+    fontSize: 12,
+    color: '#687076',
+    marginTop: 4,
+  },
+
+  greenDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 999,
+    backgroundColor: '#22C55E',
+  },
+
+  metricCard: {
+    backgroundColor: '#0A7EA4',
+    borderRadius: 22,
+    padding: 18,
+    marginBottom: 14,
+  },
+
+  metricLabel: {
+    color: 'rgba(255,255,255,0.8)',
+    fontSize: 13,
+  },
+
+  metricValue: {
+    color: '#fff',
+    fontSize: 24,
+    fontWeight: '800',
+    marginTop: 6,
+  },
+
+  smallCardsRow: {
+    flexDirection: 'row',
+    gap: 12,
+  },
+
+  smallCard: {
     flex: 1,
-    paddingVertical: 18,
+    backgroundColor: '#F4F7FA',
     borderRadius: 18,
+    paddingVertical: 18,
     alignItems: 'center',
   },
 
-  statNumber: {
-    fontSize: 20,
+  smallCardNumber: {
+    fontSize: 22,
     fontWeight: '800',
-    color: '#fff',
-    marginBottom: 4,
+    color: '#11181C',
   },
 
-  statLabel: {
-    fontSize: 13,
-    color: 'rgba(255,255,255,0.8)',
-  },
-
-  problemSection: {
-    paddingHorizontal: 24,
-    marginTop: 34,
-  },
-
-  problemTitle: {
-    fontSize: 24,
-    lineHeight: 34,
-    fontWeight: '700',
-    marginBottom: 12,
-    textAlign: 'center',
-  },
-
-  problemText: {
-    fontSize: 15,
-    lineHeight: 26,
-    opacity: 0.7,
-    textAlign: 'center',
+  smallCardLabel: {
+    marginTop: 6,
+    color: '#687076',
+    fontSize: 12,
   },
 
   featuresSection: {
-    paddingHorizontal: 22,
-    marginTop: 36,
+    paddingHorizontal: 24,
+    marginTop: 40,
     gap: 16,
   },
 
+  sectionBadge: {
+    color: '#0A7EA4',
+    fontSize: 13,
+    fontWeight: '700',
+    letterSpacing: 1,
+  },
+
   sectionTitle: {
-    textAlign: 'center',
-    fontSize: 18,
-    marginBottom: 10,
+    fontSize: 28,
+    lineHeight: 38,
+    fontWeight: '800',
+    marginBottom: 12,
   },
 
   featureCard: {
+    borderRadius: 24,
+    padding: 20,
     flexDirection: 'row',
-    padding: 18,
-    borderRadius: 18,
-    gap: 14,
     alignItems: 'flex-start',
+    gap: 16,
+    shadowColor: '#000',
+    shadowOpacity: 0.05,
+    shadowRadius: 12,
+    shadowOffset: {
+      width: 0,
+      height: 6,
+    },
+    elevation: 2,
   },
 
-  featureIcon: {
-    fontSize: 28,
-    marginTop: 2,
+  iconContainer: {
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#E8F8FF',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 
-  featureBody: {
+  featureContent: {
     flex: 1,
   },
 
   featureTitle: {
-    fontSize: 16,
+    fontSize: 17,
+    fontWeight: '700',
     marginBottom: 6,
   },
 
   featureDescription: {
     fontSize: 14,
-    lineHeight: 22,
-    opacity: 0.72,
+    lineHeight: 24,
+    opacity: 0.7,
   },
 
-  ctaSection: {
-    paddingHorizontal: 22,
+  bottomCTA: {
+    marginHorizontal: 24,
     marginTop: 42,
-    gap: 14,
+    borderRadius: 28,
+    padding: 26,
   },
 
-  primaryBtn: {
-    paddingVertical: 18,
-    borderRadius: 16,
-    alignItems: 'center',
+  bottomTitle: {
+    fontSize: 28,
+    lineHeight: 38,
+    fontWeight: '800',
+    marginBottom: 12,
   },
 
-  primaryBtnText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-
-  secondaryBtn: {
-    paddingVertical: 17,
-    borderRadius: 16,
-    alignItems: 'center',
-    borderWidth: 1.2,
-  },
-
-  secondaryBtnText: {
+  bottomDescription: {
     fontSize: 15,
-    fontWeight: '600',
+    lineHeight: 26,
+    opacity: 0.7,
   },
 
   footer: {
-    marginTop: 44,
-    marginBottom: 34,
-    paddingHorizontal: 24,
+    paddingVertical: 30,
+    alignItems: 'center',
   },
 
   footerText: {
-    fontSize: 13,
-    textAlign: 'center',
-    opacity: 0.45,
+    fontSize: 12,
+    opacity: 0.5,
   },
 });
