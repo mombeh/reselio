@@ -1,8 +1,20 @@
 import { useState } from 'react';
-import { StyleSheet, View, TouchableOpacity, Alert, ScrollView, KeyboardAvoidingView, Platform, TextInput } from 'react-native';
+import {
+  StyleSheet,
+  View,
+  TouchableOpacity,
+  Alert,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  TextInput,
+} from 'react-native';
+
 import { Link, useRouter } from 'expo-router';
+import { LinearGradient } from 'expo-linear-gradient';
+import { Mail, Lock, ShoppingBag } from 'lucide-react-native';
+
 import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
 import { useColorScheme } from '@/hooks/use-color-scheme';
 import { Colors, Fonts } from '@/constants/theme';
 import { authApi } from '@/services/api';
@@ -12,9 +24,13 @@ export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loggingIn, setLoggingIn] = useState(false);
-  const colorScheme: 'light' | 'dark' = useColorScheme() === 'dark' ? 'dark' : 'light';
+
+  const colorScheme: 'light' | 'dark' =
+    useColorScheme() === 'dark' ? 'dark' : 'light';
+
   const colors = Colors[colorScheme];
   const isDark = colorScheme === 'dark';
+
   const router = useRouter();
   const { login: setToken } = useAuth();
 
@@ -23,76 +39,146 @@ export default function LoginScreen() {
       Alert.alert('Missing fields', 'Please fill in both email and password.');
       return;
     }
+
     setLoggingIn(true);
+
     try {
-      const res = await authApi.login({ email: email.trim(), password });
+      const res = await authApi.login({
+        email: email.trim(),
+        password,
+      });
+
       await setToken(res.access_token);
+
       router.replace('/(tabs)');
     } catch (error: any) {
-      Alert.alert('Login failed', error.message ?? 'Please check your credentials and try again.');
+      Alert.alert(
+        'Login failed',
+        error.message ?? 'Please check your credentials and try again.',
+      );
     } finally {
       setLoggingIn(false);
     }
   };
 
   return (
-    <KeyboardAvoidingView style={{ flex: 1 }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
-      <ScrollView contentContainerStyle={[styles.container, { backgroundColor: colors.background }]}
-        keyboardShouldPersistTaps="handled">
-        <ThemedView style={styles.header}>
-          <ThemedText type="title" style={{ color: colors.tint }}>Reselio</ThemedText>
-          <ThemedText style={{ fontSize: 14, opacity: 0.6, marginTop: 4 }}>Sign in to your account</ThemedText>
-        </ThemedView>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    >
+      <ScrollView
+        contentContainerStyle={[
+          styles.container,
+          { backgroundColor: colors.background },
+        ]}
+        keyboardShouldPersistTaps="handled"
+      >
+        {/* HERO */}
+        <LinearGradient
+          colors={isDark ? ['#081C24', '#0A7EA4'] : ['#0A7EA4', '#13B5EA']}
+          style={styles.hero}
+        >
+          <View style={styles.logoCircle}>
+            <ShoppingBag size={28} color="#fff" />
+          </View>
 
-        <ThemedView style={styles.form}>
-          <ThemedText type="defaultSemiBold" style={styles.label}>Email</ThemedText>
-          <View style={[styles.inputBox, { borderColor: isDark ? '#3A4046' : '#D0D7DE' }]}>
+          <ThemedText style={styles.brand}>Reselio</ThemedText>
+
+          <ThemedText style={styles.heroTitle}>
+            Welcome back 👋
+          </ThemedText>
+
+          <ThemedText style={styles.heroSubtitle}>
+            Manage your orders, profits, customers and deliveries in one place.
+          </ThemedText>
+        </LinearGradient>
+
+        {/* FORM CARD */}
+        <View
+          style={[
+            styles.card,
+            {
+              backgroundColor: isDark ? '#11181C' : '#fff',
+            },
+          ]}
+        >
+          {/* EMAIL */}
+          <ThemedText style={styles.label}>Email Address</ThemedText>
+
+          <View
+            style={[
+              styles.inputContainer,
+              {
+                borderColor: isDark ? '#2C343A' : '#DDE3EA',
+              },
+            ]}
+          >
+            <Mail size={18} color={isDark ? '#94A3B8' : '#64748B'} />
+
             <TextInput
               style={[styles.input, { color: colors.text }]}
               placeholder="you@example.com"
-              placeholderTextColor={isDark ? '#687076' : '#A3AEB5'}
-              multiline
-              onChangeText={setEmail}
-              value={email}
+              placeholderTextColor={isDark ? '#687076' : '#94A3B8'}
               autoCapitalize="none"
-              autoCorrect={false}
               keyboardType="email-address"
+              value={email}
+              onChangeText={setEmail}
             />
           </View>
 
-          <ThemedText type="defaultSemiBold" style={styles.label}>Password</ThemedText>
-          <View style={[styles.inputBox, { borderColor: isDark ? '#3A4046' : '#D0D7DE' }]}>
+          {/* PASSWORD */}
+          <ThemedText style={styles.label}>Password</ThemedText>
+
+          <View
+            style={[
+              styles.inputContainer,
+              {
+                borderColor: isDark ? '#2C343A' : '#DDE3EA',
+              },
+            ]}
+          >
+            <Lock size={18} color={isDark ? '#94A3B8' : '#64748B'} />
+
             <TextInput
               style={[styles.input, { color: colors.text }]}
               placeholder="Enter your password"
-              placeholderTextColor={isDark ? '#687076' : '#A3AEB5'}
+              placeholderTextColor={isDark ? '#687076' : '#94A3B8'}
               secureTextEntry
-              multiline
-              onChangeText={setPassword}
               value={password}
+              onChangeText={setPassword}
             />
           </View>
 
+          {/* BUTTON */}
           <TouchableOpacity
             onPress={handleLogin}
-            activeOpacity={0.85}
             disabled={loggingIn}
-            style={[styles.submitBtn, { backgroundColor: colors.tint }]}
+            activeOpacity={0.9}
           >
-            <ThemedText style={[styles.submitBtnText, { color: '#fff' }]}>
-              {loggingIn ? 'Signing in…' : 'Sign In'}
-            </ThemedText>
+            <LinearGradient
+              colors={['#0A7EA4', '#13B5EA']}
+              style={styles.button}
+            >
+              <ThemedText style={styles.buttonText}>
+                {loggingIn ? 'Signing In...' : 'Sign In'}
+              </ThemedText>
+            </LinearGradient>
           </TouchableOpacity>
-        </ThemedView>
 
-        <ThemedView style={styles.footer}>
-          <ThemedText style={{ fontSize: 13, opacity: 0.6 }}>
-            Don&apos;t have an account?{' '}
-          </ThemedText>
-          <Link href="/register">
-            <ThemedText style={[styles.linkText, { color: colors.tint }]}>Create one</ThemedText>
-          </Link>
-        </ThemedView>
+          {/* FOOTER */}
+          <View style={styles.footer}>
+            <ThemedText style={{ opacity: 0.6 }}>
+              Don&apos;t have an account?
+            </ThemedText>
+
+            <Link href="/register">
+              <ThemedText style={{ color: colors.tint, fontWeight: '700' }}>
+                {' '}
+                Create one
+              </ThemedText>
+            </Link>
+          </View>
+        </View>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -101,52 +187,102 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 26,
-    paddingVertical: 44,
-    gap: 20,
   },
-  header: {
+
+  hero: {
+    paddingTop: 90,
+    paddingBottom: 120,
+    paddingHorizontal: 28,
     alignItems: 'center',
-    marginBottom: 8,
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
   },
-  form: {
-    gap: 14,
-  },
-  label: {
-    fontSize: 13,
-    opacity: 0.7,
-  },
-  inputBox: {
-    borderWidth: 1.2,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    minHeight: 50,
+
+  logoCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: 'rgba(255,255,255,0.15)',
+    alignItems: 'center',
     justifyContent: 'center',
+    marginBottom: 18,
   },
-  input: {
+
+  brand: {
+    color: '#fff',
+    fontSize: 32,
+    fontFamily: Fonts.rounded,
+    fontWeight: '800',
+    marginBottom: 10,
+  },
+
+  heroTitle: {
+    color: '#fff',
+    fontSize: 28,
+    fontWeight: '800',
+    textAlign: 'center',
+  },
+
+  heroSubtitle: {
+    color: 'rgba(255,255,255,0.85)',
+    textAlign: 'center',
+    marginTop: 10,
     fontSize: 15,
-    lineHeight: 22,
+    lineHeight: 24,
+    maxWidth: 300,
+  },
+
+  card: {
+    marginHorizontal: 22,
+    marginTop: -60,
+    borderRadius: 28,
+    padding: 24,
+    gap: 14,
+    shadowColor: '#000',
+    shadowOpacity: 0.08,
+    shadowRadius: 18,
+    elevation: 5,
+  },
+
+  label: {
+    fontSize: 14,
+    fontWeight: '600',
+    opacity: 0.75,
+  },
+
+  inputContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderWidth: 1.2,
+    borderRadius: 16,
+    paddingHorizontal: 14,
+    height: 56,
+    gap: 10,
+  },
+
+  input: {
+    flex: 1,
+    fontSize: 15,
     fontFamily: Fonts.sans,
   },
-  submitBtn: {
-    paddingVertical: 14,
-    borderRadius: 12,
+
+  button: {
+    height: 56,
+    borderRadius: 16,
+    justifyContent: 'center',
     alignItems: 'center',
-    marginTop: 6,
+    marginTop: 10,
   },
-  submitBtnText: {
+
+  buttonText: {
+    color: '#fff',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '800',
   },
+
   footer: {
     flexDirection: 'row',
     justifyContent: 'center',
-    marginTop: 10,
-  },
-  linkText: {
-    fontSize: 13,
-    fontWeight: '600',
+    marginTop: 12,
   },
 });
