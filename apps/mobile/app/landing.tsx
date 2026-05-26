@@ -1,4 +1,4 @@
-import { StyleSheet, View, ScrollView, TouchableOpacity, Platform } from 'react-native';
+import { StyleSheet, View, ScrollView, TouchableOpacity } from 'react-native';
 import { useRouter } from 'expo-router';
 
 import { ThemedText } from '@/components/themed-text';
@@ -9,84 +9,195 @@ import { Colors, Fonts } from '@/constants/theme';
 const features = [
   {
     icon: '📦',
-    title: 'Track Every Order',
-    description: 'Monitor stock flow from supplier to customer with clear status stages.',
+    title: 'Track every customer order',
+    description:
+      'Follow orders from supplier to delivery without losing details in WhatsApp chats.',
   },
   {
-    icon: '📊',
-    title: 'Live Analytics',
-    description: 'Revenue, profit, and delivery metrics updated in real time.',
+    icon: '💰',
+    title: 'Know your real profit',
+    description:
+      'Automatically calculate balances, revenue, and profit for every sale.',
+  },
+  {
+    icon: '🚚',
+    title: 'Manage deliveries easily',
+    description:
+      'Track delivery progress and know exactly which orders are pending.',
   },
   {
     icon: '👥',
-    title: 'Customer Profiles',
-    description: "Keep every customer's history, spend, and balance at your fingertips.",
-  },
-  {
-    icon: '📄',
-    title: 'Export to CSV',
-    description: 'Download your full order history for accounting or audits.',
+    title: 'Build customer loyalty',
+    description:
+      'Keep customer history, repeat orders, and payment records in one place.',
   },
 ];
 
 export default function LandingScreen() {
-  const colorScheme: 'light' | 'dark' = useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colorScheme: 'light' | 'dark' =
+    useColorScheme() === 'dark' ? 'dark' : 'light';
+
   const colors = Colors[colorScheme];
   const isDark = colorScheme === 'dark';
   const router = useRouter();
 
   return (
-    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
-      {/* ── Hero ── */}
-      <ThemedView style={[styles.hero, { backgroundColor: isDark ? '#0C2D3F' : '#0A7EA4' }]}>
-        <ThemedText style={styles.brandName}>Reselio</ThemedText>
-        <ThemedText style={styles.tagline}>Manage your orders.</ThemedText>
-        <ThemedText style={styles.tagline}>Grow your sales.</ThemedText>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      {/* HERO */}
+      <ThemedView
+        style={[
+          styles.hero,
+          {
+            backgroundColor: isDark ? '#0C2D3F' : '#0A7EA4',
+          },
+        ]}
+      >
+        <View style={styles.heroTop}>
+          <View style={styles.logoCircle}>
+            <ThemedText style={styles.logoText}>R</ThemedText>
+          </View>
+
+          <ThemedText style={styles.brandName}>Reselio</ThemedText>
+        </View>
+
+        <ThemedText style={styles.heroTitle}>
+          Track orders, profits, and deliveries in one place.
+        </ThemedText>
+
+        <ThemedText style={styles.heroDescription}>
+          Built for WhatsApp and Instagram sellers who want to run their
+          business in a simpler and more organized way.
+        </ThemedText>
+
+        {/* MINI STATS */}
+        <View style={styles.statsContainer}>
+          <View
+            style={[
+              styles.statCard,
+              { backgroundColor: 'rgba(255,255,255,0.12)' },
+            ]}
+          >
+            <ThemedText style={styles.statNumber}>24</ThemedText>
+            <ThemedText style={styles.statLabel}>Orders</ThemedText>
+          </View>
+
+          <View
+            style={[
+              styles.statCard,
+              { backgroundColor: 'rgba(255,255,255,0.12)' },
+            ]}
+          >
+            <ThemedText style={styles.statNumber}>120K</ThemedText>
+            <ThemedText style={styles.statLabel}>Profit</ThemedText>
+          </View>
+
+          <View
+            style={[
+              styles.statCard,
+              { backgroundColor: 'rgba(255,255,255,0.12)' },
+            ]}
+          >
+            <ThemedText style={styles.statNumber}>5</ThemedText>
+            <ThemedText style={styles.statLabel}>Pending</ThemedText>
+          </View>
+        </View>
       </ThemedView>
 
-      {/* ── Features ── */}
+      {/* PAIN POINT */}
+      <ThemedView style={styles.problemSection}>
+        <ThemedText style={styles.problemTitle}>
+          Still managing orders inside WhatsApp chats?
+        </ThemedText>
+
+        <ThemedText style={styles.problemText}>
+          Reselio helps you organize customer orders, balances, deliveries,
+          and profits without notebooks or spreadsheets.
+        </ThemedText>
+      </ThemedView>
+
+      {/* FEATURES */}
       <ThemedView style={styles.featuresSection}>
         <ThemedText type="subtitle" style={styles.sectionTitle}>
-          Everything you need to run your store
+          Everything you need to manage your reseller business
         </ThemedText>
 
         {features.map((feature, index) => (
-          <ThemedView key={index} style={[styles.featureCard, { backgroundColor: isDark ? '#1E2A30' : '#F5FAFE' }]}>
-            <ThemedText style={styles.featureIcon}>{feature.icon}</ThemedText>
+          <ThemedView
+            key={index}
+            style={[
+              styles.featureCard,
+              {
+                backgroundColor: isDark ? '#182229' : '#F5FAFE',
+              },
+            ]}
+          >
+            <ThemedText style={styles.featureIcon}>
+              {feature.icon}
+            </ThemedText>
+
             <View style={styles.featureBody}>
-              <ThemedText type="defaultSemiBold" style={styles.featureTitle}>{feature.title}</ThemedText>
-              <ThemedText style={styles.featureDescription}>{feature.description}</ThemedText>
+              <ThemedText
+                type="defaultSemiBold"
+                style={styles.featureTitle}
+              >
+                {feature.title}
+              </ThemedText>
+
+              <ThemedText style={styles.featureDescription}>
+                {feature.description}
+              </ThemedText>
             </View>
           </ThemedView>
         ))}
       </ThemedView>
 
-      {/* ── CTA ── */}
+      {/* CTA */}
       <ThemedView style={styles.ctaSection}>
         <TouchableOpacity
-          onPress={() => router.push('/login')}
-          activeOpacity={0.85}
-          style={[styles.primaryBtn, { backgroundColor: isDark ? '#fff' : colors.tint }]}
+          onPress={() => router.push('/register')}
+          activeOpacity={0.9}
+          style={[
+            styles.primaryBtn,
+            {
+              backgroundColor: colors.tint,
+            },
+          ]}
         >
-          <ThemedText style={[styles.primaryBtnText, { color: isDark ? '#000' : '#fff' }]}>
-            Sign in to your account
+          <ThemedText style={styles.primaryBtnText}>
+            Start organizing your business
           </ThemedText>
         </TouchableOpacity>
 
         <TouchableOpacity
-          onPress={() => router.push('/register')}
+          onPress={() => router.push('/login')}
           activeOpacity={0.85}
-          style={[styles.secondaryBtn, { borderColor: isDark ? '#9BA1A6' : '#687076' }]}
+          style={[
+            styles.secondaryBtn,
+            {
+              borderColor: isDark ? '#3A4046' : '#D0D7DE',
+            },
+          ]}
         >
-          <ThemedText style={[styles.secondaryBtnText, { color: isDark ? '#ECEDEE' : '#11181C' }]}>
-            Create a new account
+          <ThemedText
+            style={[
+              styles.secondaryBtnText,
+              {
+                color: colors.text,
+              },
+            ]}
+          >
+            I already have an account
           </ThemedText>
         </TouchableOpacity>
       </ThemedView>
 
+      {/* FOOTER */}
       <ThemedView style={styles.footer}>
-        <ThemedText style={{ fontSize: 12, textAlign: 'center', opacity: 0.5 }}>
-          Reselio · Order management for modern retailers
+        <ThemedText style={styles.footerText}>
+          Built for modern WhatsApp & Instagram resellers.
         </ThemedText>
       </ThemedView>
     </ScrollView>
@@ -97,85 +208,183 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+
   hero: {
-    paddingTop: 72,
-    paddingBottom: 52,
-    paddingHorizontal: 28,
-    borderBottomLeftRadius: 32,
-    borderBottomRightRadius: 32,
+    paddingTop: 78,
+    paddingBottom: 44,
+    paddingHorizontal: 24,
+    borderBottomLeftRadius: 34,
+    borderBottomRightRadius: 34,
   },
-  brandName: {
-    fontSize: 40,
-    fontFamily: Fonts.rounded,
-    fontWeight: 'bold',
-    color: '#fff',
-    marginBottom: 6,
-  },
-  tagline: {
-    fontSize: 22,
-    fontFamily: Fonts.rounded,
-    color: 'rgba(255,255,255,0.9)',
-  },
-  featuresSection: {
-    paddingHorizontal: 22,
-    marginTop: 32,
-    gap: 14,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    marginBottom: 6,
-    textAlign: 'center',
-  },
-  featureCard: {
+
+  heroTop: {
     flexDirection: 'row',
-    padding: 16,
-    borderRadius: 14,
-    gap: 14,
+    alignItems: 'center',
+    marginBottom: 28,
+  },
+
+  logoCircle: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    backgroundColor: '#fff',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: 12,
+  },
+
+  logoText: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#0A7EA4',
+  },
+
+  brandName: {
+    fontSize: 28,
+    fontFamily: Fonts.rounded,
+    fontWeight: '700',
+    color: '#fff',
+  },
+
+  heroTitle: {
+    fontSize: 34,
+    lineHeight: 42,
+    color: '#fff',
+    fontWeight: '800',
+    marginBottom: 16,
+  },
+
+  heroDescription: {
+    fontSize: 16,
+    lineHeight: 26,
+    color: 'rgba(255,255,255,0.88)',
+  },
+
+  statsContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginTop: 32,
+    gap: 10,
+  },
+
+  statCard: {
+    flex: 1,
+    paddingVertical: 18,
+    borderRadius: 18,
     alignItems: 'center',
   },
-  featureIcon: {
-    fontSize: 32,
-    lineHeight: 36,
+
+  statNumber: {
+    fontSize: 20,
+    fontWeight: '800',
+    color: '#fff',
+    marginBottom: 4,
   },
+
+  statLabel: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.8)',
+  },
+
+  problemSection: {
+    paddingHorizontal: 24,
+    marginTop: 34,
+  },
+
+  problemTitle: {
+    fontSize: 24,
+    lineHeight: 34,
+    fontWeight: '700',
+    marginBottom: 12,
+    textAlign: 'center',
+  },
+
+  problemText: {
+    fontSize: 15,
+    lineHeight: 26,
+    opacity: 0.7,
+    textAlign: 'center',
+  },
+
+  featuresSection: {
+    paddingHorizontal: 22,
+    marginTop: 36,
+    gap: 16,
+  },
+
+  sectionTitle: {
+    textAlign: 'center',
+    fontSize: 18,
+    marginBottom: 10,
+  },
+
+  featureCard: {
+    flexDirection: 'row',
+    padding: 18,
+    borderRadius: 18,
+    gap: 14,
+    alignItems: 'flex-start',
+  },
+
+  featureIcon: {
+    fontSize: 28,
+    marginTop: 2,
+  },
+
   featureBody: {
     flex: 1,
   },
+
   featureTitle: {
     fontSize: 16,
-    marginBottom: 3,
+    marginBottom: 6,
   },
+
   featureDescription: {
-    fontSize: 13,
-    lineHeight: 20,
-    opacity: 0.7,
+    fontSize: 14,
+    lineHeight: 22,
+    opacity: 0.72,
   },
+
   ctaSection: {
     paddingHorizontal: 22,
-    marginTop: 36,
-    gap: 12,
+    marginTop: 42,
+    gap: 14,
   },
+
   primaryBtn: {
-    paddingVertical: 15,
-    borderRadius: 14,
+    paddingVertical: 18,
+    borderRadius: 16,
     alignItems: 'center',
   },
+
   primaryBtnText: {
+    color: '#fff',
     fontSize: 16,
     fontWeight: '700',
   },
+
   secondaryBtn: {
-    paddingVertical: 14,
-    borderRadius: 14,
+    paddingVertical: 17,
+    borderRadius: 16,
     alignItems: 'center',
-    borderWidth: 1.5,
-    backgroundColor: 'transparent',
+    borderWidth: 1.2,
   },
+
   secondaryBtnText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
   },
+
   footer: {
-    marginTop: 40,
-    marginBottom: 28,
+    marginTop: 44,
+    marginBottom: 34,
+    paddingHorizontal: 24,
+  },
+
+  footerText: {
+    fontSize: 13,
+    textAlign: 'center',
+    opacity: 0.45,
   },
 });
