@@ -49,40 +49,75 @@ export default function RegisterScreen() {
   const { login: setToken } = useAuth();
 
   const handleRegister = async () => {
-    if (!name.trim() || !email.trim() || !password.trim()) {
-      Alert.alert('Missing fields', 'Please fill in all fields.');
-      return;
-    }
+  if (!name.trim() || !email.trim() || !password.trim()) {
+    Alert.alert('Missing fields', 'Please fill in all fields.');
+    return;
+  }
 
-    if (password.length < 8) {
-      Alert.alert(
-        'Weak password',
-        'Password must contain at least 8 characters.',
-      );
-      return;
-    }
+  setLoading(true);
 
-    setLoading(true);
+  try {
+    console.log('Sending registration request...');
 
-    try {
-      const res = await authApi.register({
-        name: name.trim(),
-        email: email.trim(),
-        password,
-      });
+    const res = await authApi.register({
+      name: name.trim(),
+      email: email.trim(),
+      password,
+    });
 
-      await setToken(res.access_token);
+    console.log('Registration response:', res);
 
-      router.replace('/(tabs)');
-    } catch (error: any) {
-      Alert.alert(
-        'Registration failed',
-        error.message ?? 'Something went wrong.',
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
+    await setToken(res.access_token);
+
+    router.replace('/(tabs)');
+  } catch (error: any) {
+    console.error('REGISTER ERROR:', error);
+
+    Alert.alert(
+      'Registration failed',
+      error?.message || JSON.stringify(error)
+    );
+  } finally {
+    console.log('Finished request');
+    setLoading(false);
+  }
+};
+
+  // const handleRegister = async () => {
+  //   if (!name.trim() || !email.trim() || !password.trim()) {
+  //     Alert.alert('Missing fields', 'Please fill in all fields.');
+  //     return;
+  //   }
+
+  //   if (password.length < 8) {
+  //     Alert.alert(
+  //       'Weak password',
+  //       'Password must contain at least 8 characters.',
+  //     );
+  //     return;
+  //   }
+
+  //   setLoading(true);
+
+  //   try {
+  //     const res = await authApi.register({
+  //       name: name.trim(),
+  //       email: email.trim(),
+  //       password,
+  //     });
+
+  //     await setToken(res.access_token);
+
+  //     router.replace('/(tabs)');
+  //   } catch (error: any) {
+  //     Alert.alert(
+  //       'Registration failed',
+  //       error.message ?? 'Something went wrong.',
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   return (
     <KeyboardAvoidingView
