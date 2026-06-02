@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -9,10 +9,10 @@ import {
   Platform,
   TextInput,
   ActivityIndicator,
-} from 'react-native';
+} from "react-native";
 
-import { Link, useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
+import { Link, useRouter } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
 
 import {
   User,
@@ -23,38 +23,36 @@ import {
   ShoppingBag,
   Sparkles,
   CheckCircle2,
-} from 'lucide-react-native';
+} from "lucide-react-native";
 
-import { ThemedText } from '@/components/themed-text';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Colors, Fonts } from '@/constants/theme';
-import { authApi } from '@/services/api';
-import { useAuth } from '@/contexts/AuthContext';
+import { ThemedText } from "@/components/themed-text";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors, Fonts } from "@/constants/theme";
+import { authApi } from "@/services/api";
 
 export default function RegisterScreen() {
-  const [name, setName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
 
-  const colorScheme: 'light' | 'dark' =
-    useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colorScheme: "light" | "dark" =
+    useColorScheme() === "dark" ? "dark" : "light";
 
   const colors = Colors[colorScheme];
-  const isDark = colorScheme === 'dark';
+  const isDark = colorScheme === "dark";
 
   const router = useRouter();
-  const { login: setToken } = useAuth();
 
   const handleRegister = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
-      Alert.alert('Missing fields', 'Please fill in all fields.');
+      Alert.alert("Missing fields", "Please fill in all fields.");
       return;
     }
-
-    if (password.length < 8) {
+        if (password.length < 8) {
       Alert.alert(
         'Weak password',
         'Password must contain at least 8 characters.',
@@ -62,32 +60,76 @@ export default function RegisterScreen() {
       return;
     }
 
+
     setLoading(true);
 
     try {
+      console.log("Sending registration request...");
+
       const res = await authApi.register({
         name: name.trim(),
         email: email.trim(),
         password,
       });
 
-      await setToken(res.access_token);
+      setSuccessMessage(
+        "Account created successfully! Redirecting to login...",
+      );
 
-      router.replace('/(tabs)');
+      setTimeout(() => {
+        router.replace({
+          pathname: "/login",
+          params: {
+            email: email.trim(),
+          },
+        });
+      }, 2000);
     } catch (error: any) {
+      console.error("REGISTER ERROR:", error);
+
       Alert.alert(
-        'Registration failed',
-        error.message ?? 'Something went wrong.',
+        "Registration failed",
+        error?.message || JSON.stringify(error),
       );
     } finally {
+      console.log("Finished request");
       setLoading(false);
     }
   };
 
+  // const handleRegister = async () => {
+  //   if (!name.trim() || !email.trim() || !password.trim()) {
+  //     Alert.alert('Missing fields', 'Please fill in all fields.');
+  //     return;
+  //   }
+
+
+  //   setLoading(true);
+
+  //   try {
+  //     const res = await authApi.register({
+  //       name: name.trim(),
+  //       email: email.trim(),
+  //       password,
+  //     });
+
+  //     await setToken(res.access_token);
+
+  //     router.replace('/(tabs)');
+  //   } catch (error: any) {
+  //     Alert.alert(
+  //       'Registration failed',
+  //       error.message ?? 'Something went wrong.',
+  //     );
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
         contentContainerStyle={[
@@ -101,7 +143,7 @@ export default function RegisterScreen() {
       >
         {/* HERO */}
         <LinearGradient
-          colors={isDark ? ['#081C24', '#0A7EA4'] : ['#0A7EA4', '#13B5EA']}
+          colors={isDark ? ["#081C24", "#0A7EA4"] : ["#0A7EA4", "#13B5EA"]}
           style={styles.hero}
         >
           {/* FLOATING SHAPES */}
@@ -137,7 +179,7 @@ export default function RegisterScreen() {
           style={[
             styles.card,
             {
-              backgroundColor: isDark ? '#11181C' : '#fff',
+              backgroundColor: isDark ? "#11181C" : "#fff",
             },
           ]}
         >
@@ -170,16 +212,16 @@ export default function RegisterScreen() {
             style={[
               styles.inputContainer,
               {
-                borderColor: isDark ? '#2C343A' : '#DDE3EA',
+                borderColor: isDark ? "#2C343A" : "#DDE3EA",
               },
             ]}
           >
-            <User size={18} color={isDark ? '#94A3B8' : '#64748B'} />
+            <User size={18} color={isDark ? "#94A3B8" : "#64748B"} />
 
             <TextInput
               style={[styles.input, { color: colors.text }]}
               placeholder="Jane Doe"
-              placeholderTextColor={isDark ? '#687076' : '#94A3B8'}
+              placeholderTextColor={isDark ? "#687076" : "#94A3B8"}
               value={name}
               onChangeText={setName}
             />
@@ -192,16 +234,16 @@ export default function RegisterScreen() {
             style={[
               styles.inputContainer,
               {
-                borderColor: isDark ? '#2C343A' : '#DDE3EA',
+                borderColor: isDark ? "#2C343A" : "#DDE3EA",
               },
             ]}
           >
-            <Mail size={18} color={isDark ? '#94A3B8' : '#64748B'} />
+            <Mail size={18} color={isDark ? "#94A3B8" : "#64748B"} />
 
             <TextInput
               style={[styles.input, { color: colors.text }]}
               placeholder="you@example.com"
-              placeholderTextColor={isDark ? '#687076' : '#94A3B8'}
+              placeholderTextColor={isDark ? "#687076" : "#94A3B8"}
               autoCapitalize="none"
               keyboardType="email-address"
               value={email}
@@ -216,16 +258,16 @@ export default function RegisterScreen() {
             style={[
               styles.inputContainer,
               {
-                borderColor: isDark ? '#2C343A' : '#DDE3EA',
+                borderColor: isDark ? "#2C343A" : "#DDE3EA",
               },
             ]}
           >
-            <Lock size={18} color={isDark ? '#94A3B8' : '#64748B'} />
+            <Lock size={18} color={isDark ? "#94A3B8" : "#64748B"} />
 
             <TextInput
               style={[styles.input, { color: colors.text }]}
               placeholder="Minimum 8 characters"
-              placeholderTextColor={isDark ? '#687076' : '#94A3B8'}
+              placeholderTextColor={isDark ? "#687076" : "#94A3B8"}
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={setPassword}
@@ -248,6 +290,16 @@ export default function RegisterScreen() {
             Use at least 8 characters for better security.
           </ThemedText>
 
+          {/* SUCCESS MESSAGE */}
+          {successMessage ? (
+            <View style={styles.successContainer}>
+              <CheckCircle2 size={18} color="#22C55E" />
+              <ThemedText style={styles.successText}>
+                {successMessage}
+              </ThemedText>
+            </View>
+          ) : null}
+
           {/* BUTTON */}
           <TouchableOpacity
             activeOpacity={0.9}
@@ -255,7 +307,7 @@ export default function RegisterScreen() {
             disabled={loading}
           >
             <LinearGradient
-              colors={['#0A7EA4', '#13B5EA']}
+              colors={["#0A7EA4", "#13B5EA"]}
               style={styles.button}
             >
               {loading ? (
@@ -283,10 +335,10 @@ export default function RegisterScreen() {
               <ThemedText
                 style={{
                   color: colors.tint,
-                  fontWeight: '700',
+                  fontWeight: "700",
                 }}
               >
-                {' '}
+                {" "}
                 Sign In
               </ThemedText>
             </Link>
@@ -306,28 +358,46 @@ const styles = StyleSheet.create({
     paddingTop: 90,
     paddingBottom: 130,
     paddingHorizontal: 28,
-    alignItems: 'center',
+    alignItems: "center",
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
-    overflow: 'hidden',
+    overflow: "hidden",
+  },
+
+  successContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(34,197,94,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(34,197,94,0.25)",
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 16,
+  },
+
+  successText: {
+    color: "#22C55E",
+    fontWeight: "600",
+    flex: 1,
   },
 
   circleOne: {
-    position: 'absolute',
+    position: "absolute",
     width: 220,
     height: 220,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: "rgba(255,255,255,0.06)",
     top: -40,
     right: -60,
   },
 
   circleTwo: {
-    position: 'absolute',
+    position: "absolute",
     width: 160,
     height: 160,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.04)',
+    backgroundColor: "rgba(255,255,255,0.04)",
     bottom: -20,
     left: -40,
   },
@@ -336,49 +406,49 @@ const styles = StyleSheet.create({
     width: 68,
     height: 68,
     borderRadius: 34,
-    backgroundColor: 'rgba(255,255,255,0.14)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(255,255,255,0.14)",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 18,
   },
 
   brand: {
     fontSize: 34,
     fontFamily: Fonts.rounded,
-    fontWeight: '800',
-    color: '#fff',
+    fontWeight: "800",
+    color: "#fff",
     marginBottom: 14,
   },
 
   badge: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 6,
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderRadius: 999,
-    backgroundColor: 'rgba(255,255,255,0.14)',
+    backgroundColor: "rgba(255,255,255,0.14)",
     marginBottom: 20,
   },
 
   badgeText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: "700",
   },
 
   heroTitle: {
     fontSize: 30,
-    fontWeight: '800',
-    color: '#fff',
-    textAlign: 'center',
+    fontWeight: "800",
+    color: "#fff",
+    textAlign: "center",
     lineHeight: 38,
   },
 
   heroSubtitle: {
     marginTop: 12,
-    textAlign: 'center',
-    color: 'rgba(255,255,255,0.86)',
+    textAlign: "center",
+    color: "rgba(255,255,255,0.86)",
     fontSize: 15,
     lineHeight: 24,
     maxWidth: 320,
@@ -389,15 +459,15 @@ const styles = StyleSheet.create({
     marginTop: -70,
     borderRadius: 28,
     padding: 24,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 20,
     elevation: 6,
   },
 
   featureRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     gap: 8,
     marginBottom: 10,
   },
@@ -411,7 +481,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     marginBottom: 8,
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: "700",
     opacity: 0.75,
   },
 
@@ -419,8 +489,8 @@ const styles = StyleSheet.create({
     height: 58,
     borderWidth: 1.2,
     borderRadius: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     paddingHorizontal: 14,
     gap: 10,
   },
@@ -440,28 +510,28 @@ const styles = StyleSheet.create({
   button: {
     height: 58,
     borderRadius: 18,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 24,
   },
 
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: "800",
   },
 
   terms: {
     marginTop: 16,
-    textAlign: 'center',
+    textAlign: "center",
     fontSize: 12,
     lineHeight: 18,
     opacity: 0.55,
   },
 
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 24,
   },
 });
