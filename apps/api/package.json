@@ -34,10 +34,7 @@
     "iterare": "^1.2.1",
     "json2csv": "^6.0.0-alpha.2",
     "load-esm": "^1.0.3",
-    "mongoose": "^9.2.3",
-    "passport": "^0.7.0",
-    "passport-google-oauth20": "^2.0.0",
-    "passport-jwt": "^4.0.1",
+    "mongoose": "^9.6.1",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.1",
     "sparse-bitfield": "^3.0.3"
