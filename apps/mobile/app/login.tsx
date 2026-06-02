@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState } from "react";
 import {
   StyleSheet,
   View,
@@ -8,35 +8,40 @@ import {
   KeyboardAvoidingView,
   Platform,
   TextInput,
-} from 'react-native';
+} from "react-native";
 
-import { Link, useRouter } from 'expo-router';
-import { LinearGradient } from 'expo-linear-gradient';
-import { Mail, Lock, ShoppingBag } from 'lucide-react-native';
+import { Link, useRouter, useLocalSearchParams } from "expo-router";
+import { LinearGradient } from "expo-linear-gradient";
+import { Mail, Lock, ShoppingBag } from "lucide-react-native";
+import { ActivityIndicator } from 'react-native';
 
-import { ThemedText } from '@/components/themed-text';
-import { useColorScheme } from '@/hooks/use-color-scheme';
-import { Colors, Fonts } from '@/constants/theme';
-import { authApi } from '@/services/api';
-import { useAuth } from '@/contexts/AuthContext';
+import { ThemedText } from "@/components/themed-text";
+import { useColorScheme } from "@/hooks/use-color-scheme";
+import { Colors, Fonts } from "@/constants/theme";
+import { authApi } from "@/services/api";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function LoginScreen() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const params = useLocalSearchParams();
+
+  const [email, setEmail] = useState(
+    typeof params.email === "string" ? params.email : "",
+  );
+  const [password, setPassword] = useState("");
   const [loggingIn, setLoggingIn] = useState(false);
 
-  const colorScheme: 'light' | 'dark' =
-    useColorScheme() === 'dark' ? 'dark' : 'light';
+  const colorScheme: "light" | "dark" =
+    useColorScheme() === "dark" ? "dark" : "light";
 
   const colors = Colors[colorScheme];
-  const isDark = colorScheme === 'dark';
+  const isDark = colorScheme === "dark";
 
   const router = useRouter();
   const { login: setToken } = useAuth();
 
   const handleLogin = async () => {
     if (!email.trim() || !password.trim()) {
-      Alert.alert('Missing fields', 'Please fill in both email and password.');
+      Alert.alert("Missing fields", "Please fill in both email and password.");
       return;
     }
 
@@ -50,11 +55,11 @@ export default function LoginScreen() {
 
       await setToken(res.access_token);
 
-      router.replace('/(tabs)');
+      router.replace("/(tabs)");
     } catch (error: any) {
       Alert.alert(
-        'Login failed',
-        error.message ?? 'Please check your credentials and try again.',
+        "Login failed",
+        error.message ?? "Please check your credentials and try again.",
       );
     } finally {
       setLoggingIn(false);
@@ -64,7 +69,7 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
       <ScrollView
         contentContainerStyle={[
@@ -75,7 +80,7 @@ export default function LoginScreen() {
       >
         {/* HERO */}
         <LinearGradient
-          colors={isDark ? ['#081C24', '#0A7EA4'] : ['#0A7EA4', '#13B5EA']}
+          colors={isDark ? ["#081C24", "#0A7EA4"] : ["#0A7EA4", "#13B5EA"]}
           style={styles.hero}
         >
           <View style={styles.logoCircle}>
@@ -84,9 +89,7 @@ export default function LoginScreen() {
 
           <ThemedText style={styles.brand}>Reselio</ThemedText>
 
-          <ThemedText style={styles.heroTitle}>
-            Welcome back 👋
-          </ThemedText>
+          <ThemedText style={styles.heroTitle}>Welcome back 👋</ThemedText>
 
           <ThemedText style={styles.heroSubtitle}>
             Manage your orders, profits, customers and deliveries in one place.
@@ -98,7 +101,7 @@ export default function LoginScreen() {
           style={[
             styles.card,
             {
-              backgroundColor: isDark ? '#11181C' : '#fff',
+              backgroundColor: isDark ? "#11181C" : "#fff",
             },
           ]}
         >
@@ -109,16 +112,16 @@ export default function LoginScreen() {
             style={[
               styles.inputContainer,
               {
-                borderColor: isDark ? '#2C343A' : '#DDE3EA',
+                borderColor: isDark ? "#2C343A" : "#DDE3EA",
               },
             ]}
           >
-            <Mail size={18} color={isDark ? '#94A3B8' : '#64748B'} />
+            <Mail size={18} color={isDark ? "#94A3B8" : "#64748B"} />
 
             <TextInput
               style={[styles.input, { color: colors.text }]}
               placeholder="you@example.com"
-              placeholderTextColor={isDark ? '#687076' : '#94A3B8'}
+              placeholderTextColor={isDark ? "#687076" : "#94A3B8"}
               autoCapitalize="none"
               keyboardType="email-address"
               value={email}
@@ -133,16 +136,16 @@ export default function LoginScreen() {
             style={[
               styles.inputContainer,
               {
-                borderColor: isDark ? '#2C343A' : '#DDE3EA',
+                borderColor: isDark ? "#2C343A" : "#DDE3EA",
               },
             ]}
           >
-            <Lock size={18} color={isDark ? '#94A3B8' : '#64748B'} />
+            <Lock size={18} color={isDark ? "#94A3B8" : "#64748B"} />
 
             <TextInput
               style={[styles.input, { color: colors.text }]}
               placeholder="Enter your password"
-              placeholderTextColor={isDark ? '#687076' : '#94A3B8'}
+              placeholderTextColor={isDark ? "#687076" : "#94A3B8"}
               secureTextEntry
               value={password}
               onChangeText={setPassword}
@@ -156,12 +159,14 @@ export default function LoginScreen() {
             activeOpacity={0.9}
           >
             <LinearGradient
-              colors={['#0A7EA4', '#13B5EA']}
+              colors={["#0A7EA4", "#13B5EA"]}
               style={styles.button}
             >
-              <ThemedText style={styles.buttonText}>
-                {loggingIn ? 'Signing In...' : 'Sign In'}
-              </ThemedText>
+              {loggingIn ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <ThemedText style={styles.buttonText}>Sign In</ThemedText>
+              )}
             </LinearGradient>
           </TouchableOpacity>
 
@@ -172,8 +177,8 @@ export default function LoginScreen() {
             </ThemedText>
 
             <Link href="/register">
-              <ThemedText style={{ color: colors.tint, fontWeight: '700' }}>
-                {' '}
+              <ThemedText style={{ color: colors.tint, fontWeight: "700" }}>
+                {" "}
                 Create one
               </ThemedText>
             </Link>
@@ -193,7 +198,7 @@ const styles = StyleSheet.create({
     paddingTop: 90,
     paddingBottom: 120,
     paddingHorizontal: 28,
-    alignItems: 'center',
+    alignItems: "center",
     borderBottomLeftRadius: 40,
     borderBottomRightRadius: 40,
   },
@@ -202,30 +207,30 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    alignItems: 'center',
-    justifyContent: 'center',
+    backgroundColor: "rgba(255,255,255,0.15)",
+    alignItems: "center",
+    justifyContent: "center",
     marginBottom: 18,
   },
 
   brand: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 32,
     fontFamily: Fonts.rounded,
-    fontWeight: '800',
+    fontWeight: "800",
     marginBottom: 10,
   },
 
   heroTitle: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 28,
-    fontWeight: '800',
-    textAlign: 'center',
+    fontWeight: "800",
+    textAlign: "center",
   },
 
   heroSubtitle: {
-    color: 'rgba(255,255,255,0.85)',
-    textAlign: 'center',
+    color: "rgba(255,255,255,0.85)",
+    textAlign: "center",
     marginTop: 10,
     fontSize: 15,
     lineHeight: 24,
@@ -238,7 +243,7 @@ const styles = StyleSheet.create({
     borderRadius: 28,
     padding: 24,
     gap: 14,
-    shadowColor: '#000',
+    shadowColor: "#000",
     shadowOpacity: 0.08,
     shadowRadius: 18,
     elevation: 5,
@@ -246,13 +251,13 @@ const styles = StyleSheet.create({
 
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: "600",
     opacity: 0.75,
   },
 
   inputContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
+    flexDirection: "row",
+    alignItems: "center",
     borderWidth: 1.2,
     borderRadius: 16,
     paddingHorizontal: 14,
@@ -269,20 +274,20 @@ const styles = StyleSheet.create({
   button: {
     height: 56,
     borderRadius: 16,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     marginTop: 10,
   },
 
   buttonText: {
-    color: '#fff',
+    color: "#fff",
     fontSize: 16,
-    fontWeight: '800',
+    fontWeight: "800",
   },
 
   footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
+    flexDirection: "row",
+    justifyContent: "center",
     marginTop: 12,
   },
 });

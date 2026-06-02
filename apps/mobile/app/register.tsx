@@ -29,7 +29,6 @@ import { ThemedText } from "@/components/themed-text";
 import { useColorScheme } from "@/hooks/use-color-scheme";
 import { Colors, Fonts } from "@/constants/theme";
 import { authApi } from "@/services/api";
-import { useAuth } from "@/contexts/AuthContext";
 
 export default function RegisterScreen() {
   const [name, setName] = useState("");
@@ -47,13 +46,20 @@ export default function RegisterScreen() {
   const isDark = colorScheme === "dark";
 
   const router = useRouter();
-  const { login: setToken } = useAuth();
 
   const handleRegister = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
       Alert.alert("Missing fields", "Please fill in all fields.");
       return;
     }
+        if (password.length < 8) {
+      Alert.alert(
+        'Weak password',
+        'Password must contain at least 8 characters.',
+      );
+      return;
+    }
+
 
     setLoading(true);
 
@@ -97,13 +103,6 @@ export default function RegisterScreen() {
   //     return;
   //   }
 
-  //   if (password.length < 8) {
-  //     Alert.alert(
-  //       'Weak password',
-  //       'Password must contain at least 8 characters.',
-  //     );
-  //     return;
-  //   }
 
   //   setLoading(true);
 
@@ -291,6 +290,16 @@ export default function RegisterScreen() {
             Use at least 8 characters for better security.
           </ThemedText>
 
+          {/* SUCCESS MESSAGE */}
+          {successMessage ? (
+            <View style={styles.successContainer}>
+              <CheckCircle2 size={18} color="#22C55E" />
+              <ThemedText style={styles.successText}>
+                {successMessage}
+              </ThemedText>
+            </View>
+          ) : null}
+
           {/* BUTTON */}
           <TouchableOpacity
             activeOpacity={0.9}
@@ -301,14 +310,6 @@ export default function RegisterScreen() {
               colors={["#0A7EA4", "#13B5EA"]}
               style={styles.button}
             >
-              {successMessage ? (
-                <View style={styles.successContainer}>
-                  <CheckCircle2 size={18} color="#22C55E" />
-                  <ThemedText style={styles.successText}>
-                    {successMessage}
-                  </ThemedText>
-                </View>
-              ) : null}
               {loading ? (
                 <ActivityIndicator color="#fff" />
               ) : (
@@ -364,22 +365,22 @@ const styles = StyleSheet.create({
   },
 
   successContainer: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  gap: 8,
-  backgroundColor: 'rgba(34,197,94,0.08)',
-  borderWidth: 1,
-  borderColor: 'rgba(34,197,94,0.25)',
-  borderRadius: 12,
-  padding: 12,
-  marginTop: 16,
-},
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    backgroundColor: "rgba(34,197,94,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(34,197,94,0.25)",
+    borderRadius: 12,
+    padding: 12,
+    marginTop: 16,
+  },
 
-successText: {
-  color: '#22C55E',
-  fontWeight: '600',
-  flex: 1,
-},
+  successText: {
+    color: "#22C55E",
+    fontWeight: "600",
+    flex: 1,
+  },
 
   circleOne: {
     position: "absolute",
