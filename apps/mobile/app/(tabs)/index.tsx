@@ -47,7 +47,7 @@ export default function HomeScreen() {
       try {
         setLoading(true);
         setError(null);
-        const recentOrdersRes = await ordersApi.getAll(token, {
+        const recentOrdersRes = await ordersApi.getAll(token!, {
           page: 1,
           limit: 5,
         });
@@ -200,7 +200,7 @@ export default function HomeScreen() {
               fontWeight: "700",
             }}
           >
-            Welcome Back 👋
+            Welcome Back
           </ThemedText>
 
           <ThemedText
@@ -261,23 +261,9 @@ export default function HomeScreen() {
           ]}
         >
           <ThemedText style={styles.sectionTitle}>Business Health</ThemedText>
-
-         <ThemedText>
-  Pending Deliveries: {dashboard?.pendingDeliveries}
-</ThemedText>
-
-<ThemedText>
-  Outstanding Balance:{" "}
-  {dashboard?.outstandingBalances.toLocaleString()} FCFA
-</ThemedText>
-
-<ThemedText>
-  Total Orders: {dashboard?.totalOrders}
-</ThemedText>
-
-          <ThemedText>
-            Outstanding Balance:
-            {dashboard?.outstandingBalances.toLocaleString()} FCFA
+          <ThemedText style={{ opacity: 0.6, fontSize: 13 }}>
+            Your business is doing great! Keep up the good work and continue
+            providing excellent service to your customers.
           </ThemedText>
         </ThemedView>
         <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
@@ -337,93 +323,82 @@ export default function HomeScreen() {
       </ThemedView>
 
       <View style={styles.quickActions}>
-  <TouchableOpacity
-    style={[
-      styles.actionCard,
-      {
-        backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
-      },
-    ]}
-  >
-    <ThemedText style={styles.actionIcon}>➕</ThemedText>
-    <ThemedText style={styles.actionText}>
-      New Order
-    </ThemedText>
-  </TouchableOpacity>
-
-  <TouchableOpacity
-    style={[
-      styles.actionCard,
-      {
-        backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
-      },
-    ]}
-  >
-    <ThemedText style={styles.actionIcon}>👥</ThemedText>
-    <ThemedText style={styles.actionText}>
-      Customers
-    </ThemedText>
-  </TouchableOpacity>
-
-  <TouchableOpacity
-    style={[
-      styles.actionCard,
-      {
-        backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
-      },
-    ]}
-  >
-    <ThemedText style={styles.actionIcon}>📈</ThemedText>
-    <ThemedText style={styles.actionText}>
-      Analytics
-    </ThemedText>
-  </TouchableOpacity>
-</View>
-
-<ThemedView
-  style={[
-    styles.section,
-    {
-      backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
-    },
-  ]}
->
-  <ThemedText style={styles.sectionTitle}>
-    Recent Orders
-  </ThemedText>
-
-  {recentOrders.length === 0 ? (
-    <ThemedText style={styles.emptyText}>
-      No recent orders found.
-    </ThemedText>
-  ) : (
-    recentOrders.map((order) => (
-      <View
-        key={order._id}
-        style={styles.orderRow}
-      >
-        <View>
-          <ThemedText style={styles.orderCustomer}>
-            {order.customerName}
-          </ThemedText>
-
-          <ThemedText style={styles.orderProduct}>
-            {order.productName}
-          </ThemedText>
-        </View>
-
-        <ThemedText
-          style={{
-            color: colors.tint,
-            fontWeight: "600",
-          }}
+        <TouchableOpacity
+          style={[
+            styles.actionCard,
+            {
+              backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
+            },
+          ]}
         >
-          {order.status}
-        </ThemedText>
+          <ThemedText style={styles.actionIcon}>➕</ThemedText>
+          <ThemedText style={styles.actionText}>New Order</ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.actionCard,
+            {
+              backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
+            },
+          ]}
+        >
+          <ThemedText style={styles.actionIcon}>👥</ThemedText>
+          <ThemedText style={styles.actionText}>Customers</ThemedText>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[
+            styles.actionCard,
+            {
+              backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
+            },
+          ]}
+        >
+          <ThemedText style={styles.actionIcon}>📈</ThemedText>
+          <ThemedText style={styles.actionText}>Analytics</ThemedText>
+        </TouchableOpacity>
       </View>
-    ))
-  )}
-</ThemedView>
+
+      <ThemedView
+        style={[
+          styles.section,
+          {
+            backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
+          },
+        ]}
+      >
+        <ThemedText style={styles.sectionTitle}>Recent Orders</ThemedText>
+
+        {recentOrders.length === 0 ? (
+          <ThemedText style={styles.emptyText}>
+            No recent orders found.
+          </ThemedText>
+        ) : (
+          recentOrders.map((order) => (
+            <View key={order._id} style={styles.orderRow}>
+              <View>
+                <ThemedText style={styles.orderCustomer}>
+                  {order.customerName}
+                </ThemedText>
+
+                <ThemedText style={styles.orderProduct}>
+                  {order.productName}
+                </ThemedText>
+              </View>
+
+              <ThemedText
+                style={{
+                  color: colors.tint,
+                  fontWeight: "600",
+                }}
+              >
+                {order.status}
+              </ThemedText>
+            </View>
+          ))
+        )}
+      </ThemedView>
 
       {/* Footer hint */}
       <TouchableOpacity style={styles.footerLink}>
@@ -489,24 +464,24 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
 
-orderRow: {
-  flexDirection: "row",
-  justifyContent: "space-between",
-  alignItems: "center",
-  paddingVertical: 12,
-  borderBottomWidth: 1,
-  borderBottomColor: "#E5E7EB",
-},
+  orderRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: "#E5E7EB",
+  },
 
-orderCustomer: {
-  fontWeight: "600",
-  fontSize: 14,
-},
+  orderCustomer: {
+    fontWeight: "600",
+    fontSize: 14,
+  },
 
-orderProduct: {
-  fontSize: 12,
-  opacity: 0.6,
-},
+  orderProduct: {
+    fontSize: 12,
+    opacity: 0.6,
+  },
 
   quickActions: {
     flexDirection: "row",
@@ -575,7 +550,7 @@ orderProduct: {
     borderRadius: 14,
     gap: 12,
   },
- 
+
   statusRow: {
     flexDirection: "row",
     alignItems: "center",
