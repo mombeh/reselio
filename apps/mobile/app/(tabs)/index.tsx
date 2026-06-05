@@ -278,7 +278,7 @@ export default function HomeScreen() {
             </ThemedText>
 
             <TouchableOpacity
-              style={[styles.emptyBtn, { backgroundColor: colors.tint }]}
+              style={[styles.emptyBtn, { backgroundColor: isDark ? "#1E2A30" : "#F5FAFE", borderWidth: 1, borderColor: colors.tint }]}
             >
               <ThemedText style={{ color: "#fff" }}>
                 Create First Order
