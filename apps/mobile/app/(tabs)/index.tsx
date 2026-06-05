@@ -19,6 +19,7 @@ import {
   Order,
 } from "@/services/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { router } from "expo-router";
 
 function formatPct(val: number) {
   if (val === 0) return "0%";
@@ -266,9 +267,7 @@ export default function HomeScreen() {
             providing excellent service to your customers.
           </ThemedText>
         </ThemedView>
-        <ThemedText type="defaultSemiBold" style={styles.sectionTitle}>
-          Orders by Status
-        </ThemedText>
+
         {statusBreakdown.length === 0 ? (
           <View style={styles.emptyState}>
             <ThemedText style={styles.emptyTitle}>No orders yet</ThemedText>
@@ -324,16 +323,16 @@ export default function HomeScreen() {
 
       <View style={styles.quickActions}>
         <TouchableOpacity
-          style={[
-            styles.actionCard,
-            {
-              backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
-            },
-          ]}
-        >
-          <ThemedText style={styles.actionIcon}>➕</ThemedText>
-          <ThemedText style={styles.actionText}>New Order</ThemedText>
-        </TouchableOpacity>
+  style={[
+    styles.actionCard,
+    {
+      backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
+    },
+  ]}
+  onPress={() => router.push("/orders/create")}
+>
+  <ThemedText style={styles.actionText}>New Order</ThemedText>
+</TouchableOpacity>
 
         <TouchableOpacity
           style={[
@@ -342,8 +341,8 @@ export default function HomeScreen() {
               backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
             },
           ]}
+          onPress={() => router.push("/customers")}
         >
-          <ThemedText style={styles.actionIcon}>👥</ThemedText>
           <ThemedText style={styles.actionText}>Customers</ThemedText>
         </TouchableOpacity>
 
@@ -354,8 +353,8 @@ export default function HomeScreen() {
               backgroundColor: isDark ? "#1E2A30" : "#F5FAFE",
             },
           ]}
+          onPress={() => router.push("/analytics")}
         >
-          <ThemedText style={styles.actionIcon}>📈</ThemedText>
           <ThemedText style={styles.actionText}>Analytics</ThemedText>
         </TouchableOpacity>
       </View>
