@@ -52,14 +52,13 @@ export default function RegisterScreen() {
       Alert.alert("Missing fields", "Please fill in all fields.");
       return;
     }
-        if (password.length < 8) {
+    if (password.length < 8) {
       Alert.alert(
-        'Weak password',
-        'Password must contain at least 8 characters.',
+        "Weak password",
+        "Password must contain at least 8 characters.",
       );
       return;
     }
-
 
     setLoading(true);
 
@@ -72,9 +71,9 @@ export default function RegisterScreen() {
         password,
       });
 
-      setSuccessMessage(
-        "Account created successfully! Redirecting to login...",
-      );
+      await setToken(res.access_token);
+
+      router.replace("/(tabs)");
 
       setTimeout(() => {
         router.replace({
@@ -96,13 +95,40 @@ export default function RegisterScreen() {
       setLoading(false);
     }
   };
+  const handleGoogleLogin = async () => {
+    const result = await promptAsync();
+
+    if (result.type !== "success") return;
+
+    const accessToken = result.authentication?.accessToken;
+
+    const userResponse = await fetch(
+      "https://www.googleapis.com/userinfo/v2/me",
+      {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      },
+    );
+
+    const profile = await userResponse.json();
+
+    const res = await authApi.googleMobile({
+      email: profile.email,
+      name: profile.name,
+      picture: profile.picture,
+    });
+
+    await setToken(res.access_token);
+
+    router.replace("/(tabs)");
+  };
 
   // const handleRegister = async () => {
   //   if (!name.trim() || !email.trim() || !password.trim()) {
   //     Alert.alert('Missing fields', 'Please fill in all fields.');
   //     return;
   //   }
-
 
   //   setLoading(true);
 
@@ -205,6 +231,14 @@ export default function RegisterScreen() {
             </ThemedText>
           </View>
 
+          <TouchableOpacity
+            style={styles.googleButton}
+            onPress={handleGoogleLogin}
+          >
+            <ThemedText style={styles.googleButtonText}>
+              Continue with Google
+            </ThemedText>
+          </TouchableOpacity>
           {/* NAME */}
           <ThemedText style={styles.label}>Full Name</ThemedText>
 
