@@ -213,14 +213,14 @@ export default function HomeScreen() {
             Here's your business summary
           </ThemedText>
         </View>
-        <TouchableOpacity
+        {/* <TouchableOpacity
           style={styles.logoutBtn}
           onPress={async () => {
             await logout();
           }}
         >
           <ThemedText style={styles.logoutBtnText}>Logout</ThemedText>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </ThemedView>
 
       {/* Stats grid */}
