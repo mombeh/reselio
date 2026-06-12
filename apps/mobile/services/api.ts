@@ -1,5 +1,5 @@
 const API_URL = __DEV__
-  ? "http://192.168.113.96:4000"
+  ? "http://192.168.1.96:4000"
   : "https://api.reselio.com";
 
 type FetchOptions = {
