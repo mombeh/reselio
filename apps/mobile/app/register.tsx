@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -11,6 +11,7 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { useAuth } from "@/contexts/AuthContext";
+import { useGoogleLogin } from "@/services/googleAuth";
 
 import { Link, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -36,6 +37,7 @@ export default function RegisterScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login: setToken } = useAuth();
+  const { promptAsync, response } = useGoogleLogin();
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -48,6 +50,31 @@ export default function RegisterScreen() {
   const isDark = colorScheme === "dark";
 
   const router = useRouter();
+  useEffect(() => {
+    if (response?.type === "success") {
+      const accessToken = response.authentication?.accessToken;
+
+      fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((profile) => {
+          authApi.googleMobile({
+            email: profile.email,
+            name: profile.name,
+            picture: profile.picture,
+          }).then((res) => {
+            setToken(res.access_token);
+            router.replace("/(tabs)");
+          });
+        })
+        .catch((error) => {
+          console.error("Google login error:", error);
+        });
+    }
+  }, [response]);
 
   const handleRegister = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
@@ -77,14 +104,14 @@ export default function RegisterScreen() {
 
       router.replace("/(tabs)");
 
-      setTimeout(() => {
-        router.replace({
-          pathname: "/login",
-          params: {
-            email: email.trim(),
-          },
-        });
-      }, 2000);
+      // setTimeout(() => {
+      //   router.replace({
+      //     pathname: "/login",
+      //     params: {
+      //       email: email.trim(),
+      //     },
+      //   });
+      // }, 2000);
     } catch (error: any) {
       console.error("REGISTER ERROR:", error);
 
@@ -98,32 +125,7 @@ export default function RegisterScreen() {
     }
   };
   const handleGoogleLogin = async () => {
-    const result = await promptAsync();
-
-    if (result.type !== "success") return;
-
-    const accessToken = result.authentication?.accessToken;
-
-    const userResponse = await fetch(
-      "https://www.googleapis.com/userinfo/v2/me",
-      {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      },
-    );
-
-    const profile = await userResponse.json();
-
-    const res = await authApi.googleMobile({
-      email: profile.email,
-      name: profile.name,
-      picture: profile.picture,
-    });
-
-    await setToken(res.access_token);
-
-    router.replace("/(tabs)");
+    promptAsync();
   };
 
   // const handleRegister = async () => {
@@ -410,6 +412,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     marginTop: 16,
+  },
+
+  googleButton: {
+    height: 58,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#DDE3EA",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 16,
+  },
+
+  googleButtonText: {
+    fontSize: 15,
+    fontWeight: "700",
   },
 
   successText: {
