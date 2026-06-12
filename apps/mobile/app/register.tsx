@@ -102,7 +102,7 @@ export default function RegisterScreen() {
 
       await setToken(res.access_token);
 
-      router.replace("/(tabs)");
+      router.replace("/login");
 
       // setTimeout(() => {
       //   router.replace({
