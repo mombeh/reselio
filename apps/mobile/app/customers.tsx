@@ -424,6 +424,7 @@ const styles = StyleSheet.create({
     paddingVertical: 18,
     paddingHorizontal: 16,
     gap: 16,
+    
   },
   center: {
     alignItems: "center",
