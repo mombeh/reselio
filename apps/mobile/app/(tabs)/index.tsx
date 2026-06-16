@@ -1,5 +1,6 @@
 // @ts-nocheck
-import { useCallback, useState } from "react";
+import { useFocusEffect } from "expo-router";
+import { useCallback, useEffect, useState } from "react";
 import {
   View,
   ScrollView,
@@ -70,6 +71,10 @@ export default function HomeScreen() {
   }, [token]);
 
   const refresh = useCallback(() => {
+    void loadDashboard();
+  }, [loadDashboard]);
+
+  useEffect(() => {
     void loadDashboard();
   }, [loadDashboard]);
 
