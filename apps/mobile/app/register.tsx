@@ -54,25 +54,15 @@ export default function RegisterScreen() {
     if (response?.type === "success") {
       const accessToken = response.authentication?.accessToken;
 
-      fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
-        headers: {
-          Authorization: `Bearer ${accessToken}`,
-        },
-      })
-        .then((res) => res.json())
-        .then((profile) => {
-          authApi.googleMobile({
-            email: profile.email,
-            name: profile.name,
-            picture: profile.picture,
-          }).then((res) => {
-            setToken(res.access_token);
-            router.replace("/(tabs)");
-          });
-        })
-        .catch((error) => {
-          console.error("Google login error:", error);
+      if (accessToken) {
+        authApi.googleMobile({ accessToken }).then((res) => {
+          setToken(res.access_token);
+          router.replace("/(tabs)");
+        }).catch((error) => {
+          console.error("Google mobile login error:", error);
         });
+      }
+
     }
   }, [response]);
 
@@ -102,7 +92,7 @@ export default function RegisterScreen() {
 
       await setToken(res.access_token);
 
-      router.replace("/login");
+      router.replace("/(tabs)");
 
       // setTimeout(() => {
       //   router.replace({

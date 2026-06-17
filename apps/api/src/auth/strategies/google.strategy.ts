@@ -22,11 +22,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL: redirectUri,
       scope: ['email', 'profile'],
     });
-    
-    // Use console since Logger is not available before super() call
-    console.log('[GoogleStrategy] Using redirectUri:', redirectUri);
-    console.log('[GoogleStrategy] ClientID present:', !!clientID);
-    console.log('[GoogleStrategy] ClientSecret present:', !!clientSecret);
   }
 
   async validate(
