@@ -1,4 +1,8 @@
-import { Tabs, useRouter } from 'expo-router';
+import {
+  Tabs,
+  useRouter,
+  Alert,
+} from 'expo-router';
 import React from 'react';
 
 import { HapticTab } from '@/components/haptic-tab';
@@ -13,8 +17,22 @@ export default function TabLayout() {
   const router = useRouter();
 
   const handleLogout = () => {
-    void logout();
-    void router.replace('/landing');
+    Alert.alert(
+      'Logout',
+      'Are you sure you want to log out?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Logout',
+          style: 'destructive',
+          onPress: () => {
+            void logout();
+            void router.replace('/landing');
+          },
+        },
+      ],
+      { cancelable: true },
+    );
   };
 
   return (

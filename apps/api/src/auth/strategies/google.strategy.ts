@@ -22,11 +22,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       callbackURL: redirectUri,
       scope: ['email', 'profile'],
     });
-    
-    // Use console since Logger is not available before super() call
-    console.log('[GoogleStrategy] Using redirectUri:', redirectUri);
-    console.log('[GoogleStrategy] ClientID present:', !!clientID);
-    console.log('[GoogleStrategy] ClientSecret present:', !!clientSecret);
   }
 
   async validate(
@@ -35,33 +30,22 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback,
   ): Promise<GoogleUser> {
-    try {
-      console.log('[GoogleStrategy] Validate called');
-      console.log('[GoogleStrategy] Profile:', JSON.stringify(profile));
+    const { id, displayName, emails, photos } = profile;
 
-      const { id, displayName, emails, photos } = profile;
-
-      if (!emails || !emails[0]?.value) {
-        console.error('[GoogleStrategy] No email found in profile');
-        done(new Error('No email provided by Google'), undefined);
-        return {} as GoogleUser;
-      }
-
-      const user: GoogleUser = {
-        googleId: id,
-        email: emails[0].value,
-        name: displayName || '',
-        picture: photos?.[0]?.value || '',
-        accessToken,
-      };
-
-      console.log('[GoogleStrategy] User validated:', user.email);
-      done(null, user);
-      return user;
-    } catch (error) {
-      console.error('[GoogleStrategy] Error in validate:', error);
-      done(error as Error, undefined);
+    if (!emails || !emails[0]?.value) {
+      done(new Error('No email provided by Google'), undefined);
       return {} as GoogleUser;
     }
+
+    const user: GoogleUser = {
+      googleId: id,
+      email: emails[0].value,
+      name: displayName || '',
+      picture: photos?.[0]?.value || '',
+      accessToken,
+    };
+
+    done(null, user);
+    return user;
   }
 }

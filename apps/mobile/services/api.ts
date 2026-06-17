@@ -51,7 +51,7 @@ export const authApi = {
       user: { id: string; email: string; name: string };
     }>("/auth/login", { method: "POST", body: data }),
 
-  googleMobile: (data: { email: string; name: string; picture?: string }) => 
+  googleMobile: (data: { accessToken: string }) => 
     request<{
       access_token: string;
       user: { id: string; email: string; name: string };
