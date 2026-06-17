@@ -112,6 +112,7 @@ export default function RegisterScreen() {
       //     },
       //   });
       // }, 2000);
+      
     } catch (error: any) {
       console.error("REGISTER ERROR:", error);
 
