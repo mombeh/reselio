@@ -14,8 +14,6 @@ import type { Response } from 'express';
 import { AuthService } from './auth.service';
 import { UsersService } from '../users/users.service';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
-import { CreateUserDto } from '../users/dto/create-user.dto';
-import { LoginUserDto } from '../users/dto/login-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -27,18 +25,27 @@ export class AuthController {
   ) {}
 
   @Post('register')
-  async register(@Body() createUserDto: CreateUserDto) {
-    const user = await this.usersService.create(createUserDto);
+  async register(
+    @Body() body: { name: string; email: string; password: string },
+  ) {
+    const user = await this.usersService.create({
+      email: body.email,
+      password: body.password,
+      name: body.name,
+    });
     return this.authService.login(user);
   }
 
   @Post('login')
-  async login(@Body(LoginUserDto) loginUserDto: LoginUserDto) {
-    const user = await this.authService.validateUser(loginUserDto.email, loginUserDto.password);
-    if (!user) {
+  async login(@Body() body: { email: string; password: string }) {
+    const loggedInUser = await this.authService.validateUser(
+      body.email,
+      body.password,
+    );
+    if (!loggedInUser) {
       throw new UnauthorizedException('Invalid credentials');
     }
-    return this.authService.login(user);
+    return this.authService.login(loggedInUser);
   }
 
   @Get('google')
