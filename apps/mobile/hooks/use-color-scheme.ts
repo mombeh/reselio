@@ -1,5 +1,3 @@
-import { useColorScheme as useRNColorScheme, type ColorScheme } from 'react-native';
+import { useColorScheme as useRNColorScheme } from 'react-native';
 
-export function useColorScheme(): ColorScheme | null {
-  return useRNColorScheme();
-}
+export const useColorScheme = useRNColorScheme;

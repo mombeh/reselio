@@ -1,18 +1,21 @@
 const API_URL = __DEV__
-  ? 'http://192.168.113.96:4000'
-  : 'https://api.reselio.com';
+  ? "http://10.237.161.96:4000"
+  : "https://api.reselio.com";
 
 type FetchOptions = {
-  method?: 'GET' | 'POST' | 'PATCH' | 'DELETE' | 'PUT';
+  method?: "GET" | "POST" | "PATCH" | "DELETE" | "PUT";
   token?: string | null;
   body?: unknown;
 };
 
-async function request<T>(endpoint: string, opts: FetchOptions = {}): Promise<T> {
-  const { method = 'GET', token, body } = opts;
+async function request<T>(
+  endpoint: string,
+  opts: FetchOptions = {},
+): Promise<T> {
+  const { method = "GET", token, body } = opts;
 
   const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   };
 
   if (token) {
@@ -37,50 +40,69 @@ async function request<T>(endpoint: string, opts: FetchOptions = {}): Promise<T>
 
 export const authApi = {
   register: (data: { name: string; email: string; password: string }) =>
-    request<{ access_token: string; user: { id: string; email: string; name: string } }>(
-      '/auth/register',
-      { method: 'POST', body: data },
-    ),
+    request<{
+      access_token: string;
+      user: { id: string; email: string; name: string };
+    }>("/auth/register", { method: "POST", body: data }),
 
   login: (data: { email: string; password: string }) =>
-    request<{ access_token: string; user: { id: string; email: string; name: string } }>(
-      '/auth/login',
-      { method: 'POST', body: data },
-    ),
+    request<{
+      access_token: string;
+      user: { id: string; email: string; name: string };
+    }>("/auth/login", { method: "POST", body: data }),
+
+  googleMobile: (data: { email: string; name: string; picture?: string }) => 
+    request<{
+      access_token: string;
+      user: { id: string; email: string; name: string };
+    }>("/auth/google/mobile", { method: "POST", body: data }),
 
   me: (token: string) =>
-    request<{ id: string; email: string; name: string; businessName?: string; phone?: string }>(
-      '/auth/me',
-      { token },
-    ),
+    request<{
+      id: string;
+      email: string;
+      name: string;
+      businessName?: string;
+      phone?: string;
+    }>("/auth/me", { token }),
 };
 
 // ─── Users ──────────────────────────────────────────────────────────────────
 
 export const usersApi = {
   getProfile: (token: string) =>
-    request<{ id: string; email: string; name: string; businessName?: string; phone?: string }>(
-      '/users/profile',
-      { token },
-    ),
+    request<{
+      id: string;
+      email: string;
+      name: string;
+      businessName?: string;
+      phone?: string;
+    }>("/users/profile", { token }),
 
   updateProfile: (
     token: string,
-    data: { name?: string; email?: string; businessName?: string; phone?: string },
-  ) => request('/users/profile', { method: 'PATCH', token, body: data }),
+    data: {
+      name?: string;
+      email?: string;
+      businessName?: string;
+      phone?: string;
+    },
+  ) => request("/users/profile", { method: "PATCH", token, body: data }),
 
-  updatePassword: (token: string, data: { currentPassword: string; newPassword: string }) =>
-    request('/users/password', { method: 'PATCH', token, body: data }),
+  updatePassword: (
+    token: string,
+    data: { currentPassword: string; newPassword: string },
+  ) => request("/users/password", { method: "PATCH", token, body: data }),
 };
 
 // ─── Orders ─────────────────────────────────────────────────────────────────
 
 export type OrderStatus =
-  | 'Waiting for Supplier'
-  | 'Supplier Shipped'
-  | 'Received'
-  | 'Sent to Customer'
-  | 'Delivered';
+  | "Waiting for Supplier"
+  | "Supplier Shipped"
+  | "Received"
+  | "Sent to Customer"
+  | "Delivered";
 
 export interface Order {
   _id: string;
@@ -151,40 +173,55 @@ export interface YearlyPoint {
 }
 
 export const ordersApi = {
-  getAll: (token: string, query: { status?: string; search?: string; page?: number; limit?: number } = {}) => {
+  getAll: (
+    token: string,
+    query: {
+      status?: string;
+      search?: string;
+      page?: number;
+      limit?: number;
+    } = {},
+  ) => {
     const params = new URLSearchParams();
-    if (query.status) params.set('status', query.status);
-    if (query.search) params.set('search', query.search);
-    params.set('page', String(query.page ?? 1));
-    params.set('limit', String(query.limit ?? 20));
+    if (query.status) params.set("status", query.status);
+    if (query.search) params.set("search", query.search);
+    params.set("page", String(query.page ?? 1));
+    params.set("limit", String(query.limit ?? 20));
     return request<OrdersResponse>(`/orders?${params.toString()}`, { token });
   },
 
-  getOne: (token: string, id: string) => request<Order>(`/orders/${id}`, { token }),
+  getOne: (token: string, id: string) =>
+    request<Order>(`/orders/${id}`, { token }),
 
   create: (token: string, body: Record<string, unknown>) =>
-    request<Order>('/orders', { method: 'POST', token, body }),
+    request<Order>("/orders", { method: "POST", token, body }),
 
   updateStatus: (token: string, orderId: string, status: OrderStatus) =>
-    request<Order>(`/orders/${orderId}/status`, { method: 'PATCH', token, body: { status } }),
+    request<Order>(`/orders/${orderId}/status`, {
+      method: "PATCH",
+      token,
+      body: { status },
+    }),
 
   getDashboard: (token: string) =>
-    request<DashboardMetrics>('/orders/dashboard', { token }),
+    request<DashboardMetrics>("/orders/dashboard", { token }),
 
   getMonthlyAnalytics: (token: string) =>
-    request<MonthlyPoint[]>('/orders/analytics/monthly', { token }),
+    request<MonthlyPoint[]>("/orders/analytics/monthly", { token }),
 
   getStatusBreakdown: (token: string) =>
-    request<StatusBreakdown[]>('/orders/analytics/status', { token }),
+    request<StatusBreakdown[]>("/orders/analytics/status", { token }),
 
   getTopProducts: (token: string) =>
-    request<TopProduct[]>('/orders/analytics/products', { token }),
+    request<TopProduct[]>("/orders/analytics/products", { token }),
 
   getDailySales: (token: string, days?: number) =>
-    request<DailySale[]>(`/orders/analytics/daily?days=${days ?? 30}`, { token }),
+    request<DailySale[]>(`/orders/analytics/daily?days=${days ?? 30}`, {
+      token,
+    }),
 
   getYearlyAnalytics: (token: string) =>
-    request<YearlyPoint[]>('/orders/analytics/yearly', { token }),
+    request<YearlyPoint[]>("/orders/analytics/yearly", { token }),
 
   exportCsv: async (token: string): Promise<string> => {
     const res = await fetch(`${API_URL}/orders/export`, {
@@ -219,19 +256,43 @@ export interface CustomerSummary {
 }
 
 export const customersApi = {
-  getAll: (token: string) => request<Customer[]>('/orders/customers/list', { token }),
+  getAll: (token: string) =>
+    request<Customer[]>("/orders/customers/list", { token }),
 
   getSummary: (token: string) =>
-    request<CustomerSummary[]>('/orders/customers', { token }),
+    request<CustomerSummary[]>("/orders/customers", { token }),
 
-  create: (token: string, body: { name: string; phone: string; email?: string; address?: string; notes?: string }) =>
-    request<Customer>('/orders/customers', { method: 'POST', token, body }),
+  create: (
+    token: string,
+    body: {
+      name: string;
+      phone: string;
+      email?: string;
+      address?: string;
+      notes?: string;
+    },
+  ) => request<Customer>("/orders/customers", { method: "POST", token, body }),
 
-  getOne: (token: string, id: string) => request<Customer>(`/orders/customers/${id}`, { token }),
+  getOne: (token: string, id: string) =>
+    request<Customer>(`/orders/customers/${id}`, { token }),
 
-  update: (token: string, id: string, body: { name?: string; phone?: string; email?: string; address?: string; notes?: string }) =>
-    request<Customer>(`/orders/customers/${id}`, { method: 'PATCH', token, body }),
+  update: (
+    token: string,
+    id: string,
+    body: {
+      name?: string;
+      phone?: string;
+      email?: string;
+      address?: string;
+      notes?: string;
+    },
+  ) =>
+    request<Customer>(`/orders/customers/${id}`, {
+      method: "PATCH",
+      token,
+      body,
+    }),
 
   delete: (token: string, id: string) =>
-    request<void>(`/orders/customers/${id}`, { method: 'DELETE', token }),
+    request<void>(`/orders/customers/${id}`, { method: "DELETE", token }),
 };

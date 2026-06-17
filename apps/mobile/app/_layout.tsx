@@ -14,6 +14,22 @@ export const unstable_settings = {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
+  if (typeof global !== 'undefined' && !global.__keepAwakeHandlerInstalled) {
+    global.__keepAwakeHandlerInstalled = true;
+    const handler = (event: PromiseRejectionEvent) => {
+      const reason = event.reason;
+      if (
+        reason instanceof Error &&
+        /Unable to activate keep awake/.test(reason.message)
+      ) {
+        event.preventDefault();
+      }
+    };
+    if (typeof globalThis !== 'undefined') {
+      globalThis.addEventListener?.('unhandledrejection', handler as any);
+    }
+  }
+
   return (
     <AuthProvider>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>

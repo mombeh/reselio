@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   StyleSheet,
   View,
@@ -10,6 +10,8 @@ import {
   TextInput,
   ActivityIndicator,
 } from "react-native";
+import { useAuth } from "@/contexts/AuthContext";
+import { useGoogleLogin } from "@/services/googleAuth";
 
 import { Link, useRouter } from "expo-router";
 import { LinearGradient } from "expo-linear-gradient";
@@ -34,6 +36,8 @@ export default function RegisterScreen() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { login: setToken } = useAuth();
+  const { promptAsync, response } = useGoogleLogin();
 
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -46,20 +50,44 @@ export default function RegisterScreen() {
   const isDark = colorScheme === "dark";
 
   const router = useRouter();
+  useEffect(() => {
+    if (response?.type === "success") {
+      const accessToken = response.authentication?.accessToken;
+
+      fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
+      })
+        .then((res) => res.json())
+        .then((profile) => {
+          authApi.googleMobile({
+            email: profile.email,
+            name: profile.name,
+            picture: profile.picture,
+          }).then((res) => {
+            setToken(res.access_token);
+            router.replace("/(tabs)");
+          });
+        })
+        .catch((error) => {
+          console.error("Google login error:", error);
+        });
+    }
+  }, [response]);
 
   const handleRegister = async () => {
     if (!name.trim() || !email.trim() || !password.trim()) {
       Alert.alert("Missing fields", "Please fill in all fields.");
       return;
     }
-        if (password.length < 8) {
+    if (password.length < 8) {
       Alert.alert(
-        'Weak password',
-        'Password must contain at least 8 characters.',
+        "Weak password",
+        "Password must contain at least 8 characters.",
       );
       return;
     }
-
 
     setLoading(true);
 
@@ -72,18 +100,19 @@ export default function RegisterScreen() {
         password,
       });
 
-      setSuccessMessage(
-        "Account created successfully! Redirecting to login...",
-      );
+      await setToken(res.access_token);
 
-      setTimeout(() => {
-        router.replace({
-          pathname: "/login",
-          params: {
-            email: email.trim(),
-          },
-        });
-      }, 2000);
+      router.replace("/login");
+
+      // setTimeout(() => {
+      //   router.replace({
+      //     pathname: "/login",
+      //     params: {
+      //       email: email.trim(),
+      //     },
+      //   });
+      // }, 2000);
+      
     } catch (error: any) {
       console.error("REGISTER ERROR:", error);
 
@@ -96,13 +125,15 @@ export default function RegisterScreen() {
       setLoading(false);
     }
   };
+  const handleGoogleLogin = async () => {
+    promptAsync();
+  };
 
   // const handleRegister = async () => {
   //   if (!name.trim() || !email.trim() || !password.trim()) {
   //     Alert.alert('Missing fields', 'Please fill in all fields.');
   //     return;
   //   }
-
 
   //   setLoading(true);
 
@@ -205,6 +236,14 @@ export default function RegisterScreen() {
             </ThemedText>
           </View>
 
+          <TouchableOpacity
+            style={styles.googleButton}
+            onPress={handleGoogleLogin}
+          >
+            <ThemedText style={styles.googleButtonText}>
+              Continue with Google
+            </ThemedText>
+          </TouchableOpacity>
           {/* NAME */}
           <ThemedText style={styles.label}>Full Name</ThemedText>
 
@@ -374,6 +413,21 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     padding: 12,
     marginTop: 16,
+  },
+
+  googleButton: {
+    height: 58,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "#DDE3EA",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 16,
+  },
+
+  googleButtonText: {
+    fontSize: 15,
+    fontWeight: "700",
   },
 
   successText: {
