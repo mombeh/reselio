@@ -84,16 +84,13 @@ export class OrdersController {
   }
   @UseGuards(AuthGuard('jwt'))
   @Get('export')
-  async exportOrders(
-   @Req() req: any,
-  @Res() res: Response,
-){
-  const csv = await this.ordersService.exportOrders(req.user.userId);
+  async exportOrders(@Req() req: any, @Res() res: Response) {
+    const csv = await this.ordersService.exportOrders(req.user.userId);
 
-  res.header('Content-Type', 'text/csv');
-  res.attachment('orders.csv');
-  return res.send(csv);
-}
+    res.header('Content-Type', 'text/csv');
+    res.attachment('orders.csv');
+    return res.send(csv);
+  }
 
   // Customer endpoints
   @UseGuards(AuthGuard('jwt'))

@@ -53,13 +53,11 @@ describe('AuthController (e2e)', () => {
     const uniqueEmail = `logintest${Date.now()}@example.com`;
 
     beforeAll(async () => {
-      await request(app.getHttpServer())
-        .post('/auth/register')
-        .send({
-          name: 'Login Test',
-          email: uniqueEmail,
-          password: 'Passw0rd!',
-        });
+      await request(app.getHttpServer()).post('/auth/register').send({
+        name: 'Login Test',
+        email: uniqueEmail,
+        password: 'Passw0rd!',
+      });
     });
 
     it('should login with correct credentials', async () => {
@@ -114,9 +112,7 @@ describe('AuthController (e2e)', () => {
     });
 
     it('should reject without token', async () => {
-      await request(app.getHttpServer())
-        .get('/auth/me')
-        .expect(401);
+      await request(app.getHttpServer()).get('/auth/me').expect(401);
     });
 
     it('should reject with invalid token', async () => {

@@ -29,12 +29,14 @@ export class AuthService {
   }
 
   async googleMobileLogin(accessToken: string) {
-    const profile = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    }).then((res) => {
-      if (!res.ok) throw new Error('Invalid Google access token');
-      return res.json();
-    });
+    const profile = await globalThis
+      .fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      })
+      .then((res) => {
+        if (!res.ok) throw new Error('Invalid Google access token');
+        return res.json();
+      });
 
     const email = profile.email;
     if (!email) {
@@ -71,29 +73,29 @@ export class AuthService {
   async googleLogin(googleUser: any) {
     try {
       this.logger.log('Processing Google login for:', googleUser.email);
-      
+
       if (!googleUser.email) {
         throw new Error('No email provided by Google');
       }
 
       // Check if user already exists
       let user = await this.usersService.findByEmail(googleUser.email);
-      
+
       if (!user) {
         this.logger.log('Creating new user from Google OAuth');
         // Create new user with Google profile
         const randomPassword = Math.random().toString(36).slice(-16);
         const hashedPassword = await bcrypt.hash(randomPassword, 10);
-        
+
         user = await this.usersService.createWithGoogle(
           googleUser.email,
           googleUser.name,
           hashedPassword,
         );
       }
-      
+
       this.logger.log('User found/created, generating JWT');
-      
+
       // Generate JWT token
       const payload = { email: user.email, sub: user._id };
       return {
