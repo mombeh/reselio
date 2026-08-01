@@ -5,6 +5,7 @@ import { User, UserDocument } from './schemas/user.schema';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { ConflictException, UnauthorizedException } from '@nestjs/common';
+import { Role } from '../auth/enums/role.enum';
 
 @Injectable()
 export class UsersService {
@@ -22,6 +23,7 @@ export class UsersService {
     const newUser = new this.userModel({
       ...userData,
       password: hashedPassword,
+      role: userData.role ?? Role.Customer,
     });
     return newUser.save();
   }
@@ -47,6 +49,7 @@ export class UsersService {
       email,
       name,
       password: hashedPassword,
+      role: Role.Customer,
     });
     return newUser.save();
   }

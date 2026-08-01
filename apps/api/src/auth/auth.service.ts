@@ -17,13 +17,14 @@ export class AuthService {
   }
 
   async login(user: any) {
-    const payload = { email: user.email, sub: user._id };
+    const payload = { email: user.email, sub: user._id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
       user: {
         id: user._id,
         email: user.email,
         name: user.name,
+        role: user.role,
       },
     };
   }
@@ -59,13 +60,14 @@ export class AuthService {
       );
     }
 
-    const payload = { email: user.email, sub: user._id };
+    const payload = { email: user.email, sub: user._id, role: user.role };
     return {
       access_token: this.jwtService.sign(payload),
       user: {
         id: user._id,
         email: user.email,
         name: user.name,
+        role: user.role,
       },
     };
   }
@@ -97,13 +99,14 @@ export class AuthService {
       this.logger.log('User found/created, generating JWT');
 
       // Generate JWT token
-      const payload = { email: user.email, sub: user._id };
+      const payload = { email: user.email, sub: user._id, role: user.role };
       return {
         access_token: this.jwtService.sign(payload),
         user: {
           id: user._id,
           email: user.email,
           name: user.name,
+          role: user.role,
         },
       };
     } catch (error) {
