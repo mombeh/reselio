@@ -34,6 +34,7 @@ export class UsersController {
       email?: string;
       businessName?: string;
       phone?: string;
+      role?: string;
     },
   ) {
     return this.usersService.updateProfile(req.user.userId, body);
