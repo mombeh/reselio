@@ -26,13 +26,29 @@ export class UsersController {
 
   @Patch('profile')
   @UseGuards(AuthGuard('jwt'))
-  updateProfile(@Req() req: any, @Body() body: { name?: string; email?: string; businessName?: string; phone?: string }) {
+  updateProfile(
+    @Req() req: any,
+    @Body()
+    body: {
+      name?: string;
+      email?: string;
+      businessName?: string;
+      phone?: string;
+    },
+  ) {
     return this.usersService.updateProfile(req.user.userId, body);
   }
 
   @Patch('password')
   @UseGuards(AuthGuard('jwt'))
-  updatePassword(@Req() req: any, @Body() body: { currentPassword: string; newPassword: string }) {
-    return this.usersService.updatePassword(req.user.userId, body.currentPassword, body.newPassword);
+  updatePassword(
+    @Req() req: any,
+    @Body() body: { currentPassword: string; newPassword: string },
+  ) {
+    return this.usersService.updatePassword(
+      req.user.userId,
+      body.currentPassword,
+      body.newPassword,
+    );
   }
 }

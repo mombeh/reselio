@@ -173,16 +173,16 @@ export class OrdersService {
     startDate.setDate(startDate.getDate() - days);
 
     return this.orderModel.aggregate([
-      { 
-        $match: { 
+      {
+        $match: {
           userId,
-          createdAt: { $gte: startDate }
-        }
+          createdAt: { $gte: startDate },
+        },
       },
       {
         $group: {
           _id: {
-            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' }
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
           },
           totalOrders: { $sum: 1 },
           totalRevenue: { $sum: '$sellingPrice' },
@@ -190,7 +190,7 @@ export class OrdersService {
         },
       },
       {
-        $sort: { '_id': 1 },
+        $sort: { _id: 1 },
       },
     ]);
   }
@@ -207,67 +207,73 @@ export class OrdersService {
         },
       },
       {
-        $sort: { '_id': 1 },
+        $sort: { _id: 1 },
       },
     ]);
   }
 
-async exportOrders(userId: string): Promise<string> {
-  const orders = await this.findAllByUser(userId, {});
+  async exportOrders(userId: string): Promise<string> {
+    const orders = await this.findAllByUser(userId, {});
 
-  if (orders.data.length === 0) {
-    return '';
+    if (orders.data.length === 0) {
+      return '';
+    }
+
+    const fields = [
+      'customerName',
+      'phone',
+      'productName',
+      'size',
+      'color',
+      'costPrice',
+      'sellingPrice',
+      'balance',
+      'profit',
+      'status',
+      'createdAt',
+    ];
+
+    const parser = new Parser({ fields });
+    return parser.parse(orders.data);
   }
 
-  const fields = [
-    'customerName',
-    'phone',
-    'productName',
-    'size',
-    'color',
-    'costPrice',
-    'sellingPrice',
-    'balance',
-    'profit',
-    'status',
-    'createdAt',
-  ];
-
-  const parser = new Parser({ fields });
-  return parser.parse(orders.data);
-}
-
-// Customer methods
-async createCustomer(customerData: any, userId: string) {
-  const customer = new this.customerModel({
-    ...customerData,
-    userId,
-  });
-  return customer.save();
-}
-
-async findAllCustomers(userId: string) {
-  return this.customerModel.find({ userId }).sort({ createdAt: -1 });
-}
-
-async findCustomerById(customerId: string, userId: string) {
-  return this.customerModel.findOne({ _id: customerId, userId });
-}
-
-async updateCustomer(customerId: string, customerData: any, userId: string) {
-  const customer = await this.customerModel.findOne({ _id: customerId, userId });
-  if (!customer) {
-    throw new Error('Customer not found or you are not authorized');
+  // Customer methods
+  async createCustomer(customerData: any, userId: string) {
+    const customer = new this.customerModel({
+      ...customerData,
+      userId,
+    });
+    return customer.save();
   }
-  Object.assign(customer, customerData);
-  return customer.save();
-}
 
-async deleteCustomer(customerId: string, userId: string) {
-  const customer = await this.customerModel.findOne({ _id: customerId, userId });
-  if (!customer) {
-    throw new Error('Customer not found or you are not authorized');
+  async findAllCustomers(userId: string) {
+    return this.customerModel.find({ userId }).sort({ createdAt: -1 });
   }
-  return customer.deleteOne();
-}
+
+  async findCustomerById(customerId: string, userId: string) {
+    return this.customerModel.findOne({ _id: customerId, userId });
+  }
+
+  async updateCustomer(customerId: string, customerData: any, userId: string) {
+    const customer = await this.customerModel.findOne({
+      _id: customerId,
+      userId,
+    });
+    if (!customer) {
+      throw new Error('Customer not found or you are not authorized');
+    }
+    Object.assign(customer, customerData);
+    return customer.save();
+  }
+
+  async deleteCustomer(customerId: string, userId: string) {
+    const customer = await this.customerModel.findOne({
+      _id: customerId,
+      userId,
+    });
+    if (!customer) {
+      throw new Error('Customer not found or you are not authorized');
+    }
+    return customer.deleteOne();
+  }
 }

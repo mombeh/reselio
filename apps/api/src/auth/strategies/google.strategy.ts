@@ -10,12 +10,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     // Simply use the redirect URI that matches the current environment
     // The GOOGLE_REDIRECT_URI is set to the production callback for deployed
     // The GOOGLE_REDIRECT_URI_LOCAL is set to localhost for local dev
-    const redirectUri = configService.get<string>('GOOGLE_REDIRECT_URI') || 
-                       configService.get<string>('GOOGLE_REDIRECT_URI_LOCAL') || '';
-    
+    const redirectUri =
+      configService.get<string>('GOOGLE_REDIRECT_URI') ||
+      configService.get<string>('GOOGLE_REDIRECT_URI_LOCAL') ||
+      '';
+
     const clientID = configService.get<string>('GOOGLE_CLIENT_ID') || '';
-    const clientSecret = configService.get<string>('GOOGLE_CLIENT_SECRET') || '';
-    
+    const clientSecret =
+      configService.get<string>('GOOGLE_CLIENT_SECRET') || '';
+
     super({
       clientID,
       clientSecret,
