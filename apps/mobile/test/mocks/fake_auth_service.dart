@@ -1,6 +1,5 @@
 import 'package:mobile/models/auth_response.dart';
 import 'package:mobile/models/user.dart';
-import 'package:mobile/services/api_service.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'fake_api_service.dart';
 

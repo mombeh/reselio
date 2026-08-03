@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/screens/profile_screen.dart';
-import 'package:mobile/services/auth_service.dart';
 import 'mocks/fake_auth_service.dart';
 
 void main() {
