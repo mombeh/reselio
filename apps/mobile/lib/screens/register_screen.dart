@@ -112,8 +112,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter your email';
                     }
-                    if (!value.contains('@')) {
-                      return 'Please enter a valid email';
+                    final emailRegex = RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$');
+                    if (!emailRegex.hasMatch(value)) {
+                      return 'Please provide a valid email address';
                     }
                     return null;
                   },
@@ -144,6 +145,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     }
                     if (value.length < 8) {
                       return 'Password must be at least 8 characters';
+                    }
+                    if (value.length > 32) {
+                      return 'Password must not exceed 32 characters';
+                    }
+                    if (!RegExp(r'[a-z]').hasMatch(value)) {
+                      return 'Password must contain at least one lowercase letter';
+                    }
+                    if (!RegExp(r'[A-Z]').hasMatch(value)) {
+                      return 'Password must contain at least one uppercase letter';
+                    }
+                    if (!RegExp(r'\d').hasMatch(value)) {
+                      return 'Password must contain at least one number';
+                    }
+                    if (!RegExp(r'[@$!%*?&]').hasMatch(value)) {
+                      return 'Password must contain at least one special character (@\$!%*?&)';
                     }
                     return null;
                   },

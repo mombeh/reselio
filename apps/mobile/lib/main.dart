@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/services/api_service.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'screens/login_screen.dart';
+import 'screens/welcome_screen.dart';
 import 'screens/customer_home.dart';
 import 'screens/client_home.dart';
 import 'screens/admin_home.dart';
@@ -85,7 +85,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => LoginScreen(authService: authService),
+          builder: (_) => WelcomeScreen(authService: authService),
         ),
       );
     }
