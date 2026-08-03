@@ -59,9 +59,9 @@ export class UsersService {
     data: {
       name?: string;
       email?: string;
-      businessName?: string;
-      phone?: string;
-      role?: string;
+       businessName?: string;
+       phone?: string;
+       role?: Role;
     },
   ) {
     const user = await this.userModel.findById(userId);
