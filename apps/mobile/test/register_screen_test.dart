@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/screens/register_screen.dart';
-import 'mocks/fake_auth_service.dart';
+import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('RegisterScreen', () {
-    late FakeAuthService fakeAuthService;
+    late ApiService apiService;
+    late AuthService authService;
 
-    setUp(() {
-      fakeAuthService = FakeAuthService();
+    setUp(() async {
+      final prefs = await SharedPreferences.getInstance();
+      apiService = ApiService(prefs);
+      authService = AuthService(apiService);
     });
 
     testWidgets('renders registration form', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RegisterScreen(authService: fakeAuthService),
+          home: RegisterScreen(authService: authService),
         ),
       );
 
@@ -28,7 +33,7 @@ void main() {
     testWidgets('shows error when name is too short', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RegisterScreen(authService: fakeAuthService),
+          home: RegisterScreen(authService: authService),
         ),
       );
 
@@ -42,7 +47,7 @@ void main() {
     testWidgets('shows error when passwords do not match', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RegisterScreen(authService: fakeAuthService),
+          home: RegisterScreen(authService: authService),
         ),
       );
 

@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/screens/role_selection_screen.dart';
-import 'mocks/fake_auth_service.dart';
+import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('RoleSelectionScreen', () {
-    late FakeAuthService fakeAuthService;
+    late ApiService apiService;
+    late AuthService authService;
 
-    setUp(() {
-      fakeAuthService = FakeAuthService();
+    setUp(() async {
+      final prefs = await SharedPreferences.getInstance();
+      apiService = ApiService(prefs);
+      authService = AuthService(apiService);
     });
 
     testWidgets('renders role selection options', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RoleSelectionScreen(authService: fakeAuthService),
+          home: RoleSelectionScreen(authService: authService),
         ),
       );
 
@@ -27,7 +32,7 @@ void main() {
     testWidgets('shows customer subtitle', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RoleSelectionScreen(authService: fakeAuthService),
+          home: RoleSelectionScreen(authService: authService),
         ),
       );
 
@@ -37,7 +42,7 @@ void main() {
     testWidgets('shows client subtitle', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RoleSelectionScreen(authService: fakeAuthService),
+          home: RoleSelectionScreen(authService: authService),
         ),
       );
 
@@ -47,7 +52,7 @@ void main() {
     testWidgets('shows admin subtitle', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: RoleSelectionScreen(authService: fakeAuthService),
+          home: RoleSelectionScreen(authService: authService),
         ),
       );
 

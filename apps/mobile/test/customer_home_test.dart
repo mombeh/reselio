@@ -1,20 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile/screens/customer_home.dart';
-import 'mocks/fake_auth_service.dart';
+import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/auth_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
   group('CustomerHome', () {
-    late FakeAuthService fakeAuthService;
+    late ApiService apiService;
+    late AuthService authService;
 
-    setUp(() {
-      fakeAuthService = FakeAuthService();
+    setUp(() async {
+      final prefs = await SharedPreferences.getInstance();
+      apiService = ApiService(prefs);
+      authService = AuthService(apiService);
     });
 
     testWidgets('renders customer dashboard', (WidgetTester tester) async {
       await tester.pumpWidget(
         MaterialApp(
-          home: CustomerHome(authService: fakeAuthService),
+          home: CustomerHome(authService: authService),
         ),
       );
 
