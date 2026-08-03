@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { UseGuards, Req } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Role } from '../auth/enums/role.enum';
 
 @Controller('users')
 export class UsersController {
@@ -34,6 +35,7 @@ export class UsersController {
       email?: string;
       businessName?: string;
       phone?: string;
+      role?: Role;
     },
   ) {
     return this.usersService.updateProfile(req.user.userId, body);
