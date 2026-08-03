@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/router/app_router.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   final AuthService authService;
@@ -16,19 +17,19 @@ class RoleSelectionScreen extends StatelessWidget {
       if (role == 'customer') {
         Navigator.pushReplacementNamed(
           context,
-          '/customer-home',
+          AppRouter.customerHome,
           arguments: {'authService': authService},
         );
       } else if (role == 'client') {
         Navigator.pushReplacementNamed(
           context,
-          '/client-home',
+          AppRouter.clientHome,
           arguments: {'authService': authService},
         );
       } else {
         Navigator.pushReplacementNamed(
           context,
-          '/admin-home',
+          AppRouter.adminHome,
           arguments: {'authService': authService},
         );
       }

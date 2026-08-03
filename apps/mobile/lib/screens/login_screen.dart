@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/router/app_router.dart';
 
 class LoginScreen extends StatefulWidget {
   final AuthService authService;
@@ -43,7 +44,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!hasSelectedRole) {
         Navigator.pushReplacementNamed(
           context,
-          '/role-selection',
+          AppRouter.roleSelection,
           arguments: {'authService': widget.authService},
         );
         return;
@@ -55,19 +56,19 @@ class _LoginScreenState extends State<LoginScreen> {
       if (role == 'customer') {
         Navigator.pushReplacementNamed(
           context,
-          '/customer-home',
+          AppRouter.customerHome,
           arguments: {'authService': widget.authService},
         );
       } else if (role == 'client') {
         Navigator.pushReplacementNamed(
           context,
-          '/client-home',
+          AppRouter.clientHome,
           arguments: {'authService': widget.authService},
         );
       } else {
         Navigator.pushReplacementNamed(
           context,
-          '/admin-home',
+          AppRouter.adminHome,
           arguments: {'authService': widget.authService},
         );
       }
@@ -182,7 +183,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   onPressed: () {
                     Navigator.pushReplacementNamed(
                       context,
-                      '/register',
+                      AppRouter.register,
                       arguments: {'authService': widget.authService},
                     );
                   },

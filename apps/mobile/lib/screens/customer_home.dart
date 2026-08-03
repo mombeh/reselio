@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/router/app_router.dart';
 
 class CustomerHome extends StatelessWidget {
   final AuthService authService;
@@ -17,7 +18,7 @@ class CustomerHome extends StatelessWidget {
             onPressed: () {
               Navigator.pushNamed(
                 context,
-                '/profile',
+                AppRouter.profile,
                 arguments: {'authService': authService},
               );
             },

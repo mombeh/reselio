@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
-import 'login_screen.dart';
+import 'package:mobile/router/app_router.dart';
 
 class RegisterScreen extends StatefulWidget {
   final AuthService authService;
@@ -48,11 +48,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (!mounted) return;
 
-      Navigator.pushReplacement(
+      Navigator.pushReplacementNamed(
         context,
-        MaterialPageRoute(
-          builder: (_) => LoginScreen(authService: widget.authService),
-        ),
+        AppRouter.login,
+        arguments: {'authService': widget.authService},
       );
     } catch (e) {
       setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
@@ -216,7 +215,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: () {
                     Navigator.pushReplacementNamed(
                       context,
-                      '/login',
+                      AppRouter.login,
                       arguments: {'authService': widget.authService},
                     );
                   },

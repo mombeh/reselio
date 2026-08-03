@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/router/app_router.dart';
 
 class ProfileScreen extends StatelessWidget {
   final AuthService authService;
@@ -11,7 +12,7 @@ class ProfileScreen extends StatelessWidget {
     if (!context.mounted) return;
     Navigator.pushReplacementNamed(
       context,
-      '/login',
+      AppRouter.login,
       arguments: {'authService': authService},
     );
   }
