@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
-import 'register_screen.dart';
-import 'login_screen.dart';
 
 class WelcomeScreen extends StatelessWidget {
   final AuthService authService;
@@ -42,11 +40,10 @@ class WelcomeScreen extends StatelessWidget {
               const Spacer(),
               ElevatedButton(
                 onPressed: () {
-                  Navigator.pushReplacement(
+                  Navigator.pushReplacementNamed(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => RegisterScreen(authService: authService),
-                    ),
+                    '/register',
+                    arguments: {'authService': authService},
                   );
                 },
                 style: ElevatedButton.styleFrom(
@@ -57,11 +54,10 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 12),
               TextButton(
                 onPressed: () {
-                  Navigator.pushReplacement(
+                  Navigator.pushReplacementNamed(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => LoginScreen(authService: authService),
-                    ),
+                    '/login',
+                    arguments: {'authService': authService},
                   );
                 },
                 child: const Text('Already have an account? Login'),

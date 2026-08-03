@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
-import 'profile_screen.dart';
 
 class AdminHome extends StatelessWidget {
   final AuthService authService;
@@ -16,11 +15,10 @@ class AdminHome extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.person_outline),
             onPressed: () {
-              Navigator.push(
+              Navigator.pushNamed(
                 context,
-                MaterialPageRoute(
-                  builder: (_) => ProfileScreen(authService: authService),
-                ),
+                '/profile',
+                arguments: {'authService': authService},
               );
             },
           ),

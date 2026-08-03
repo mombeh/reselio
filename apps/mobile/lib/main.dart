@@ -3,9 +3,13 @@ import 'package:mobile/services/api_service.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'screens/welcome_screen.dart';
+import 'screens/login_screen.dart';
+import 'screens/register_screen.dart';
+import 'screens/role_selection_screen.dart';
 import 'screens/customer_home.dart';
 import 'screens/client_home.dart';
 import 'screens/admin_home.dart';
+import 'screens/profile_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -29,6 +33,42 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      onGenerateRoute: (settings) {
+        final args = (settings.arguments as Map<String, dynamic>?) ?? {};
+        final authService = args['authService'] as AuthService?;
+
+        Widget Function(BuildContext) builder;
+        switch (settings.name) {
+          case '/welcome':
+            builder = (_) => WelcomeScreen(authService: authService!);
+            break;
+          case '/login':
+            builder = (_) => LoginScreen(authService: authService!);
+            break;
+          case '/register':
+            builder = (_) => RegisterScreen(authService: authService!);
+            break;
+          case '/role-selection':
+            builder = (_) => RoleSelectionScreen(authService: authService!);
+            break;
+          case '/customer-home':
+            builder = (_) => CustomerHome(authService: authService!);
+            break;
+          case '/client-home':
+            builder = (_) => ClientHome(authService: authService!);
+            break;
+          case '/admin-home':
+            builder = (_) => AdminHome(authService: authService!);
+            break;
+          case '/profile':
+            builder = (_) => ProfileScreen(authService: authService!);
+            break;
+          default:
+            builder = (_) => SplashScreen(authService: authService);
+        }
+
+        return MaterialPageRoute(builder: builder);
+      },
       home: SplashScreen(authService: authService),
     );
   }
@@ -58,35 +98,45 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (isLoggedIn) {
-      final role = authService.currentUser?.role ?? 'customer';
-      if (role == 'customer') {
-        Navigator.pushReplacement(
+      final hasSelectedRole = await authService.hasSelectedRole;
+      if (!mounted) return;
+
+      if (!hasSelectedRole) {
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => CustomerHome(authService: authService),
-          ),
+          '/role-selection',
+          arguments: {'authService': authService},
+        );
+        return;
+      }
+
+      final role = authService.currentUser?.role ?? 'customer';
+      if (!mounted) return;
+
+      if (role == 'customer') {
+        Navigator.pushReplacementNamed(
+          context,
+          '/customer-home',
+          arguments: {'authService': authService},
         );
       } else if (role == 'client') {
-        Navigator.pushReplacement(
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => ClientHome(authService: authService),
-          ),
+          '/client-home',
+          arguments: {'authService': authService},
         );
       } else {
-        Navigator.pushReplacement(
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => AdminHome(authService: authService),
-          ),
+          '/admin-home',
+          arguments: {'authService': authService},
         );
       }
     } else {
-      Navigator.pushReplacement(
+      Navigator.pushReplacementNamed(
         context,
-        MaterialPageRoute(
-          builder: (_) => WelcomeScreen(authService: authService),
-        ),
+        '/welcome',
+        arguments: {'authService': authService},
       );
     }
   }

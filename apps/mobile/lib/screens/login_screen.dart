@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
-import 'customer_home.dart';
-import 'client_home.dart';
-import 'admin_home.dart';
-import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   final AuthService authService;
@@ -41,27 +37,38 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      final role = response.user.role;
-      if (role == 'customer') {
-        Navigator.pushReplacement(
+      final hasSelectedRole = await widget.authService.hasSelectedRole;
+      if (!mounted) return;
+
+      if (!hasSelectedRole) {
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => CustomerHome(authService: widget.authService),
-          ),
+          '/role-selection',
+          arguments: {'authService': widget.authService},
+        );
+        return;
+      }
+
+      final role = response.user.role;
+      if (!mounted) return;
+
+      if (role == 'customer') {
+        Navigator.pushReplacementNamed(
+          context,
+          '/customer-home',
+          arguments: {'authService': widget.authService},
         );
       } else if (role == 'client') {
-        Navigator.pushReplacement(
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => ClientHome(authService: widget.authService),
-          ),
+          '/client-home',
+          arguments: {'authService': widget.authService},
         );
       } else {
-        Navigator.pushReplacement(
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => AdminHome(authService: widget.authService),
-          ),
+          '/admin-home',
+          arguments: {'authService': widget.authService},
         );
       }
     } catch (e) {
@@ -173,13 +180,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
+                    Navigator.pushReplacementNamed(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => RegisterScreen(
-                          authService: widget.authService,
-                        ),
-                      ),
+                      '/register',
+                      arguments: {'authService': widget.authService},
                     );
                   },
                   child: const Text('Don\'t have an account? Register'),

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'login_screen.dart';
-import 'role_selection_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   final AuthService authService;
@@ -45,12 +44,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (!mounted) return;
 
+      await widget.authService.logout();
+
+      if (!mounted) return;
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (_) => RoleSelectionScreen(
-            authService: widget.authService,
-          ),
+          builder: (_) => LoginScreen(authService: widget.authService),
         ),
       );
     } catch (e) {
@@ -213,13 +214,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 const SizedBox(height: 16),
                 TextButton(
                   onPressed: () {
-                    Navigator.pushReplacement(
+                    Navigator.pushReplacementNamed(
                       context,
-                      MaterialPageRoute(
-                        builder: (_) => LoginScreen(
-                          authService: widget.authService,
-                        ),
-                      ),
+                      '/login',
+                      arguments: {'authService': widget.authService},
                     );
                   },
                   child: const Text('Already have an account? Login'),

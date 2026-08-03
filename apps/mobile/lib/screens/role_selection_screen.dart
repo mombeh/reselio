@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
-import 'customer_home.dart';
-import 'client_home.dart';
-import 'admin_home.dart';
 
 class RoleSelectionScreen extends StatelessWidget {
   final AuthService authService;
@@ -12,29 +9,27 @@ class RoleSelectionScreen extends StatelessWidget {
   Future<void> _selectRole(BuildContext context, String role) async {
     try {
       await authService.updateRole(role);
+      await authService.setRoleSelected();
 
       if (!context.mounted) return;
 
       if (role == 'customer') {
-        Navigator.pushReplacement(
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => CustomerHome(authService: authService),
-          ),
+          '/customer-home',
+          arguments: {'authService': authService},
         );
       } else if (role == 'client') {
-        Navigator.pushReplacement(
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => ClientHome(authService: authService),
-          ),
+          '/client-home',
+          arguments: {'authService': authService},
         );
       } else {
-        Navigator.pushReplacement(
+        Navigator.pushReplacementNamed(
           context,
-          MaterialPageRoute(
-            builder: (_) => AdminHome(authService: authService),
-          ),
+          '/admin-home',
+          arguments: {'authService': authService},
         );
       }
     } catch (e) {
