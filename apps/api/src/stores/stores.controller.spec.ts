@@ -56,12 +56,14 @@ describe('StoresController', () => {
 
   it('should call service.updateStore with userId from request', async () => {
     const dto = { name: 'Updated Store' };
-    mockStoresService.updateStore.mockResolvedValue({ ...dto, userId: 'user1' });
+    mockStoresService.updateStore.mockResolvedValue({
+      ...dto,
+      userId: 'user1',
+    });
 
-    const result = await controller.updateStore(
-      dto,
-      { user: { userId: 'user1' } },
-    );
+    const result = await controller.updateStore(dto, {
+      user: { userId: 'user1' },
+    });
 
     expect(mockStoresService.updateStore).toHaveBeenCalledWith('user1', dto);
     expect(result.name).toBe('Updated Store');

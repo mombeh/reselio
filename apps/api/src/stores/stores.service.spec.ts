@@ -45,9 +45,11 @@ describe('StoresService', () => {
         address: '123 Main St',
       });
 
-      jest.spyOn(service['storeModel'] as any, 'constructor', 'value').mockImplementation(() => ({
-        save: saveMock,
-      }));
+      jest
+        .spyOn(service['storeModel'] as any, 'constructor', 'value')
+        .mockImplementation(() => ({
+          save: saveMock,
+        }));
 
       model.findOne.mockResolvedValue(null);
 

@@ -30,13 +30,7 @@ export class StoresController {
 
   @UseGuards(AuthGuard('jwt'))
   @Patch('my-store')
-  updateStore(
-    @Body() updateStoreDto: UpdateStoreDto,
-    @Req() req: any,
-  ) {
-    return this.storesService.updateStore(
-      req.user.userId,
-      updateStoreDto,
-    );
+  updateStore(@Body() updateStoreDto: UpdateStoreDto, @Req() req: any) {
+    return this.storesService.updateStore(req.user.userId, updateStoreDto);
   }
 }
