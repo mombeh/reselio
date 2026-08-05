@@ -241,23 +241,23 @@ export class OrdersService {
   async createCustomer(customerData: any, userId: string) {
     const customer = new this.customerModel({
       ...customerData,
-      userId,
+      storeId: userId,
     });
     return customer.save();
   }
 
   async findAllCustomers(userId: string) {
-    return this.customerModel.find({ userId }).sort({ createdAt: -1 });
+    return this.customerModel.find({ storeId: userId }).sort({ createdAt: -1 });
   }
 
   async findCustomerById(customerId: string, userId: string) {
-    return this.customerModel.findOne({ _id: customerId, userId });
+    return this.customerModel.findOne({ _id: customerId, storeId: userId });
   }
 
   async updateCustomer(customerId: string, customerData: any, userId: string) {
     const customer = await this.customerModel.findOne({
       _id: customerId,
-      userId,
+      storeId: userId,
     });
     if (!customer) {
       throw new Error('Customer not found or you are not authorized');
@@ -269,7 +269,7 @@ export class OrdersService {
   async deleteCustomer(customerId: string, userId: string) {
     const customer = await this.customerModel.findOne({
       _id: customerId,
-      userId,
+      storeId: userId,
     });
     if (!customer) {
       throw new Error('Customer not found or you are not authorized');
