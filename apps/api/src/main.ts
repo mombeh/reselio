@@ -1,6 +1,8 @@
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { join } from 'path';
+import * as express from 'express';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -15,7 +17,6 @@ async function bootstrap() {
     }),
   );
 
-  // Allow multiple origins - both local development and production
   app.enableCors({
     origin:
       process.env.NODE_ENV === 'development'
@@ -33,10 +34,8 @@ async function bootstrap() {
               'https://reselio-web.vercel.app',
             ];
 
-            // Allow requests with no origin (Postman, mobile apps)
             if (!origin) return callback(null, true);
 
-            // Allow any localhost origin in development
             if (origin.startsWith('http://localhost:')) {
               return callback(null, true);
             }
@@ -60,6 +59,9 @@ async function bootstrap() {
     exposedHeaders: ['Authorization'],
     optionsSuccessStatus: 204,
   });
+
+  app.use('/uploads', express.static(join(process.cwd(), 'uploads')));
+
   await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();
