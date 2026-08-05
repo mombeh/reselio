@@ -4,7 +4,6 @@ import { StoresService } from './stores.service';
 
 describe('StoresController', () => {
   let controller: StoresController;
-  let service: StoresService;
 
   const mockStoresService = {
     create: jest.fn(),
@@ -19,7 +18,6 @@ describe('StoresController', () => {
     }).compile();
 
     controller = module.get<StoresController>(StoresController);
-    service = module.get<StoresService>(StoresService);
   });
 
   afterEach(() => {

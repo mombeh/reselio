@@ -6,10 +6,9 @@ describe('StoresService', () => {
   let service: StoresService;
   let model: any;
 
-  const mockStoreModel = {
-    findOne: jest.fn(),
-    findOneAndUpdate: jest.fn(),
-  };
+  const mockStoreModel: any = jest.fn();
+  mockStoreModel.findOne = jest.fn();
+  mockStoreModel.findOneAndUpdate = jest.fn();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -45,11 +44,9 @@ describe('StoresService', () => {
         address: '123 Main St',
       });
 
-      jest
-        .spyOn(service['storeModel'] as any, 'constructor', 'value')
-        .mockImplementation(() => ({
-          save: saveMock,
-        }));
+      mockStoreModel.mockImplementation(() => ({
+        save: saveMock,
+      }));
 
       model.findOne.mockResolvedValue(null);
 
