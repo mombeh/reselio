@@ -49,8 +49,10 @@ class CustomerHome extends StatelessWidget {
               subtitle: const Text('Explore available products'),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Products feature coming soon')),
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.productList,
+                  arguments: {'authService': authService},
                 );
               },
             ),

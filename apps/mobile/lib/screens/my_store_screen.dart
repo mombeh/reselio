@@ -147,6 +147,21 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
                   onPressed: () {
                     Navigator.pushNamed(
                       context,
+                      AppRouter.productList,
+                      arguments: {'authService': widget.authService},
+                    );
+                  },
+                  icon: const Icon(Icons.inventory_2_outlined),
+                  label: const Text('View Products'),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                ElevatedButton.icon(
+                  onPressed: () {
+                    Navigator.pushNamed(
+                      context,
                       AppRouter.createStore,
                       arguments: {
                         'authService': widget.authService,

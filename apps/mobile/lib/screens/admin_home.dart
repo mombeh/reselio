@@ -60,6 +60,22 @@ class AdminHome extends StatelessWidget {
           const SizedBox(height: 12),
           Card(
             child: ListTile(
+              leading: const Icon(Icons.inventory_2_outlined, color: Colors.teal),
+              title: const Text('Products'),
+              subtitle: const Text('Manage your products'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.productList,
+                  arguments: {'authService': authService},
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
               leading: const Icon(Icons.business_outlined, color: Colors.blue),
               title: const Text('All Orders'),
               subtitle: const Text('View all platform orders'),
