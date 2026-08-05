@@ -8,6 +8,9 @@ import 'package:mobile/screens/client_home.dart';
 import 'package:mobile/screens/admin_home.dart';
 import 'package:mobile/screens/profile_screen.dart';
 import 'package:mobile/screens/splash_screen.dart';
+import 'package:mobile/screens/create_store_screen.dart';
+import 'package:mobile/screens/my_store_screen.dart';
+import 'package:mobile/models/store.dart';
 import 'package:mobile/services/auth_service.dart';
 
 class AppRouter {
@@ -20,13 +23,16 @@ class AppRouter {
   static const String clientHome = '/client-home';
   static const String adminHome = '/admin-home';
   static const String profile = '/profile';
+  static const String createStore = '/create-store';
+  static const String myStore = '/my-store';
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings,
     AuthService? authService,
   ) {
+    Map<String, dynamic> args = {};
     if (settings.arguments is Map) {
-      final args = settings.arguments as Map<String, dynamic>;
+      args = settings.arguments as Map<String, dynamic>;
       authService = args['authService'] as AuthService? ?? authService;
     }
 
@@ -74,6 +80,19 @@ class AppRouter {
       case profile:
         return MaterialPageRoute(
           builder: (_) => ProfileScreen(authService: authService!),
+          settings: settings,
+        );
+      case createStore:
+        return MaterialPageRoute(
+          builder: (_) => CreateStoreScreen(
+            authService: authService!,
+            store: args['store'] as Store?,
+          ),
+          settings: settings,
+        );
+      case myStore:
+        return MaterialPageRoute(
+          builder: (_) => MyStoreScreen(authService: authService!),
           settings: settings,
         );
       default:
