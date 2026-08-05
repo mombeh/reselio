@@ -18,7 +18,6 @@ class _CreateStoreScreenState extends State<CreateStoreScreen> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
   final _logoController = TextEditingController();
-  bool _obscurePassword = true;
   String? _error;
 
   @override
