@@ -10,6 +10,7 @@ import 'package:mobile/screens/profile_screen.dart';
 import 'package:mobile/screens/splash_screen.dart';
 import 'package:mobile/screens/create_store_screen.dart';
 import 'package:mobile/screens/my_store_screen.dart';
+import 'package:mobile/models/store.dart';
 import 'package:mobile/services/auth_service.dart';
 
 class AppRouter {
@@ -29,8 +30,9 @@ class AppRouter {
     RouteSettings settings,
     AuthService? authService,
   ) {
+    Map<String, dynamic> args = {};
     if (settings.arguments is Map) {
-      final args = settings.arguments as Map<String, dynamic>;
+      args = settings.arguments as Map<String, dynamic>;
       authService = args['authService'] as AuthService? ?? authService;
     }
 
@@ -82,7 +84,10 @@ class AppRouter {
         );
       case createStore:
         return MaterialPageRoute(
-          builder: (_) => CreateStoreScreen(authService: authService!),
+          builder: (_) => CreateStoreScreen(
+            authService: authService!,
+            store: args['store'] as Store?,
+          ),
           settings: settings,
         );
       case myStore:

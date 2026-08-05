@@ -148,7 +148,10 @@ class _MyStoreScreenState extends State<MyStoreScreen> {
                     Navigator.pushNamed(
                       context,
                       AppRouter.createStore,
-                      arguments: {'authService': widget.authService},
+                      arguments: {
+                        'authService': widget.authService,
+                        'store': store,
+                      },
                     );
                   },
                   icon: const Icon(Icons.edit),
