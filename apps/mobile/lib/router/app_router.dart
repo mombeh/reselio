@@ -10,7 +10,11 @@ import 'package:mobile/screens/profile_screen.dart';
 import 'package:mobile/screens/splash_screen.dart';
 import 'package:mobile/screens/create_store_screen.dart';
 import 'package:mobile/screens/my_store_screen.dart';
+import 'package:mobile/screens/product_list_screen.dart';
+import 'package:mobile/screens/add_product_screen.dart';
+import 'package:mobile/screens/product_detail_screen.dart';
 import 'package:mobile/models/store.dart';
+import 'package:mobile/models/product.dart';
 import 'package:mobile/services/auth_service.dart';
 
 class AppRouter {
@@ -25,6 +29,9 @@ class AppRouter {
   static const String profile = '/profile';
   static const String createStore = '/create-store';
   static const String myStore = '/my-store';
+  static const String productList = '/product-list';
+  static const String addProduct = '/add-product';
+  static const String productDetail = '/product-detail';
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings,
@@ -93,6 +100,26 @@ class AppRouter {
       case myStore:
         return MaterialPageRoute(
           builder: (_) => MyStoreScreen(authService: authService!),
+          settings: settings,
+        );
+      case productList:
+        return MaterialPageRoute(
+          builder: (_) => ProductListScreen(authService: authService!),
+          settings: settings,
+        );
+      case addProduct:
+        return MaterialPageRoute(
+          builder: (_) => AddProductScreen(
+            authService: authService!,
+            product: args['product'] as Product?,
+          ),
+          settings: settings,
+        );
+      case productDetail:
+        return MaterialPageRoute(
+          builder: (_) => ProductDetailScreen(
+            product: args['product'] as Product,
+          ),
           settings: settings,
         );
       default:

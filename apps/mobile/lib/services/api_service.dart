@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
+import '../models/product.dart';
 import '../models/store.dart';
 import '../models/user.dart';
 
@@ -145,6 +146,58 @@ class ApiService {
 
     final response = await dio.patch('/stores/my-store', data: data);
     return Store.fromJson(response.data);
+  }
+
+  Future<List<Product>> getProducts() async {
+    final response = await dio.get('/products');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => Product.fromJson(item)).toList();
+  }
+
+  Future<Product> createProduct({
+    required String name,
+    required String description,
+    required double price,
+    required int quantity,
+    required String category,
+    String? imageUrl,
+  }) async {
+    final data = <String, dynamic>{
+      'name': name,
+      'description': description,
+      'price': price,
+      'quantity': quantity,
+      'category': category,
+    };
+    if (imageUrl != null) data['imageUrl'] = imageUrl;
+
+    final response = await dio.post('/products', data: data);
+    return Product.fromJson(response.data);
+  }
+
+  Future<Product> updateProduct({
+    required String id,
+    String? name,
+    String? description,
+    double? price,
+    int? quantity,
+    String? category,
+    String? imageUrl,
+  }) async {
+    final data = <String, dynamic>{};
+    if (name != null) data['name'] = name;
+    if (description != null) data['description'] = description;
+    if (price != null) data['price'] = price;
+    if (quantity != null) data['quantity'] = quantity;
+    if (category != null) data['category'] = category;
+    if (imageUrl != null) data['imageUrl'] = imageUrl;
+
+    final response = await dio.patch('/products/$id', data: data);
+    return Product.fromJson(response.data);
+  }
+
+  Future<void> deleteProduct(String id) async {
+    await dio.delete('/products/$id');
   }
 
   Future<void> saveToken(String token) async {
