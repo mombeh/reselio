@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
+import '../models/store.dart';
 import '../models/user.dart';
 
 class ApiService {
@@ -102,6 +103,48 @@ class ApiService {
         'newPassword': newPassword,
       },
     );
+  }
+
+  Future<Store> createStore({
+    required String name,
+    required String description,
+    required String phone,
+    required String address,
+    String? logo,
+  }) async {
+    final data = <String, dynamic>{
+      'name': name,
+      'description': description,
+      'phone': phone,
+      'address': address,
+    };
+    if (logo != null) data['logo'] = logo;
+
+    final response = await dio.post('/stores', data: data);
+    return Store.fromJson(response.data);
+  }
+
+  Future<Store> getMyStore() async {
+    final response = await dio.get('/stores/my-store');
+    return Store.fromJson(response.data);
+  }
+
+  Future<Store> updateStore({
+    String? name,
+    String? description,
+    String? phone,
+    String? address,
+    String? logo,
+  }) async {
+    final data = <String, dynamic>{};
+    if (name != null) data['name'] = name;
+    if (description != null) data['description'] = description;
+    if (phone != null) data['phone'] = phone;
+    if (address != null) data['address'] = address;
+    if (logo != null) data['logo'] = logo;
+
+    final response = await dio.patch('/stores/my-store', data: data);
+    return Store.fromJson(response.data);
   }
 
   Future<void> saveToken(String token) async {
