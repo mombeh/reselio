@@ -49,8 +49,10 @@ class ClientHome extends StatelessWidget {
               subtitle: const Text('View and manage customers'),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Customers feature coming soon')),
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.customerList,
+                  arguments: {'authService': authService},
                 );
               },
             ),

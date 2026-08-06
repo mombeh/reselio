@@ -13,8 +13,12 @@ import 'package:mobile/screens/my_store_screen.dart';
 import 'package:mobile/screens/product_list_screen.dart';
 import 'package:mobile/screens/add_product_screen.dart';
 import 'package:mobile/screens/product_detail_screen.dart';
+import 'package:mobile/screens/customer_list_screen.dart';
+import 'package:mobile/screens/add_customer_screen.dart';
+import 'package:mobile/screens/customer_detail_screen.dart';
 import 'package:mobile/models/store.dart';
 import 'package:mobile/models/product.dart';
+import 'package:mobile/models/customer.dart';
 import 'package:mobile/services/auth_service.dart';
 
 class AppRouter {
@@ -32,6 +36,9 @@ class AppRouter {
   static const String productList = '/product-list';
   static const String addProduct = '/add-product';
   static const String productDetail = '/product-detail';
+  static const String customerList = '/customer-list';
+  static const String addCustomer = '/add-customer';
+  static const String customerDetail = '/customer-detail';
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings,
@@ -119,6 +126,26 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => ProductDetailScreen(
             product: args['product'] as Product,
+          ),
+          settings: settings,
+        );
+      case customerList:
+        return MaterialPageRoute(
+          builder: (_) => CustomerListScreen(authService: authService!),
+          settings: settings,
+        );
+      case addCustomer:
+        return MaterialPageRoute(
+          builder: (_) => AddCustomerScreen(
+            authService: authService!,
+            customer: args['customer'] as Customer?,
+          ),
+          settings: settings,
+        );
+      case customerDetail:
+        return MaterialPageRoute(
+          builder: (_) => CustomerDetailScreen(
+            customer: args['customer'] as Customer,
           ),
           settings: settings,
         );
