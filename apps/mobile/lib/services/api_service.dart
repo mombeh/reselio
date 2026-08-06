@@ -201,6 +201,59 @@ class ApiService {
     await dio.delete('/products/$id');
   }
 
+  Future<List<Customer>> getCustomers() async {
+    final response = await dio.get('/customers');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => Customer.fromJson(item)).toList();
+  }
+
+  Future<Customer> getCustomer(String id) async {
+    final response = await dio.get('/customers/$id');
+    return Customer.fromJson(response.data);
+  }
+
+  Future<Customer> createCustomer({
+    required String fullName,
+    required String phoneNumber,
+    String? email,
+    String? address,
+    String? notes,
+  }) async {
+    final data = <String, dynamic>{
+      'fullName': fullName,
+      'phoneNumber': phoneNumber,
+    };
+    if (email != null && email.isNotEmpty) data['email'] = email;
+    if (address != null && address.isNotEmpty) data['address'] = address;
+    if (notes != null && notes.isNotEmpty) data['notes'] = notes;
+
+    final response = await dio.post('/customers', data: data);
+    return Customer.fromJson(response.data);
+  }
+
+  Future<Customer> updateCustomer({
+    required String id,
+    String? fullName,
+    String? phoneNumber,
+    String? email,
+    String? address,
+    String? notes,
+  }) async {
+    final data = <String, dynamic>{};
+    if (fullName != null && fullName.isNotEmpty) data['fullName'] = fullName;
+    if (phoneNumber != null && phoneNumber.isNotEmpty) data['phoneNumber'] = phoneNumber;
+    if (email != null) data['email'] = email;
+    if (address != null && address.isNotEmpty) data['address'] = address;
+    if (notes != null && notes.isNotEmpty) data['notes'] = notes;
+
+    final response = await dio.patch('/customers/$id', data: data);
+    return Customer.fromJson(response.data);
+  }
+
+  Future<void> deleteCustomer(String id) async {
+    await dio.delete('/customers/$id');
+  }
+
   Future<void> saveToken(String token) async {
     await prefs.setString(tokenKey, token);
   }
