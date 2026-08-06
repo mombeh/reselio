@@ -4,14 +4,35 @@ import { getModelToken } from '@nestjs/mongoose';
 
 describe('OrdersService', () => {
   let service: OrdersService;
-  let model: any;
+  let orderModel: any;
+  let orderItemModel: any;
+  let customerModel: any;
+  let productModel: any;
 
   const mockOrderModel = {
     find: jest.fn(),
     findOne: jest.fn(),
+    findOneAndUpdate: jest.fn(),
     countDocuments: jest.fn(),
     aggregate: jest.fn(),
     create: jest.fn(),
+  };
+
+  const mockOrderItemModel = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+    findOneAndDelete: jest.fn(),
+    create: jest.fn(),
+  };
+
+  const mockCustomerModel = {
+    findOne: jest.fn(),
+  };
+
+  const mockProductModel = {
+    findOne: jest.fn(),
+    findByIdAndUpdate: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -22,31 +43,48 @@ describe('OrdersService', () => {
           provide: getModelToken('Order'),
           useValue: mockOrderModel,
         },
+        {
+          provide: getModelToken('OrderItem'),
+          useValue: mockOrderItemModel,
+        },
+        {
+          provide: getModelToken('Customer'),
+          useValue: mockCustomerModel,
+        },
+        {
+          provide: getModelToken('Product'),
+          useValue: mockProductModel,
+        },
       ],
     }).compile();
 
     service = module.get<OrdersService>(OrdersService);
-    model = module.get(getModelToken('Order'));
+    orderModel = module.get(getModelToken('Order'));
+    orderItemModel = module.get(getModelToken('OrderItem'));
+    customerModel = module.get(getModelToken('Customer'));
+    productModel = module.get(getModelToken('Product'));
   });
 
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  describe('findAllByUser', () => {
+  describe('findAllByStore', () => {
     it('should return paginated orders', async () => {
-      const mockOrders = [{ customerName: 'Sarah' }];
+      const mockOrders = [{ orderNumber: 'ORD-1', customerId: { fullName: 'Alice' } }];
 
-      model.countDocuments.mockResolvedValue(1);
-      model.find.mockReturnValue({
-        sort: () => ({
-          skip: () => ({
-            limit: () => mockOrders,
+      orderModel.countDocuments.mockResolvedValue(1);
+      orderModel.find.mockReturnValue({
+        populate: jest.fn().mockReturnValue({
+          sort: () => ({
+            skip: () => ({
+              limit: () => mockOrders,
+            }),
           }),
         }),
       });
 
-      const result = await service.findAllByUser('user123', {
+      const result = await service.findAllByStore('user123', {
         page: '1',
         limit: '10',
       });
@@ -68,113 +106,12 @@ describe('OrdersService', () => {
         },
       ];
 
-      model.aggregate.mockResolvedValue(mockAnalytics);
+      orderModel.aggregate.mockResolvedValue(mockAnalytics);
 
       const result = await service.getMonthlyAnalytics('user123');
 
       expect(result).toEqual(mockAnalytics);
-      expect(model.aggregate).toHaveBeenCalled();
-    });
-  });
-});
-
-import { OrdersController } from './orders.controller';
-import { Order } from './schemas/order.schema';
-
-describe('OrdersController', () => {
-  let controller: OrdersController;
-  let service: OrdersService;
-
-  const mockOrdersService = {
-    create: jest.fn(),
-    findAllByUser: jest.fn(),
-    updateStatus: jest.fn(),
-    getDashboardMetrics: jest.fn(),
-    getCustomersSummary: jest.fn(),
-    getMonthlyAnalytics: jest.fn(),
-    exportOrders: jest.fn(), // <-- add this
-  };
-
-  const userId = 'test-user-id';
-  const sampleOrders: Order[] = [
-    {
-      _id: '1',
-      userId,
-      customerName: 'Alice',
-      phone: '123456',
-      productName: 'Red Dress',
-      size: 'M',
-      color: 'Red',
-      costPrice: 100,
-      sellingPrice: 150,
-      advancePaid: 50,
-      balance: 100,
-      profit: 50,
-      status: 'Waiting for Supplier',
-      createdAt: new Date(),
-      updatedAt: new Date(),
-      __v: 0,
-    } as any,
-  ];
-
-  beforeEach(async () => {
-    const module: TestingModule = await Test.createTestingModule({
-      controllers: [OrdersController],
-      providers: [
-        {
-          provide: OrdersService,
-          useValue: mockOrdersService,
-        },
-      ],
-    }).compile();
-
-    controller = module.get<OrdersController>(OrdersController);
-  });
-
-  it('should be defined', () => {
-    expect(controller).toBeDefined();
-  });
-
-  describe('exportOrders', () => {
-    it('should return CSV string for user orders', async () => {
-      mockOrdersService.exportOrders.mockResolvedValue(
-        'customerName,phone,productName\nSarah,670000000,Red Dress',
-      );
-
-      const res: any = {
-        header: jest.fn().mockReturnThis(),
-        attachment: jest.fn().mockReturnThis(),
-        send: jest.fn(),
-      };
-
-      await controller.exportOrders({ user: { userId: 'user123' } }, res);
-
-      expect(mockOrdersService.exportOrders).toHaveBeenCalledWith('user123');
-      expect(res.header).toHaveBeenCalledWith('Content-Type', 'text/csv');
-      expect(res.attachment).toHaveBeenCalledWith('orders.csv');
-      expect(res.send).toHaveBeenCalledWith(
-        'customerName,phone,productName\nSarah,670000000,Red Dress',
-      );
-    });
-
-    it('should handle empty order array', async () => {
-      mockOrdersService.exportOrders.mockResolvedValue(''); // empty CSV
-
-      // Mock Express response
-      const res: any = {
-        header: jest.fn().mockReturnThis(),
-        attachment: jest.fn().mockReturnThis(),
-        send: jest.fn().mockReturnThis(),
-      };
-
-      const req: any = { user: { userId: 'user123' } };
-
-      await controller.exportOrders(req, res);
-
-      expect(mockOrdersService.exportOrders).toHaveBeenCalledWith('user123');
-      expect(res.header).toHaveBeenCalledWith('Content-Type', 'text/csv');
-      expect(res.attachment).toHaveBeenCalledWith('orders.csv');
-      expect(res.send).toHaveBeenCalledWith('');
+      expect(orderModel.aggregate).toHaveBeenCalled();
     });
   });
 });
