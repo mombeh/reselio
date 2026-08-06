@@ -3,11 +3,11 @@ import { IsString, IsOptional, IsNotEmpty } from 'class-validator';
 export class CreateCustomerDto {
   @IsString()
   @IsNotEmpty()
-  name: string;
+  fullName: string;
 
   @IsString()
   @IsNotEmpty()
-  phone: string;
+  phoneNumber: string;
 
   @IsString()
   @IsOptional()
