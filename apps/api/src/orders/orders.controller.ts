@@ -9,29 +9,40 @@ import {
   Param,
   Res,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { OrdersService } from './orders.service';
+import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
-import { Query } from '@nestjs/common';
-import type { Response } from 'express';
 import { GetOrdersQueryDto } from './dto/get-orders-query.dto';
-import { CreateCustomerDto } from './dto/create-customer.dto';
+import { CustomersService } from '../customers/customers.service';
+import { CreateCustomerDto } from '../customers/dto/create-customer.dto';
+import type { Response } from 'express';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    private readonly customersService: CustomersService,
+  ) {}
 
   @UseGuards(AuthGuard('jwt'))
   @Post()
-  create(@Body() body: any, @Req() req: any) {
-    return this.ordersService.create(body, req.user.userId);
+  create(@Body() createOrderDto: CreateOrderDto, @Req() req: any) {
+    return this.ordersService.create(req.user.userId, createOrderDto);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
   getMyOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
-    return this.ordersService.findAllByUser(req.user.userId, query);
+    return this.ordersService.findAllByStore(req.user.userId, query);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':id')
+  findOne(@Param('id') id: string, @Req() req: any) {
+    return this.ordersService.findOne(id, req.user.userId);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -47,41 +58,55 @@ export class OrdersController {
       req.user.userId,
     );
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Delete(':id')
+  cancelOrder(@Param('id') orderId: string, @Req() req: any) {
+    return this.ordersService.cancelOrder(orderId, req.user.userId);
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('dashboard')
   getDashboard(@Req() req: any) {
     return this.ordersService.getDashboardMetrics(req.user.userId);
   }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('customers')
   getCustomers(@Req() req: any) {
     return this.ordersService.getCustomersSummary(req.user.userId);
   }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('analytics/monthly')
   getMonthlyAnalytics(@Req() req: any) {
     return this.ordersService.getMonthlyAnalytics(req.user.userId);
   }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('analytics/status')
   getStatusBreakdown(@Req() req: any) {
     return this.ordersService.getStatusBreakdown(req.user.userId);
   }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('analytics/products')
   getTopProducts(@Req() req: any) {
     return this.ordersService.getTopProducts(req.user.userId);
   }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('analytics/daily')
   getDailySales(@Req() req: any) {
     return this.ordersService.getDailySales(req.user.userId);
   }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('analytics/yearly')
   getYearlyAnalytics(@Req() req: any) {
     return this.ordersService.getYearlyAnalytics(req.user.userId);
   }
+
   @UseGuards(AuthGuard('jwt'))
   @Get('export')
   async exportOrders(@Req() req: any, @Res() res: Response) {
@@ -96,19 +121,19 @@ export class OrdersController {
   @UseGuards(AuthGuard('jwt'))
   @Post('customers')
   createCustomer(@Body() body: CreateCustomerDto, @Req() req: any) {
-    return this.ordersService.createCustomer(body, req.user.userId);
+    return this.customersService.create(req.user.userId, body);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('customers/list')
   getAllCustomers(@Req() req: any) {
-    return this.ordersService.findAllCustomers(req.user.userId);
+    return this.customersService.findAllByStore(req.user.userId);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Get('customers/:id')
   getCustomerById(@Param('id') id: string, @Req() req: any) {
-    return this.ordersService.findCustomerById(id, req.user.userId);
+    return this.customersService.findOne(id, req.user.userId);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -118,12 +143,12 @@ export class OrdersController {
     @Body() body: CreateCustomerDto,
     @Req() req: any,
   ) {
-    return this.ordersService.updateCustomer(id, body, req.user.userId);
+    return this.customersService.update(id, req.user.userId, body);
   }
 
   @UseGuards(AuthGuard('jwt'))
   @Delete('customers/:id')
   deleteCustomer(@Param('id') id: string, @Req() req: any) {
-    return this.ordersService.deleteCustomer(id, req.user.userId);
+    return this.customersService.remove(id, req.user.userId);
   }
 }

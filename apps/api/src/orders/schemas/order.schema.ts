@@ -6,28 +6,33 @@ export type OrderDocument = Order & Document;
 @Schema({ timestamps: true })
 export class Order {
   @Prop({ required: true })
-  userId: string;
+  storeId: string;
 
   @Prop({ required: true })
-  customerName: string;
+  customerId: string;
 
-  @Prop({ required: true })
-  phone: string;
+  @Prop({ required: true, unique: true })
+  orderNumber: string;
 
-  @Prop({ required: true })
-  productName: string;
+  @Prop({
+    enum: [
+      'Pending',
+      'Waiting for Supplier',
+      'Supplier Shipped',
+      'Received',
+      'Sent to Customer',
+      'Delivered',
+      'Cancelled',
+    ],
+    default: 'Pending',
+  })
+  status: string;
 
-  @Prop()
-  size: string;
+  @Prop({ required: true, min: 0, default: 0 })
+  subtotal: number;
 
-  @Prop()
-  color: string;
-
-  @Prop({ required: true })
-  costPrice: number;
-
-  @Prop({ required: true })
-  sellingPrice: number;
+  @Prop({ required: true, min: 0, default: 0 })
+  total: number;
 
   @Prop({ default: 0 })
   advancePaid: number;
@@ -37,18 +42,6 @@ export class Order {
 
   @Prop()
   profit: number;
-
-  @Prop({
-    enum: [
-      'Waiting for Supplier',
-      'Supplier Shipped',
-      'Received',
-      'Sent to Customer',
-      'Delivered',
-    ],
-    default: 'Waiting for Supplier',
-  })
-  status: string;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
