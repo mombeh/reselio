@@ -15,33 +15,27 @@ class CustomerListScreen extends StatefulWidget {
 class _CustomerListScreenState extends State<CustomerListScreen> {
   late Future<List<Customer>> _customersFuture;
   final TextEditingController _searchController = TextEditingController();
-  List<Customer> _allCustomers = [];
-  List<Customer> _filteredCustomers = [];
   bool _isSearching = false;
 
   @override
   void initState() {
     super.initState();
     _customersFuture = widget.authService.apiService.getCustomers();
-    _searchController.addListener(_onSearchChanged);
   }
 
   @override
   void dispose() {
-    _searchController.removeListener(_onSearchChanged);
     _searchController.dispose();
     super.dispose();
   }
 
-  void _onSearchChanged() {
+  List<Customer> _filter(List<Customer> customers) {
     final query = _searchController.text.trim().toLowerCase();
-    setState(() {
-      _filteredCustomers = _allCustomers.where((customer) {
-        if (query.isEmpty) return true;
-        return customer.fullName.toLowerCase().contains(query) ||
-            customer.phoneNumber.contains(query);
-      }).toList();
-    });
+    if (query.isEmpty) return customers;
+    return customers.where((customer) {
+      return customer.fullName.toLowerCase().contains(query) ||
+          customer.phoneNumber.contains(query);
+    }).toList();
   }
 
   void _refresh() {
@@ -143,9 +137,7 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                   }
 
                   final customers = snapshot.data ?? [];
-                  _allCustomers = customers;
-                  _onSearchChanged();
-                  final displayCustomers = _filteredCustomers;
+                  final displayCustomers = _filter(customers);
 
                   if (displayCustomers.isEmpty) {
                     return Center(
