@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
+import '../models/customer.dart';
 import '../models/product.dart';
 import '../models/store.dart';
 import '../models/user.dart';
