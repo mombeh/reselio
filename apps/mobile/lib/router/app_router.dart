@@ -21,6 +21,7 @@ import 'package:mobile/screens/create_order_screen.dart';
 import 'package:mobile/screens/order_detail_screen.dart';
 import 'package:mobile/screens/dashboard_screen.dart';
 import 'package:mobile/screens/reports_screen.dart';
+import 'package:mobile/screens/shared_product_screen.dart';
 import 'package:mobile/models/store.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/models/customer.dart';
@@ -50,6 +51,7 @@ class AppRouter {
   static const String orderDetail = '/order-detail';
   static const String dashboard = '/dashboard';
   static const String reports = '/reports';
+  static const String sharedProduct = '/shared-product';
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings,
@@ -136,7 +138,16 @@ class AppRouter {
       case productDetail:
         return MaterialPageRoute(
           builder: (_) => ProductDetailScreen(
+            authService: authService,
             product: args['product'] as Product,
+            shareUrl: args['shareUrl'] as String?,
+          ),
+          settings: settings,
+        );
+      case sharedProduct:
+        return MaterialPageRoute(
+          builder: (_) => SharedProductScreen(
+            publicId: args['publicId'] as String,
           ),
           settings: settings,
         );

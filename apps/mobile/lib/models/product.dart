@@ -7,6 +7,7 @@ class Product {
   final int quantity;
   final String category;
   final String? imageUrl;
+  final String? publicId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -19,6 +20,7 @@ class Product {
     required this.quantity,
     required this.category,
     this.imageUrl,
+    this.publicId,
     this.createdAt,
     this.updatedAt,
   });
@@ -37,6 +39,7 @@ class Product {
           : 0,
       category: json['category'] ?? '',
       imageUrl: json['imageUrl'],
+      publicId: json['publicId'],
       createdAt: json['createdAt'] != null
           ? DateTime.tryParse(json['createdAt'])
           : null,
@@ -56,6 +59,7 @@ class Product {
       'quantity': quantity,
       'category': category,
       'imageUrl': imageUrl,
+      'publicId': publicId,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
     };
