@@ -8,6 +8,9 @@ import { Customer, CustomerDocument } from './schemas/customer.schema';
 import { Product, ProductDocument } from '../products/schemas/product.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
+import { NotificationsService } from '../notifications/notifications.service';
+import { NotificationType } from '../notifications/enums/notification-type.enum';
+import { LOW_STOCK_THRESHOLD } from '../notifications/notifications.service';
 
 @Injectable()
 export class OrdersService {
@@ -16,6 +19,7 @@ export class OrdersService {
     @InjectModel(OrderItem.name) private orderItemModel: Model<OrderItemDocument>,
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    private notificationsService: NotificationsService,
   ) {}
 
   private generateOrderNumber(): string {
@@ -90,6 +94,14 @@ export class OrdersService {
 
     const savedOrder = await order.save();
 
+    await this.notificationsService.create(storeId, {
+      type: NotificationType.ORDER_CREATED,
+      title: 'New Order Received',
+      message: `Order ${orderNumber} has been created successfully.`,
+      referenceId: savedOrder._id.toString(),
+      referenceType: 'order',
+    });
+
     for (const item of orderItems) {
       const orderItem = new this.orderItemModel({
         ...item,
@@ -100,6 +112,16 @@ export class OrdersService {
       await this.productModel.findByIdAndUpdate(item.productId, {
         $inc: { quantity: -item.quantity },
       });
+
+      const updatedProduct = await this.productModel.findById(item.productId);
+      if (updatedProduct && updatedProduct.quantity < LOW_STOCK_THRESHOLD) {
+        await this.notificationsService.createLowStockNotification(
+          storeId,
+          item.productId,
+          updatedProduct.name,
+          updatedProduct.quantity,
+        );
+      }
     }
 
     const populatedOrder = await savedOrder.populate('customerId', 'fullName phoneNumber email');
@@ -163,14 +185,52 @@ export class OrdersService {
   }
 
   async updateStatus(id: string, storeId: string, status: string) {
+    const existingOrder = await this.orderModel.findOne({ _id: id, storeId });
+    if (!existingOrder) {
+      throw new NotFoundException('Order not found');
+    }
+
+    const previousStatus = existingOrder.status;
     const order = await this.orderModel.findOneAndUpdate(
       { _id: id, storeId },
       { status },
       { new: true },
     );
+
     if (!order) {
       throw new NotFoundException('Order not found');
     }
+
+    if (status === 'Delivered' && previousStatus !== 'Delivered') {
+      await this.notificationsService.create(storeId, {
+        type: NotificationType.ORDER_DELIVERED,
+        title: 'Order Delivered',
+        message: `Order ${order.orderNumber} has been delivered.`,
+        referenceId: order._id.toString(),
+        referenceType: 'order',
+      });
+    } else if (status === 'Cancelled' && previousStatus !== 'Cancelled') {
+      await this.notificationsService.create(storeId, {
+        type: NotificationType.ORDER_CANCELLED,
+        title: 'Order Cancelled',
+        message: `Order ${order.orderNumber} has been cancelled.`,
+        referenceId: order._id.toString(),
+        referenceType: 'order',
+      });
+    } else if (
+      previousStatus === 'Pending' &&
+      status !== 'Pending' &&
+      status !== 'Cancelled'
+    ) {
+      await this.notificationsService.create(storeId, {
+        type: NotificationType.ORDER_CONFIRMED,
+        title: 'Order Confirmed',
+        message: `Order ${order.orderNumber} has been confirmed.`,
+        referenceId: order._id.toString(),
+        referenceType: 'order',
+      });
+    }
+
     return order;
   }
 
@@ -193,7 +253,17 @@ export class OrdersService {
     }
 
     order.status = 'Cancelled';
-    return order.save();
+    const savedOrder = await order.save();
+
+    await this.notificationsService.create(storeId, {
+      type: NotificationType.ORDER_CANCELLED,
+      title: 'Order Cancelled',
+      message: `Order ${order.orderNumber} has been cancelled.`,
+      referenceId: order._id.toString(),
+      referenceType: 'order',
+    });
+
+    return savedOrder;
   }
 
   async getDashboardMetrics(storeId: string) {
