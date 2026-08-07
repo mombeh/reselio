@@ -82,50 +82,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
         return Colors.grey;
     }
   }
-
-  Future<void> _cancelOrder(Order order) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Cancel Order'),
-        content: Text('Are you sure you want to cancel order ${order.orderNumber}?'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Keep Order'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Cancel Order'),
-          ),
-        ],
-      ),
-    );
-
-    if (confirmed == true) {
-      try {
-        await widget.authService.apiService.cancelOrder(order.id);
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Order cancelled'),
-            backgroundColor: Colors.red,
-          ),
-        );
-        _refresh();
-      } catch (e) {
-        if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to cancel: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
-    }
-  }
-
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -197,9 +154,9 @@ class _OrderListScreenState extends State<OrderListScreen> {
                     );
                   }
 
-                  final result = snapshot.data ?? {};
-                  final orders = result['orders'] as List<Order>? ?? [];
-                  final total = result['total'] as int? ?? 0;
+                final result = snapshot.data ?? {};
+                final orders = result['orders'] as List<Order>? ?? [];
+
 
                   if (orders.isEmpty) {
                     return Center(

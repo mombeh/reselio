@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/models/customer.dart';
-import 'package:mobile/models/order.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/services/auth_service.dart';
-import 'package:mobile/router/app_router.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final AuthService authService;
@@ -160,7 +158,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               }
               final customers = snapshot.data ?? [];
               return DropdownButtonFormField<Customer>(
-                value: _selectedCustomer,
+                initialValue: _selectedCustomer,
                 decoration: const InputDecoration(
                   labelText: 'Customer',
                   prefixIcon: Icon(Icons.person_outlined),
@@ -227,7 +225,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                           width: 40,
                           height: 40,
                           fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, size: 40),
+                          errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported, size: 40),
                         )
                       : const Icon(Icons.image_outlined, size: 40),
                   title: Text(item.productName),
