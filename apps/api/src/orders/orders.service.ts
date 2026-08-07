@@ -59,7 +59,7 @@ export class OrdersService {
       }
 
       const itemTotal = item.quantity * product.price;
-      const itemCost = item.quantity * product.costPrice;
+      const itemCost = item.quantity * (product.costPrice || 0);
       subtotal += itemTotal;
       totalCost += itemCost;
 
