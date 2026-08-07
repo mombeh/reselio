@@ -46,12 +46,14 @@ class _OrderListScreenState extends State<OrderListScreen> {
   }
 
   Future<Map<String, dynamic>> _loadOrders() {
-    setState(() => _ordersFuture = widget.authService.apiService.getOrders(
-          status: _selectedStatus.isEmpty ? null : _selectedStatus,
-          search: _searchController.text.isEmpty ? null : _searchController.text,
-          page: _currentPage,
-          limit: 10,
-        ));
+    setState(() {
+      _ordersFuture = widget.authService.apiService.getOrders(
+        status: _selectedStatus.isEmpty ? null : _selectedStatus,
+        search: _searchController.text.isEmpty ? null : _searchController.text,
+        page: _currentPage,
+        limit: 10,
+      );
+    });
     return _ordersFuture;
   }
 

@@ -257,7 +257,7 @@ class ApiService {
   }
 
   Future<List<Customer>> getCustomersForOrder() async {
-    final response = await dio.get('/orders/customers');
+    final response = await dio.get('/orders/customers/list');
     final List<dynamic> data = response.data as List;
     return data.map((item) => Customer.fromJson(item)).toList();
   }
