@@ -79,6 +79,11 @@ export class ProductsService {
       throw new NotFoundException('Product not found');
     }
 
+    if (!product.publicId) {
+      product.publicId = this.generatePublicId();
+      await product.save();
+    }
+
     const baseUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
     return {
       shareUrl: `${baseUrl}/p/${product.publicId}`,
