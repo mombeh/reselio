@@ -7,6 +7,7 @@ import '../models/dashboard_metrics.dart';
 import '../models/daily_sale.dart';
 import '../models/order.dart';
 import '../models/product.dart';
+import '../models/shared_product.dart';
 import '../models/store.dart';
 import '../models/top_product.dart';
 import '../models/user.dart';
@@ -204,6 +205,16 @@ class ApiService {
 
   Future<void> deleteProduct(String id) async {
     await dio.delete('/products/$id');
+  }
+
+  Future<String> getProductShareUrl(String id) async {
+    final response = await dio.get('/products/$id/share');
+    return response.data['shareUrl'] as String;
+  }
+
+  Future<SharedProduct> getPublicProduct(String publicId) async {
+    final response = await dio.get('/products/public/$publicId');
+    return SharedProduct.fromJson(response.data);
   }
 
   Future<List<Customer>> getCustomers() async {

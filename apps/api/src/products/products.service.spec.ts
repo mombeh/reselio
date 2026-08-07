@@ -36,7 +36,7 @@ describe('ProductsService', () => {
   });
 
   describe('create', () => {
-    it('should create a new product', async () => {
+    it('should create a new product with a publicId', async () => {
       const saveMock = jest.fn().mockResolvedValue({
         _id: 'prod1',
         storeId: 'store1',
@@ -45,6 +45,7 @@ describe('ProductsService', () => {
         price: 5000,
         quantity: 10,
         category: 'Dresses',
+        publicId: 'abc123',
       });
 
       mockProductModel.mockImplementation(() => ({
@@ -61,6 +62,7 @@ describe('ProductsService', () => {
 
       expect(result._id).toBe('prod1');
       expect(result.name).toBe('Red Dress');
+      expect(result.publicId).toBeDefined();
     });
   });
 
@@ -95,6 +97,29 @@ describe('ProductsService', () => {
       model.findOne.mockResolvedValue(null);
 
       await expect(service.findOne('prod1', 'store1')).rejects.toThrow(
+        'Product not found',
+      );
+    });
+  });
+
+  describe('findByPublicId', () => {
+    it('should return a product by publicId', async () => {
+      const mockProduct = {
+        _id: 'prod1',
+        name: 'Red Dress',
+        publicId: 'abc123',
+        storeId: { name: 'My Store' },
+      };
+      model.findOne.mockResolvedValue(mockProduct);
+
+      const result = await service.findByPublicId('abc123');
+      expect(result).toEqual(mockProduct);
+    });
+
+    it('should throw NotFoundException if product not found by publicId', async () => {
+      model.findOne.mockResolvedValue(null);
+
+      await expect(service.findByPublicId('nonexistent')).rejects.toThrow(
         'Product not found',
       );
     });
@@ -150,6 +175,27 @@ describe('ProductsService', () => {
       model.findOneAndDelete.mockResolvedValue(null);
 
       await expect(service.remove('prod1', 'store1')).rejects.toThrow(
+        'Product not found',
+      );
+    });
+  });
+
+  describe('getShareUrl', () => {
+    it('should return a share URL for a valid product', async () => {
+      model.findOne.mockResolvedValue({ _id: 'prod1', publicId: 'abc123' });
+
+      process.env.FRONTEND_URL = 'https://reselio.com';
+
+      const result = await service.getShareUrl('prod1', 'store1');
+
+      expect(model.findOne).toHaveBeenCalledWith({ _id: 'prod1', storeId: 'store1' });
+      expect(result.shareUrl).toBe('https://reselio.com/p/abc123');
+    });
+
+    it('should throw NotFoundException if product not found', async () => {
+      model.findOne.mockResolvedValue(null);
+
+      await expect(service.getShareUrl('prod1', 'store1')).rejects.toThrow(
         'Product not found',
       );
     });
