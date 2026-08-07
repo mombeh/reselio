@@ -70,6 +70,35 @@ export class ProductsController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get(':id/share')
+  getShareUrl(@Param('id') id: string, @Req() req: any) {
+    return this.productsService.getShareUrl(id, req.user.userId);
+  }
+
+  @Get('public/:publicId')
+  async getPublicProduct(@Param('publicId') publicId: string) {
+    const product = await this.productsService.findByPublicId(publicId);
+    if (!product) {
+      return {
+        name: null,
+        description: null,
+        price: null,
+        imageUrl: null,
+        storeName: null,
+        available: false,
+      };
+    }
+    return {
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      storeName: (product as any).storeId?.name || null,
+      available: product.quantity > 0,
+    };
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', { storage }))
   uploadFile(@UploadedFile() file: Express.Multer.File) {

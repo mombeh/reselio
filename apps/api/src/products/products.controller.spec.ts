@@ -11,6 +11,8 @@ describe('ProductsController', () => {
     findOne: jest.fn(),
     update: jest.fn(),
     remove: jest.fn(),
+    getShareUrl: jest.fn(),
+    findByPublicId: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -74,11 +76,7 @@ describe('ProductsController', () => {
       user: { userId: 'store1' },
     });
 
-    expect(mockProductsService.update).toHaveBeenCalledWith(
-      'prod1',
-      'store1',
-      dto,
-    );
+    expect(mockProductsService.update).toHaveBeenCalledWith('prod1', 'store1', dto);
     expect(result.name).toBe('Updated Dress');
   });
 
@@ -91,5 +89,46 @@ describe('ProductsController', () => {
 
     expect(mockProductsService.remove).toHaveBeenCalledWith('prod1', 'store1');
     expect(result._id).toBe('prod1');
+  });
+
+  it('should call service.getShareUrl with id and userId from request', async () => {
+    mockProductsService.getShareUrl.mockResolvedValue({
+      shareUrl: 'http://localhost:4000/p/abc123',
+    });
+
+    const result = await controller.getShareUrl('prod1', {
+      user: { userId: 'store1' },
+    });
+
+    expect(mockProductsService.getShareUrl).toHaveBeenCalledWith('prod1', 'store1');
+    expect(result.shareUrl).toBe('http://localhost:4000/p/abc123');
+  });
+
+  it('should return public product details without auth', async () => {
+    mockProductsService.findByPublicId.mockResolvedValue({
+      name: 'Red Dress',
+      description: 'A beautiful red dress',
+      price: 5000,
+      quantity: 10,
+      imageUrl: 'http://localhost:4000/uploads/image.jpg',
+      storeId: { name: 'My Store' },
+    });
+
+    const result = await controller.getPublicProduct('abc123');
+
+    expect(mockProductsService.findByPublicId).toHaveBeenCalledWith('abc123');
+    expect(result.name).toBe('Red Dress');
+    expect(result.storeName).toBe('My Store');
+    expect(result.available).toBe(true);
+  });
+
+  it('should return empty product details when public product not found', async () => {
+    mockProductsService.findByPublicId.mockResolvedValue(null);
+
+    const result = await controller.getPublicProduct('nonexistent');
+
+    expect(mockProductsService.findByPublicId).toHaveBeenCalledWith('nonexistent');
+    expect(result.name).toBeNull();
+    expect(result.available).toBe(false);
   });
 });
