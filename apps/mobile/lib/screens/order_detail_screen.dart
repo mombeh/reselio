@@ -161,7 +161,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       children: [
                         Expanded(
                           child: DropdownButtonFormField<String>(
-                            value: _selectedStatus,
+                            initialValue: _selectedStatus,
                             decoration: const InputDecoration(
                               labelText: 'Update Status',
                               border: OutlineInputBorder(),
@@ -279,7 +279,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                                 width: 40,
                                 height: 40,
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Icon(Icons.image_not_supported, size: 40),
+                                errorBuilder: (_, _, _) => const Icon(Icons.image_not_supported, size: 40),
                               ),
                             )
                           else
@@ -299,7 +299,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         ],
                       ),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),

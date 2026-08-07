@@ -40,6 +40,64 @@ export class OrdersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('dashboard')
+  getDashboard(@Req() req: any) {
+    return this.ordersService.getDashboardMetrics(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('analytics/daily')
+  getDailySales(@Req() req: any) {
+    return this.ordersService.getDailySales(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('analytics/monthly')
+  getMonthlyAnalytics(@Req() req: any) {
+    return this.ordersService.getMonthlyAnalytics(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('analytics/status')
+  getStatusBreakdown(@Req() req: any) {
+    return this.ordersService.getStatusBreakdown(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('analytics/products')
+  getTopProducts(@Req() req: any) {
+    return this.ordersService.getTopProducts(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('analytics/yearly')
+  getYearlyAnalytics(@Req() req: any) {
+    return this.ordersService.getYearlyAnalytics(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('customers')
+  getCustomers(@Req() req: any) {
+    return this.ordersService.getCustomersSummary(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('customers/list')
+  getAllCustomers(@Req() req: any) {
+    return this.customersService.findAllByStore(req.user.userId);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('export')
+  async exportOrders(@Req() req: any, @Res() res: Response) {
+    const csv = await this.ordersService.exportOrders(req.user.userId);
+
+    res.header('Content-Type', 'text/csv');
+    res.attachment('orders.csv');
+    return res.send(csv);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req: any) {
     return this.ordersService.findOne(id, req.user.userId);
@@ -65,69 +123,11 @@ export class OrdersController {
     return this.ordersService.cancelOrder(orderId, req.user.userId);
   }
 
-  @UseGuards(AuthGuard('jwt'))
-  @Get('dashboard')
-  getDashboard(@Req() req: any) {
-    return this.ordersService.getDashboardMetrics(req.user.userId);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('customers')
-  getCustomers(@Req() req: any) {
-    return this.ordersService.getCustomersSummary(req.user.userId);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('analytics/monthly')
-  getMonthlyAnalytics(@Req() req: any) {
-    return this.ordersService.getMonthlyAnalytics(req.user.userId);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('analytics/status')
-  getStatusBreakdown(@Req() req: any) {
-    return this.ordersService.getStatusBreakdown(req.user.userId);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('analytics/products')
-  getTopProducts(@Req() req: any) {
-    return this.ordersService.getTopProducts(req.user.userId);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('analytics/daily')
-  getDailySales(@Req() req: any) {
-    return this.ordersService.getDailySales(req.user.userId);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('analytics/yearly')
-  getYearlyAnalytics(@Req() req: any) {
-    return this.ordersService.getYearlyAnalytics(req.user.userId);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('export')
-  async exportOrders(@Req() req: any, @Res() res: Response) {
-    const csv = await this.ordersService.exportOrders(req.user.userId);
-
-    res.header('Content-Type', 'text/csv');
-    res.attachment('orders.csv');
-    return res.send(csv);
-  }
-
   // Customer endpoints
   @UseGuards(AuthGuard('jwt'))
   @Post('customers')
   createCustomer(@Body() body: CreateCustomerDto, @Req() req: any) {
     return this.customersService.create(req.user.userId, body);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('customers/list')
-  getAllCustomers(@Req() req: any) {
-    return this.customersService.findAllByStore(req.user.userId);
   }
 
   @UseGuards(AuthGuard('jwt'))

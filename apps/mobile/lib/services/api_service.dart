@@ -2,10 +2,12 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
 import '../models/customer.dart';
+import '../models/dashboard_metrics.dart';
+import '../models/daily_sale.dart';
 import '../models/order.dart';
-import '../models/order_item.dart';
 import '../models/product.dart';
 import '../models/store.dart';
+import '../models/top_product.dart';
 import '../models/user.dart';
 
 class ApiService {
@@ -314,6 +316,24 @@ class ApiService {
 
   Future<void> cancelOrder(String id) async {
     await dio.delete('/orders/$id');
+  }
+
+  Future<DashboardMetrics> getDashboardMetrics() async {
+    final response = await dio.get('/orders/dashboard');
+    final data = response.data as Map<String, dynamic>;
+    return DashboardMetrics.fromJson(data);
+  }
+
+  Future<List<DailySale>> getDailySales({int days = 7}) async {
+    final response = await dio.get('/orders/analytics/daily?days=$days');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => DailySale.fromJson(item)).toList();
+  }
+
+  Future<List<TopProduct>> getTopProducts() async {
+    final response = await dio.get('/orders/analytics/products');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => TopProduct.fromJson(item)).toList();
   }
 
   Future<void> saveToken(String token) async {
