@@ -47,8 +47,9 @@ export class OrdersController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('analytics/daily')
-  getDailySales(@Req() req: any) {
-    return this.ordersService.getDailySales(req.user.userId);
+  getDailySales(@Req() req: any, @Query('days') days?: string) {
+    const daysNum = days ? parseInt(days, 10) : 30;
+    return this.ordersService.getDailySales(req.user.userId, daysNum);
   }
 
   @UseGuards(AuthGuard('jwt'))
