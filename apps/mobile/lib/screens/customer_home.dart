@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/router/app_router.dart';
+import 'package:mobile/widgets/notification_icon_badge.dart';
 
 class CustomerHome extends StatelessWidget {
   final AuthService authService;
@@ -13,6 +14,7 @@ class CustomerHome extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Customer Dashboard'),
         actions: [
+          NotificationIconBadge(authService: authService),
           IconButton(
             icon: const Icon(Icons.person_outline),
             onPressed: () {
@@ -28,6 +30,22 @@ class CustomerHome extends StatelessWidget {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.notifications_outlined, color: Colors.deepOrange),
+              title: const Text('Notifications'),
+              subtitle: const Text('View your notifications'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.notifications,
+                  arguments: {'authService': authService},
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
           Card(
             child: ListTile(
               leading: const Icon(Icons.shopping_bag, color: Colors.blue),

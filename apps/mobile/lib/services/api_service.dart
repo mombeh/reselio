@@ -8,6 +8,7 @@ import '../models/daily_sale.dart';
 import '../models/order.dart';
 import '../models/product.dart';
 import '../models/shared_product.dart';
+import '../models/notification_model.dart';
 import '../models/store.dart';
 import '../models/top_product.dart';
 import '../models/user.dart';
@@ -215,6 +216,26 @@ class ApiService {
   Future<SharedProduct> getPublicProduct(String publicId) async {
     final response = await dio.get('/products/public/$publicId');
     return SharedProduct.fromJson(response.data);
+  }
+
+  Future<List<NotificationModel>> getNotifications() async {
+    final response = await dio.get('/notifications');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => NotificationModel.fromJson(item)).toList();
+  }
+
+  Future<int> getUnreadNotificationCount() async {
+    final response = await dio.get('/notifications');
+    final List<dynamic> data = response.data as List;
+    return data.where((item) => item['isRead'] != true).length;
+  }
+
+  Future<void> markNotificationRead(String id) async {
+    await dio.patch('/notifications/$id/read');
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await dio.patch('/notifications/read-all');
   }
 
   Future<List<Customer>> getCustomers() async {
