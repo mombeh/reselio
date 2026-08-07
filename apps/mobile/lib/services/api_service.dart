@@ -2,6 +2,8 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
 import '../models/customer.dart';
+import '../models/order.dart';
+import '../models/order_item.dart';
 import '../models/product.dart';
 import '../models/store.dart';
 import '../models/user.dart';
@@ -252,6 +254,66 @@ class ApiService {
 
   Future<void> deleteCustomer(String id) async {
     await dio.delete('/customers/$id');
+  }
+
+  Future<List<Customer>> getCustomersForOrder() async {
+    final response = await dio.get('/orders/customers');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => Customer.fromJson(item)).toList();
+  }
+
+  Future<Map<String, dynamic>> getOrders({
+    String? status,
+    String? search,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final params = <String, dynamic>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+    if (status != null && status.isNotEmpty) params['status'] = status;
+    if (search != null && search.isNotEmpty) params['search'] = search;
+
+    final response = await dio.get('/orders', queryParameters: params);
+    final data = response.data as Map<String, dynamic>;
+    final List<dynamic> ordersList = data['data'] as List;
+    return {
+      'orders': ordersList.map((item) => Order.fromJson(item)).toList(),
+      'total': data['total'] as int,
+      'page': data['page'] as int,
+      'limit': data['limit'] as int,
+      'totalPages': data['totalPages'] as int,
+    };
+  }
+
+  Future<Order> getOrder(String id) async {
+    final response = await dio.get('/orders/$id');
+    return Order.fromJson(response.data);
+  }
+
+  Future<Order> createOrder({
+    required String customerId,
+    required List<Map<String, dynamic>> items,
+    double advancePaid = 0,
+  }) async {
+    final data = <String, dynamic>{
+      'customerId': customerId,
+      'items': items,
+      'advancePaid': advancePaid,
+    };
+
+    final response = await dio.post('/orders', data: data);
+    return Order.fromJson(response.data);
+  }
+
+  Future<Order> updateOrderStatus(String id, String status) async {
+    final response = await dio.patch('/orders/$id/status', data: {'status': status});
+    return Order.fromJson(response.data);
+  }
+
+  Future<void> cancelOrder(String id) async {
+    await dio.delete('/orders/$id');
   }
 
   Future<void> saveToken(String token) async {

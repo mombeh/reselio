@@ -35,8 +35,10 @@ class ClientHome extends StatelessWidget {
               subtitle: const Text('Manage and track orders'),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Orders feature coming soon')),
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.orderList,
+                  arguments: {'authService': authService},
                 );
               },
             ),
