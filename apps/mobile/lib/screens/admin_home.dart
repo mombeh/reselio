@@ -92,13 +92,31 @@ class AdminHome extends StatelessWidget {
           const SizedBox(height: 12),
           Card(
             child: ListTile(
+              leading: const Icon(Icons.receipt_long, color: Colors.blue),
+              title: const Text('Orders'),
+              subtitle: const Text('Manage orders'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.orderList,
+                  arguments: {'authService': authService},
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
               leading: const Icon(Icons.business_outlined, color: Colors.blue),
               title: const Text('All Orders'),
               subtitle: const Text('View all platform orders'),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Orders feature coming soon')),
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.orderList,
+                  arguments: {'authService': authService},
                 );
               },
             ),

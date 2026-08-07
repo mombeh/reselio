@@ -16,9 +16,14 @@ import 'package:mobile/screens/product_detail_screen.dart';
 import 'package:mobile/screens/customer_list_screen.dart';
 import 'package:mobile/screens/add_customer_screen.dart';
 import 'package:mobile/screens/customer_detail_screen.dart';
+import 'package:mobile/screens/order_list_screen.dart';
+import 'package:mobile/screens/create_order_screen.dart';
+import 'package:mobile/screens/order_detail_screen.dart';
 import 'package:mobile/models/store.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/models/customer.dart';
+import 'package:mobile/models/order.dart';
+import 'package:mobile/models/order_item.dart';
 import 'package:mobile/services/auth_service.dart';
 
 class AppRouter {
@@ -39,6 +44,9 @@ class AppRouter {
   static const String customerList = '/customer-list';
   static const String addCustomer = '/add-customer';
   static const String customerDetail = '/customer-detail';
+  static const String orderList = '/order-list';
+  static const String createOrder = '/create-order';
+  static const String orderDetail = '/order-detail';
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings,
@@ -146,6 +154,24 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => CustomerDetailScreen(
             customer: args['customer'] as Customer,
+          ),
+          settings: settings,
+        );
+      case orderList:
+        return MaterialPageRoute(
+          builder: (_) => OrderListScreen(authService: authService!),
+          settings: settings,
+        );
+      case createOrder:
+        return MaterialPageRoute(
+          builder: (_) => CreateOrderScreen(authService: authService!),
+          settings: settings,
+        );
+      case orderDetail:
+        return MaterialPageRoute(
+          builder: (_) => OrderDetailScreen(
+            authService: authService!,
+            order: args['order'] as Order,
           ),
           settings: settings,
         );

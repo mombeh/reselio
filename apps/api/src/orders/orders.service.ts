@@ -59,7 +59,7 @@ export class OrdersService {
       }
 
       const itemTotal = item.quantity * product.price;
-      const itemCost = item.quantity * product.costPrice;
+      const itemCost = item.quantity * (product.costPrice || 0);
       subtotal += itemTotal;
       totalCost += itemCost;
 
@@ -102,14 +102,12 @@ export class OrdersService {
       });
     }
 
-    return savedOrder.populate([
-      { path: 'customerId', model: Customer.name },
-      {
-        path: 'orderItems',
-        match: { orderId: savedOrder._id },
-        model: OrderItem.name,
-      },
-    ]);
+    const populatedOrder = await savedOrder.populate('customerId', 'fullName phoneNumber email');
+    const orderItemsResult = await this.orderItemModel
+      .find({ orderId: savedOrder._id.toString() })
+      .populate('productId', 'name price imageUrl');
+
+    return { ...populatedOrder.toObject(), orderItems: orderItemsResult };
   }
 
   async findAllByStore(storeId: string, query: any) {
