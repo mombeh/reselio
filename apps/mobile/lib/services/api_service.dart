@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
 import '../models/customer.dart';
+import '../models/customer_summary.dart';
 import '../models/dashboard_metrics.dart';
 import '../models/daily_sale.dart';
 import '../models/order.dart';
@@ -328,6 +329,13 @@ class ApiService {
     final response = await dio.get('/orders/analytics/daily?days=$days');
     final List<dynamic> data = response.data as List;
     return data.map((item) => DailySale.fromJson(item)).toList();
+  }
+
+  Future<List<CustomerSummary>> getTopCustomers({int limit = 5}) async {
+    final response = await dio.get('/orders/customers');
+    final List<dynamic> data = response.data as List;
+    final all = data.map((item) => CustomerSummary.fromJson(item)).toList();
+    return all.take(limit).toList();
   }
 
   Future<List<TopProduct>> getTopProducts() async {

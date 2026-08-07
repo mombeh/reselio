@@ -46,6 +46,22 @@ class ClientHome extends StatelessWidget {
           const SizedBox(height: 12),
           Card(
             child: ListTile(
+              leading: const Icon(Icons.bar_chart_outlined, color: Colors.red),
+              title: const Text('Reports'),
+              subtitle: const Text('Detailed analytics and charts'),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: () {
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.reports,
+                  arguments: {'authService': authService},
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
               leading: const Icon(Icons.receipt_long, color: Colors.blue),
               title: const Text('My Orders'),
               subtitle: const Text('Manage and track orders'),

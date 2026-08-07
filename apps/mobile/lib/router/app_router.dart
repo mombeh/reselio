@@ -20,6 +20,7 @@ import 'package:mobile/screens/order_list_screen.dart';
 import 'package:mobile/screens/create_order_screen.dart';
 import 'package:mobile/screens/order_detail_screen.dart';
 import 'package:mobile/screens/dashboard_screen.dart';
+import 'package:mobile/screens/reports_screen.dart';
 import 'package:mobile/models/store.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/models/customer.dart';
@@ -48,6 +49,7 @@ class AppRouter {
   static const String createOrder = '/create-order';
   static const String orderDetail = '/order-detail';
   static const String dashboard = '/dashboard';
+  static const String reports = '/reports';
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings,
@@ -179,6 +181,11 @@ class AppRouter {
       case dashboard:
         return MaterialPageRoute(
           builder: (_) => DashboardScreen(authService: authService!),
+          settings: settings,
+        );
+      case reports:
+        return MaterialPageRoute(
+          builder: (_) => ReportsScreen(authService: authService!),
           settings: settings,
         );
       default:
