@@ -13,6 +13,7 @@ describe('ProductsController', () => {
     remove: jest.fn(),
     getShareUrl: jest.fn(),
     findByPublicId: jest.fn(),
+    getStockStatus: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -53,7 +54,7 @@ describe('ProductsController', () => {
 
     const result = await controller.findAll({ user: { userId: 'store1' } });
 
-    expect(mockProductsService.findAllByStore).toHaveBeenCalledWith('store1');
+    expect(mockProductsService.findAllByStore).toHaveBeenCalledWith('store1', undefined, undefined);
     expect(result[0]._id).toBe('prod1');
   });
 
@@ -113,13 +114,14 @@ describe('ProductsController', () => {
       imageUrl: 'http://localhost:4000/uploads/image.jpg',
       storeId: { name: 'My Store' },
     });
+    mockProductsService.getStockStatus.mockReturnValue('In Stock');
 
     const result = await controller.getPublicProduct('abc123');
 
     expect(mockProductsService.findByPublicId).toHaveBeenCalledWith('abc123');
     expect(result.name).toBe('Red Dress');
     expect(result.storeName).toBe('My Store');
-    expect(result.available).toBe(true);
+    expect(result.availability).toBe('In Stock');
   });
 
   it('should return empty product details when public product not found', async () => {
@@ -129,6 +131,6 @@ describe('ProductsController', () => {
 
     expect(mockProductsService.findByPublicId).toHaveBeenCalledWith('nonexistent');
     expect(result.name).toBeNull();
-    expect(result.available).toBe(false);
+    expect(result.availability).toBe('Out of Stock');
   });
 });

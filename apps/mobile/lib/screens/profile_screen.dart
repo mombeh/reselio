@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/router/app_router.dart';
+import 'package:mobile/widgets/edit_profile_dialog.dart';
 
 class ProfileScreen extends StatelessWidget {
   final AuthService authService;
@@ -17,11 +18,27 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
+  Future<void> _editProfile(BuildContext context) async {
+    final user = authService.currentUser;
+    await showDialog(
+      context: context,
+      builder: (context) => EditProfileDialog(user: user, authService: authService),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final user = authService.currentUser;
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        title: const Text('Profile'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.edit_outlined),
+            onPressed: () => _editProfile(context),
+          ),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
@@ -60,6 +77,15 @@ class ProfileScreen extends StatelessWidget {
             ),
             backgroundColor: Colors.deepPurple,
           ),
+          if (user != null && user.businessName != null && user.businessName!.isNotEmpty)
+            ...[
+              const SizedBox(height: 8),
+              Text(
+                'Store: ${user.businessName!}',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16, color: Colors.grey.shade700),
+              ),
+            ],
           const SizedBox(height: 32),
           Card(
             child: ListTile(
@@ -76,6 +102,52 @@ class ProfileScreen extends StatelessWidget {
               subtitle: Text(user?.email ?? ''),
             ),
           ),
+          if (user != null) ...[
+            if (user.businessName != null && user.businessName!.isNotEmpty)
+              ...[
+                const SizedBox(height: 8),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.store_outlined),
+                    title: const Text('Store Name'),
+                    subtitle: Text(user.businessName!),
+                  ),
+                ),
+              ],
+            if (user.phone != null && user.phone!.isNotEmpty)
+              ...[
+                const SizedBox(height: 8),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.phone_outlined),
+                    title: const Text('Phone'),
+                    subtitle: Text(user.phone!),
+                  ),
+                ),
+              ],
+            if (user.address != null && user.address!.isNotEmpty)
+              ...[
+                const SizedBox(height: 8),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.location_on_outlined),
+                    title: const Text('Address'),
+                    subtitle: Text(user.address!),
+                  ),
+                ),
+              ],
+            if (user.currency != null && user.currency!.isNotEmpty)
+              ...[
+                const SizedBox(height: 8),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.attach_money_outlined),
+                    title: const Text('Currency'),
+                    subtitle: Text(user.currency!),
+                  ),
+                ),
+              ],
+          ],
           const SizedBox(height: 8),
           Card(
             child: ListTile(

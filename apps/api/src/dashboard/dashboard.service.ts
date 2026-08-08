@@ -40,7 +40,7 @@ export class DashboardService {
       this.orderModel.countDocuments({ storeId, status: 'Pending' }),
       this.orderModel.countDocuments({
         storeId,
-        status: { $in: ['Delivered', 'Received', 'Sent to Customer'] },
+        status: 'Delivered',
       }),
       this.getTodayRevenue(storeId),
       this.getMonthlyRevenue(storeId),

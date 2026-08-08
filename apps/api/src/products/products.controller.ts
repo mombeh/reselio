@@ -11,6 +11,7 @@ import {
   UploadedFile,
   BadRequestException,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ProductsService } from './products.service';
@@ -43,8 +44,8 @@ export class ProductsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll(@Req() req: any) {
-    return this.productsService.findAllByStore(req.user.userId);
+  findAll(@Req() req: any, @Query('search') search?: string, @Query('category') category?: string) {
+    return this.productsService.findAllByStore(req.user.userId, search, category);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -85,7 +86,8 @@ export class ProductsController {
         price: null,
         imageUrl: null,
         storeName: null,
-        available: false,
+        quantity: 0,
+        availability: 'Out of Stock',
       };
     }
     return {
@@ -94,7 +96,8 @@ export class ProductsController {
       price: product.price,
       imageUrl: product.imageUrl,
       storeName: (product as any).storeId?.name || null,
-      available: product.quantity > 0,
+      quantity: product.quantity,
+      availability: this.productsService.getStockStatus(product.quantity),
     };
   }
 

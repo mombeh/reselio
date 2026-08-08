@@ -623,14 +623,12 @@ class _ReportsScreenState extends State<ReportsScreen> {
     switch (status) {
       case 'Pending':
         return Colors.orange;
-      case 'Waiting for Supplier':
-        return Colors.blue;
-      case 'Supplier Shipped':
-        return Colors.cyan;
-      case 'Received':
+      case 'Confirmed':
+        return Colors.lightBlue;
+      case 'Preparing':
+        return Colors.purple;
+      case 'Ready for Pickup':
         return Colors.teal;
-      case 'Sent to Customer':
-        return Colors.deepPurple;
       case 'Delivered':
         return Colors.green;
       case 'Cancelled':

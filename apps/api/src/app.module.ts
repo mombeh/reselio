@@ -11,6 +11,7 @@ import { ProductsModule } from './products/products.module';
 import { CustomersModule } from './customers/customers.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportsModule } from './reports/reports.module';
+import { NotificationsModule } from './notifications/notifications.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { ReportsModule } from './reports/reports.module';
     CustomersModule,
     DashboardModule,
     ReportsModule,
+    NotificationsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

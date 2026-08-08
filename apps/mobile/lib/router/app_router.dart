@@ -18,6 +18,7 @@ import 'package:mobile/screens/add_customer_screen.dart';
 import 'package:mobile/screens/customer_detail_screen.dart';
 import 'package:mobile/screens/order_list_screen.dart';
 import 'package:mobile/screens/create_order_screen.dart';
+import 'package:mobile/screens/notification_screen.dart';
 import 'package:mobile/screens/order_detail_screen.dart';
 import 'package:mobile/screens/dashboard_screen.dart';
 import 'package:mobile/screens/reports_screen.dart';
@@ -52,6 +53,7 @@ class AppRouter {
   static const String dashboard = '/dashboard';
   static const String reports = '/reports';
   static const String sharedProduct = '/shared-product';
+  static const String notifications = '/notifications';
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings,
@@ -151,6 +153,11 @@ class AppRouter {
           ),
           settings: settings,
         );
+      case notifications:
+        return MaterialPageRoute(
+          builder: (_) => NotificationScreen(authService: authService),
+          settings: settings,
+        );
       case customerList:
         return MaterialPageRoute(
           builder: (_) => CustomerListScreen(authService: authService!),
@@ -168,6 +175,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => CustomerDetailScreen(
             customer: args['customer'] as Customer,
+            authService: authService,
           ),
           settings: settings,
         );

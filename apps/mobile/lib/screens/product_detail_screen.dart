@@ -178,9 +178,30 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
           const SizedBox(height: 8),
           Card(
             child: ListTile(
-              leading: const Icon(Icons.numbers_outlined, color: Colors.orange),
-              title: const Text('Quantity'),
-              subtitle: Text('${widget.product.quantity} in stock'),
+              leading: Icon(
+                Icons.numbers_outlined,
+                color: widget.product.quantity == 0
+                    ? Colors.red
+                    : widget.product.quantity <= 5
+                        ? Colors.orange
+                        : Colors.green,
+              ),
+              title: const Text('Availability'),
+              subtitle: Text(
+                widget.product.quantity == 0
+                    ? 'Out of Stock'
+                    : widget.product.quantity <= 5
+                        ? '${widget.product.quantity} - Low Stock'
+                        : 'In Stock',
+                style: TextStyle(
+                  color: widget.product.quantity == 0
+                      ? Colors.red
+                      : widget.product.quantity <= 5
+                          ? Colors.orange
+                          : Colors.green,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
           ),
           const SizedBox(height: 8),

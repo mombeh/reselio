@@ -8,6 +8,7 @@ import '../models/daily_sale.dart';
 import '../models/order.dart';
 import '../models/product.dart';
 import '../models/shared_product.dart';
+import '../models/notification_model.dart';
 import '../models/store.dart';
 import '../models/top_product.dart';
 import '../models/user.dart';
@@ -87,6 +88,8 @@ class ApiService {
     String? email,
     String? businessName,
     String? phone,
+    String? address,
+    String? currency,
     String? role,
   }) async {
     final data = <String, dynamic>{};
@@ -94,6 +97,8 @@ class ApiService {
     if (email != null) data['email'] = email;
     if (businessName != null) data['businessName'] = businessName;
     if (phone != null) data['phone'] = phone;
+    if (address != null) data['address'] = address;
+    if (currency != null) data['currency'] = currency;
     if (role != null) data['role'] = role;
 
     final response = await dio.patch('/users/profile', data: data);
@@ -155,8 +160,11 @@ class ApiService {
     return Store.fromJson(response.data);
   }
 
-  Future<List<Product>> getProducts() async {
-    final response = await dio.get('/products');
+  Future<List<Product>> getProducts({String? search, String? category}) async {
+    final params = <String, dynamic>{};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (category != null && category.isNotEmpty) params['category'] = category;
+    final response = await dio.get('/products', queryParameters: params);
     final List<dynamic> data = response.data as List;
     return data.map((item) => Product.fromJson(item)).toList();
   }
@@ -215,6 +223,26 @@ class ApiService {
   Future<SharedProduct> getPublicProduct(String publicId) async {
     final response = await dio.get('/products/public/$publicId');
     return SharedProduct.fromJson(response.data);
+  }
+
+  Future<List<NotificationModel>> getNotifications() async {
+    final response = await dio.get('/notifications');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => NotificationModel.fromJson(item)).toList();
+  }
+
+  Future<int> getUnreadNotificationCount() async {
+    final response = await dio.get('/notifications');
+    final List<dynamic> data = response.data as List;
+    return data.where((item) => item['isRead'] != true).length;
+  }
+
+  Future<void> markNotificationRead(String id) async {
+    await dio.patch('/notifications/$id/read');
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await dio.patch('/notifications/read-all');
   }
 
   Future<List<Customer>> getCustomers() async {
@@ -301,6 +329,19 @@ class ApiService {
     };
   }
 
+  Future<Map<String, dynamic>> getOrdersByCustomer(String customerId) async {
+    final response = await dio.get('/orders/customer/$customerId');
+    final data = response.data as Map<String, dynamic>;
+    final List<dynamic> ordersList = data['data'] as List;
+    return {
+      'orders': ordersList.map((item) => Order.fromJson(item)).toList(),
+      'total': data['total'] as int,
+      'page': data['page'] as int,
+      'limit': data['limit'] as int,
+      'totalPages': data['totalPages'] as int,
+    };
+  }
+
   Future<Order> getOrder(String id) async {
     final response = await dio.get('/orders/$id');
     return Order.fromJson(response.data);
@@ -334,6 +375,45 @@ class ApiService {
     final response = await dio.get('/orders/dashboard');
     final data = response.data as Map<String, dynamic>;
     return DashboardMetrics.fromJson(data);
+  }
+
+  Future<Map<String, dynamic>> getAggregatedDashboard() async {
+    final response = await dio.get('/dashboard');
+    final data = response.data as Map<String, dynamic>;
+    return data;
+  }
+
+  Future<Map<String, dynamic>> getSalesReport({String? period, String? startDate, String? endDate}) async {
+    final params = <String, dynamic>{};
+    if (period != null) params['period'] = period;
+    if (startDate != null) params['startDate'] = startDate;
+    if (endDate != null) params['endDate'] = endDate;
+
+    final response = await dio.get('/reports/sales', queryParameters: params);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<List<Map<String, dynamic>>> getProductPerformance() async {
+    final response = await dio.get('/reports/products');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getCustomerReport() async {
+    final response = await dio.get('/reports/customers');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getRevenueTrend({String? period, String? startDate, String? endDate}) async {
+    final params = <String, dynamic>{};
+    if (period != null) params['period'] = period;
+    if (startDate != null) params['startDate'] = startDate;
+    if (endDate != null) params['endDate'] = endDate;
+
+    final response = await dio.get('/reports/revenue', queryParameters: params);
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
   }
 
   Future<List<DailySale>> getDailySales({int days = 7}) async {

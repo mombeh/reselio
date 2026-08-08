@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersService } from './orders.service';
 import { getModelToken } from '@nestjs/mongoose';
+import { NotificationsService } from '../notifications/notifications.service';
 
 describe('OrdersService', () => {
   let service: OrdersService;
@@ -35,6 +36,11 @@ describe('OrdersService', () => {
     findByIdAndUpdate: jest.fn(),
   };
 
+  const mockNotificationsService = {
+    create: jest.fn(),
+    createLowStockNotification: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -54,6 +60,10 @@ describe('OrdersService', () => {
         {
           provide: getModelToken('Product'),
           useValue: mockProductModel,
+        },
+        {
+          provide: NotificationsService,
+          useValue: mockNotificationsService,
         },
       ],
     }).compile();

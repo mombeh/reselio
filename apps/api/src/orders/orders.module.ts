@@ -8,6 +8,7 @@ import { Customer, CustomerSchema } from './schemas/customer.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
 import { CustomersModule } from '../customers/customers.module';
 import { ProductsModule } from '../products/products.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { ProductsModule } from '../products/products.module';
     ]),
     CustomersModule,
     ProductsModule,
+    NotificationsModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService],

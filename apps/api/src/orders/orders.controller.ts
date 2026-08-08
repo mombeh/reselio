@@ -89,6 +89,16 @@ export class OrdersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('customer/:customerId')
+  getCustomerOrders(
+    @Param('customerId') customerId: string,
+    @Req() req: any,
+    @Query() query: GetOrdersQueryDto,
+  ) {
+    return this.ordersService.findAllByCustomer(req.user.userId, customerId, query);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get('export')
   async exportOrders(@Req() req: any, @Res() res: Response) {
     const csv = await this.ordersService.exportOrders(req.user.userId);

@@ -17,10 +17,9 @@ export class Order {
   @Prop({
     enum: [
       'Pending',
-      'Waiting for Supplier',
-      'Supplier Shipped',
-      'Received',
-      'Sent to Customer',
+      'Confirmed',
+      'Preparing',
+      'Ready for Pickup',
       'Delivered',
       'Cancelled',
     ],

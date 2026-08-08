@@ -4,7 +4,8 @@ class SharedProduct {
   final double? price;
   final String? imageUrl;
   final String? storeName;
-  final bool available;
+  final int? quantity;
+  final String? availability;
 
   SharedProduct({
     this.name,
@@ -12,7 +13,8 @@ class SharedProduct {
     this.price,
     this.imageUrl,
     this.storeName,
-    required this.available,
+    this.quantity,
+    this.availability,
   });
 
   factory SharedProduct.fromJson(Map<String, dynamic> json) {
@@ -24,7 +26,8 @@ class SharedProduct {
           : null,
       imageUrl: json['imageUrl'],
       storeName: json['storeName'],
-      available: json['available'] ?? false,
+      quantity: json['quantity'] is int ? json['quantity'] as int : null,
+      availability: json['availability'],
     );
   }
 }

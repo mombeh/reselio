@@ -112,7 +112,7 @@ class _SharedProductScreenState extends State<SharedProductScreen> {
 
           final product = snapshot.data!;
 
-          if (!product.available) {
+          if (product.availability == 'Out of Stock') {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
