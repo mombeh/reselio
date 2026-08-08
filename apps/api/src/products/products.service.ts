@@ -99,4 +99,10 @@ export class ProductsService {
       shareUrl: `${baseUrl}/p/${product.publicId}`,
     };
   }
+
+  getStockStatus(quantity: number): string {
+    if (quantity <= 0) return 'Out of Stock';
+    if (quantity < 5) return 'Low Stock';
+    return 'In Stock';
+  }
 }

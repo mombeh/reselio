@@ -59,7 +59,7 @@ export class ReportsService {
     }
 
     const orders = await this.orderModel
-      .find({ storeId, ...dateFilter, status: { $ne: 'Cancelled' } })
+      .find({ storeId, ...dateFilter, status: 'Delivered' })
       .populate('customerId', 'fullName phoneNumber');
 
     const totalOrders = orders.length;

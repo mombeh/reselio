@@ -63,9 +63,11 @@ export class UsersService {
     data: {
       name?: string;
       email?: string;
-       businessName?: string;
-       phone?: string;
-       role?: Role;
+      businessName?: string;
+      phone?: string;
+      address?: string;
+      currency?: string;
+      role?: Role;
     },
   ) {
     const user = await this.userModel.findById(userId);
@@ -77,6 +79,8 @@ export class UsersService {
     if (data.email) user.email = data.email;
     if (data.businessName !== undefined) (user as any).businessName = data.businessName;
     if (data.phone !== undefined) (user as any).phone = data.phone;
+    if (data.address !== undefined) (user as any).address = data.address;
+    if (data.currency !== undefined) (user as any).currency = data.currency;
     if (data.role) user.role = data.role;
 
     return user.save();

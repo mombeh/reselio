@@ -249,8 +249,7 @@ export class OrdersService {
       });
     } else if (
       previousStatus === 'Pending' &&
-      status !== 'Pending' &&
-      status !== 'Cancelled'
+      status === 'Confirmed'
     ) {
       await this.notificationsService.create(storeId, {
         type: NotificationType.ORDER_CONFIRMED,
@@ -272,6 +271,10 @@ export class OrdersService {
 
     if (order.status === 'Cancelled') {
       throw new ConflictException('Order is already cancelled');
+    }
+
+    if (order.status === 'Delivered') {
+      throw new ConflictException('Delivered orders cannot be cancelled');
     }
 
     const orderItems = await this.orderItemModel.find({ orderId: id });
