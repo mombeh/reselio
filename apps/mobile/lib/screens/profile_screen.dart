@@ -125,6 +125,28 @@ class ProfileScreen extends StatelessWidget {
                   ),
                 ),
               ],
+            if (user.address != null && user.address!.isNotEmpty)
+              ...[
+                const SizedBox(height: 8),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.location_on_outlined),
+                    title: const Text('Address'),
+                    subtitle: Text(user.address!),
+                  ),
+                ),
+              ],
+            if (user.currency != null && user.currency!.isNotEmpty)
+              ...[
+                const SizedBox(height: 8),
+                Card(
+                  child: ListTile(
+                    leading: const Icon(Icons.attach_money_outlined),
+                    title: const Text('Currency'),
+                    subtitle: Text(user.currency!),
+                  ),
+                ),
+              ],
           ],
           const SizedBox(height: 8),
           Card(

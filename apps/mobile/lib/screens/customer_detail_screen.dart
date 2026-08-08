@@ -240,7 +240,6 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
       case 'Confirmed':
       case 'Preparing':
       case 'Ready for Pickup':
-      case 'Sent to Customer':
         return Colors.blue;
       default:
         return Colors.grey;
@@ -255,8 +254,12 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
         return Icons.cancel;
       case 'Pending':
         return Icons.access_time;
-      case 'Sent to Customer':
+      case 'Ready for Pickup':
         return Icons.local_shipping;
+      case 'Preparing':
+        return Icons.pending_outlined;
+      case 'Confirmed':
+        return Icons.verified_outlined;
       default:
         return Icons.shopping_bag;
     }

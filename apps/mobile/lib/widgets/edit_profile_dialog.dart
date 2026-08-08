@@ -21,6 +21,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
   late TextEditingController _emailController;
   late TextEditingController _businessNameController;
   late TextEditingController _phoneController;
+  late TextEditingController _addressController;
+  late TextEditingController _currencyController;
   bool _isLoading = false;
 
   @override
@@ -31,6 +33,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     _emailController = TextEditingController(text: user?.email ?? '');
     _businessNameController = TextEditingController(text: user?.businessName ?? '');
     _phoneController = TextEditingController(text: user?.phone ?? '');
+    _addressController = TextEditingController(text: user?.address ?? '');
+    _currencyController = TextEditingController(text: user?.currency ?? '');
   }
 
   @override
@@ -39,6 +43,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     _emailController.dispose();
     _businessNameController.dispose();
     _phoneController.dispose();
+    _addressController.dispose();
+    _currencyController.dispose();
     super.dispose();
   }
 
@@ -53,6 +59,8 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
         email: _emailController.text.isNotEmpty ? _emailController.text : null,
         businessName: _businessNameController.text.isNotEmpty ? _businessNameController.text : null,
         phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
+        address: _addressController.text.isNotEmpty ? _addressController.text : null,
+        currency: _currencyController.text.isNotEmpty ? _currencyController.text : null,
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -110,6 +118,22 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                   border: OutlineInputBorder(),
                 ),
                 keyboardType: TextInputType.phone,
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _addressController,
+                decoration: const InputDecoration(
+                  labelText: 'Address',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+              TextField(
+                controller: _currencyController,
+                decoration: const InputDecoration(
+                  labelText: 'Currency',
+                  border: OutlineInputBorder(),
+                ),
               ),
             ],
           ),

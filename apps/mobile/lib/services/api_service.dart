@@ -88,6 +88,8 @@ class ApiService {
     String? email,
     String? businessName,
     String? phone,
+    String? address,
+    String? currency,
     String? role,
   }) async {
     final data = <String, dynamic>{};
@@ -95,6 +97,8 @@ class ApiService {
     if (email != null) data['email'] = email;
     if (businessName != null) data['businessName'] = businessName;
     if (phone != null) data['phone'] = phone;
+    if (address != null) data['address'] = address;
+    if (currency != null) data['currency'] = currency;
     if (role != null) data['role'] = role;
 
     final response = await dio.patch('/users/profile', data: data);
@@ -371,6 +375,45 @@ class ApiService {
     final response = await dio.get('/orders/dashboard');
     final data = response.data as Map<String, dynamic>;
     return DashboardMetrics.fromJson(data);
+  }
+
+  Future<Map<String, dynamic>> getAggregatedDashboard() async {
+    final response = await dio.get('/dashboard');
+    final data = response.data as Map<String, dynamic>;
+    return data;
+  }
+
+  Future<Map<String, dynamic>> getSalesReport({String? period, String? startDate, String? endDate}) async {
+    final params = <String, dynamic>{};
+    if (period != null) params['period'] = period;
+    if (startDate != null) params['startDate'] = startDate;
+    if (endDate != null) params['endDate'] = endDate;
+
+    final response = await dio.get('/reports/sales', queryParameters: params);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<List<Map<String, dynamic>>> getProductPerformance() async {
+    final response = await dio.get('/reports/products');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getCustomerReport() async {
+    final response = await dio.get('/reports/customers');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getRevenueTrend({String? period, String? startDate, String? endDate}) async {
+    final params = <String, dynamic>{};
+    if (period != null) params['period'] = period;
+    if (startDate != null) params['startDate'] = startDate;
+    if (endDate != null) params['endDate'] = endDate;
+
+    final response = await dio.get('/reports/revenue', queryParameters: params);
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
   }
 
   Future<List<DailySale>> getDailySales({int days = 7}) async {

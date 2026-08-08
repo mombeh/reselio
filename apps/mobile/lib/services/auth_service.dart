@@ -118,6 +118,8 @@ class AuthService extends ChangeNotifier {
     String? email,
     String? businessName,
     String? phone,
+    String? address,
+    String? currency,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -127,6 +129,8 @@ class AuthService extends ChangeNotifier {
         email: email,
         businessName: businessName,
         phone: phone,
+        address: address,
+        currency: currency,
       );
       _isLoading = false;
       notifyListeners();
