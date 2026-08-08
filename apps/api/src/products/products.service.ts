@@ -26,8 +26,18 @@ export class ProductsService {
     return product.save();
   }
 
-  async findAllByStore(storeId: string) {
-    return this.productModel.find({ storeId }).sort({ createdAt: -1 });
+  async findAllByStore(storeId: string, search?: string, category?: string) {
+    const filter: Record<string, unknown> = { storeId };
+
+    if (category && category.isNotEmpty) {
+      filter.category = category;
+    }
+
+    if (search && search.isNotEmpty) {
+      filter.name = { $regex: search, $options: 'i' };
+    }
+
+    return this.productModel.find(filter).sort({ createdAt: -1 });
   }
 
   async findOne(id: string, storeId: string) {

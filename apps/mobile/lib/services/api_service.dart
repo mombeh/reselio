@@ -156,8 +156,11 @@ class ApiService {
     return Store.fromJson(response.data);
   }
 
-  Future<List<Product>> getProducts() async {
-    final response = await dio.get('/products');
+  Future<List<Product>> getProducts({String? search, String? category}) async {
+    final params = <String, dynamic>{};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (category != null && category.isNotEmpty) params['category'] = category;
+    final response = await dio.get('/products', queryParameters: params);
     final List<dynamic> data = response.data as List;
     return data.map((item) => Product.fromJson(item)).toList();
   }
@@ -311,6 +314,19 @@ class ApiService {
     if (search != null && search.isNotEmpty) params['search'] = search;
 
     final response = await dio.get('/orders', queryParameters: params);
+    final data = response.data as Map<String, dynamic>;
+    final List<dynamic> ordersList = data['data'] as List;
+    return {
+      'orders': ordersList.map((item) => Order.fromJson(item)).toList(),
+      'total': data['total'] as int,
+      'page': data['page'] as int,
+      'limit': data['limit'] as int,
+      'totalPages': data['totalPages'] as int,
+    };
+  }
+
+  Future<Map<String, dynamic>> getOrdersByCustomer(String customerId) async {
+    final response = await dio.get('/orders/customer/$customerId');
     final data = response.data as Map<String, dynamic>;
     final List<dynamic> ordersList = data['data'] as List;
     return {

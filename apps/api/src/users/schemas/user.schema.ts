@@ -32,3 +32,29 @@ export class User {
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+UserSchema.virtual('userId').get(function () {
+  return this._id;
+});
+
+UserSchema.set('toJSON', {
+  virtuals: true,
+  transform: (_doc, ret) => {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+    delete ret.password;
+    return ret;
+  },
+});
+
+UserSchema.set('toObject', {
+  virtuals: true,
+  transform: (_doc, ret) => {
+    ret.id = ret._id;
+    delete ret._id;
+    delete ret.__v;
+    delete ret.password;
+    return ret;
+  },
+});

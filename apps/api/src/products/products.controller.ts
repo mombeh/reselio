@@ -11,6 +11,7 @@ import {
   UploadedFile,
   BadRequestException,
   UseInterceptors,
+  Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ProductsService } from './products.service';
@@ -43,8 +44,8 @@ export class ProductsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll(@Req() req: any) {
-    return this.productsService.findAllByStore(req.user.userId);
+  findAll(@Req() req: any, @Query('search') search?: string, @Query('category') category?: string) {
+    return this.productsService.findAllByStore(req.user.userId, search, category);
   }
 
   @UseGuards(AuthGuard('jwt'))

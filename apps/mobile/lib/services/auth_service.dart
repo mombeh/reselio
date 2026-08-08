@@ -113,6 +113,30 @@ class AuthService extends ChangeNotifier {
     }
   }
 
+  Future<void> updateProfile({
+    String? name,
+    String? email,
+    String? businessName,
+    String? phone,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      _currentUser = await apiService.updateProfile(
+        name: name,
+        email: email,
+        businessName: businessName,
+        phone: phone,
+      );
+      _isLoading = false;
+      notifyListeners();
+    } catch (e) {
+      _isLoading = false;
+      notifyListeners();
+      rethrow;
+    }
+  }
+
   Future<void> logout() async {
     await apiService.clearToken();
     await clearRoleSelected();

@@ -175,6 +175,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => CustomerDetailScreen(
             customer: args['customer'] as Customer,
+            authService: authService,
           ),
           settings: settings,
         );

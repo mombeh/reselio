@@ -167,6 +167,36 @@ export class OrdersService {
     };
   }
 
+  async findAllByCustomer(storeId: string, customerId: string, query: any) {
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const filter: any = { storeId, customerId };
+
+    if (query.status) {
+      filter.status = query.status;
+    }
+
+    const total = await this.orderModel.countDocuments(filter);
+
+    const orders = await this.orderModel
+      .find(filter)
+      .populate('customerId', 'fullName phoneNumber email')
+      .populate('orderItems.productId', 'name price imageUrl')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return {
+      data: orders,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
   async findOne(id: string, storeId: string) {
     const order = await this.orderModel.findOne({ _id: id, storeId }).populate(
       'customerId',
