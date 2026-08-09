@@ -106,7 +106,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       Navigator.pop(context);
     } catch (e) {
       setState(() {
-        _error = e.toString().replaceFirst('Exception: ', '');
+        _error = widget.authService.apiService.getErrorMessage(e);
         _isSubmitting = false;
       });
     }
@@ -156,6 +156,34 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.wifi_off_rounded, size: 36, color: Colors.grey),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.authService.apiService.getErrorMessage(snapshot.error),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _customersFuture = widget.authService.apiService.getCustomersForOrder();
+                            });
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
               final customers = snapshot.data ?? [];
               return DropdownButtonFormField<Customer>(
                 initialValue: _selectedCustomer,
@@ -188,6 +216,34 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.wifi_off_rounded, size: 36, color: Colors.grey),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.authService.apiService.getErrorMessage(snapshot.error),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _productsFuture = widget.authService.apiService.getProducts();
+                            });
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
               }
               final products = snapshot.data ?? [];
               return Wrap(

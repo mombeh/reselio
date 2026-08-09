@@ -73,7 +73,7 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       }
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      setState(() => _error = widget.authService.apiService.getErrorMessage(e));
     }
   }
 

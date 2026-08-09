@@ -91,7 +91,7 @@ export class ReportsService {
         },
       },
       { $unwind: '$order' },
-      { $match: { 'order.storeId': storeId, 'order.status': { $ne: 'Cancelled' } } },
+      { $match: { 'order.storeId': storeId, 'order.status': 'Delivered' } },
       {
         $group: {
           _id: '$productId',
@@ -123,7 +123,7 @@ export class ReportsService {
 
   async getCustomerReport(storeId: string) {
     const result = await this.orderModel.aggregate([
-      { $match: { storeId, status: { $ne: 'Cancelled' } } },
+      { $match: { storeId, status: 'Delivered' } },
       {
         $lookup: {
           from: 'customers',
@@ -195,7 +195,7 @@ export class ReportsService {
     }
 
     const result = await this.orderModel.aggregate([
-      { $match: { storeId, status: { $ne: 'Cancelled' }, ...dateFilter } },
+      { $match: { storeId, status: 'Delivered', ...dateFilter } },
       {
         $group: {
           _id: {

@@ -48,6 +48,37 @@ class ApiService {
     ));
   }
 
+  String getErrorMessage(dynamic error) {
+    if (error is DioException) {
+      if (error.type == DioExceptionType.connectionError ||
+          error.type == DioExceptionType.connectionTimeout ||
+          error.type == DioExceptionType.receiveTimeout ||
+          error.type == DioExceptionType.sendTimeout) {
+        return 'Unable to connect. Please check your internet connection.';
+      }
+      if (error.type == DioExceptionType.cancel) {
+        return 'Request was cancelled. Please try again.';
+      }
+      if (error.response?.data != null && error.response!.data is Map) {
+        final data = error.response!.data as Map;
+        if (data['message'] != null) {
+          return data['message'].toString();
+        }
+        if (data['error'] != null) {
+          return data['error'].toString();
+        }
+      }
+      if (error.response?.statusMessage != null) {
+        return error.response!.statusMessage!;
+      }
+      return 'Something went wrong. Please try again.';
+    }
+    if (error is String) {
+      return error;
+    }
+    return error.toString().replaceFirst('Exception: ', '');
+  }
+
   Future<AuthResponse> register({
     required String name,
     required String email,

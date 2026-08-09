@@ -343,8 +343,9 @@ export class OrdersService {
     const orders = await this.orderModel.find({ storeId, status: { $ne: 'Cancelled' } });
 
     const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-    const totalProfit = orders.reduce((sum, o) => sum + (o.profit || 0), 0);
+    const deliveredOrders = orders.filter((o) => o.status === 'Delivered');
+    const totalRevenue = deliveredOrders.reduce((sum, o) => sum + o.total, 0);
+    const totalProfit = deliveredOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
     const pendingDeliveries = orders.filter(
       (o) => !['Delivered', 'Cancelled'].includes(o.status),
     ).length;
@@ -364,7 +365,7 @@ export class OrdersService {
 
   async getCustomersSummary(storeId: string) {
     return this.orderModel.aggregate([
-      { $match: { storeId } },
+      { $match: { storeId, status: 'Delivered' } },
       {
         $lookup: {
           from: 'customers',
@@ -395,7 +396,7 @@ export class OrdersService {
 
   async getMonthlyAnalytics(storeId: string) {
     return this.orderModel.aggregate([
-      { $match: { storeId, status: { $ne: 'Cancelled' } } },
+      { $match: { storeId, status: 'Delivered' } },
       {
         $group: {
           _id: {
