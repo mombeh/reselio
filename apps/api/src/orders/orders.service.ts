@@ -118,7 +118,7 @@ export class OrdersService {
     for (const item of orderItems) {
       const orderItem = new this.orderItemModel({
         ...item,
-        orderId: savedOrder._id,
+        orderId: savedOrder._id.toString(),
       });
       await orderItem.save();
 
@@ -132,7 +132,7 @@ export class OrdersService {
         await this.productModel.findByIdAndUpdate(item.productId, {
           $inc: { quantity: item.quantity },
         });
-        await this.orderItemModel.deleteMany({ orderId: savedOrder._id });
+        await this.orderItemModel.deleteMany({ orderId: savedOrder._id.toString() });
         await this.orderModel.findByIdAndDelete(savedOrder._id);
         throw new ConflictException(
           `Insufficient stock for product ${item.productId}. Stock cannot be negative.`,
