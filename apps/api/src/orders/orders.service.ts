@@ -43,6 +43,19 @@ export class OrdersService {
       throw new ConflictException('Order must contain at least one item');
     }
 
+    const recentPendingOrder = await this.orderModel.findOne({
+      storeId,
+      customerId,
+      status: 'Pending',
+      createdAt: { $gte: new Date(Date.now() - 2 * 60 * 1000) },
+    });
+
+    if (recentPendingOrder) {
+      throw new ConflictException(
+        'A pending order already exists for this customer. Please wait before creating another.',
+      );
+    }
+
     let subtotal = 0;
     let totalCost = 0;
     const orderItems: any[] = [];
@@ -221,6 +234,27 @@ export class OrdersService {
     }
 
     const previousStatus = existingOrder.status;
+
+    if (previousStatus === 'Delivered' || previousStatus === 'Cancelled') {
+      throw new ConflictException(
+        `Cannot update status of an order that is already ${previousStatus.toLowerCase()}`
+      );
+    }
+
+    const allowedTransitions: Record<string, string[]> = {
+      'Pending': ['Confirmed', 'Preparing', 'Cancelled'],
+      'Confirmed': ['Preparing', 'Ready for Pickup', 'Delivered', 'Cancelled'],
+      'Preparing': ['Ready for Pickup', 'Delivered', 'Cancelled'],
+      'Ready for Pickup': ['Delivered', 'Cancelled'],
+    };
+
+    const allowedNextStatuses = allowedTransitions[previousStatus] || [];
+    if (!allowedNextStatuses.includes(status)) {
+      throw new ConflictException(
+        `Invalid status transition from ${previousStatus} to ${status}`
+      );
+    }
+
     const order = await this.orderModel.findOneAndUpdate(
       { _id: id, storeId },
       { status },
@@ -229,6 +263,15 @@ export class OrdersService {
 
     if (!order) {
       throw new NotFoundException('Order not found');
+    }
+
+    if (status === 'Cancelled' && previousStatus !== 'Cancelled') {
+      const orderItems = await this.orderItemModel.find({ orderId: id });
+      for (const item of orderItems) {
+        await this.productModel.findByIdAndUpdate(item.productId, {
+          $inc: { quantity: item.quantity },
+        });
+      }
     }
 
     if (status === 'Delivered' && previousStatus !== 'Delivered') {
@@ -247,10 +290,7 @@ export class OrdersService {
         referenceId: order._id.toString(),
         referenceType: 'order',
       });
-    } else if (
-      previousStatus === 'Pending' &&
-      status === 'Confirmed'
-    ) {
+    } else if (previousStatus === 'Pending' && status === 'Confirmed') {
       await this.notificationsService.create(storeId, {
         type: NotificationType.ORDER_CONFIRMED,
         title: 'Order Confirmed',

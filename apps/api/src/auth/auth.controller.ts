@@ -91,4 +91,10 @@ export class AuthController {
   getProfile(@Req() req: any) {
     return req.user;
   }
+
+  @Post('logout')
+  @UseGuards(AuthGuard('jwt'))
+  logout() {
+    return { message: 'Logged out successfully' };
+  }
 }

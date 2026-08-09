@@ -16,6 +16,7 @@ export class CreateProductDto {
   description: string;
 
   @IsNumber()
+  @Min(0, { message: 'Price must be greater than or equal to 0' })
   price: number;
 
   @IsNumber()

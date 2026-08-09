@@ -29,11 +29,11 @@ export class ProductsService {
   async findAllByStore(storeId: string, search?: string, category?: string) {
     const filter: Record<string, unknown> = { storeId };
 
-    if (category && category.isNotEmpty) {
+    if (category && category.length > 0) {
       filter.category = category;
     }
 
-    if (search && search.isNotEmpty) {
+    if (search && search.length > 0) {
       filter.name = { $regex: search, $options: 'i' };
     }
 

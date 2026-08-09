@@ -142,6 +142,11 @@ class AuthService extends ChangeNotifier {
   }
 
   Future<void> logout() async {
+    try {
+      await apiService.logout();
+    } catch (e) {
+      // Ignore logout errors, still clear local data
+    }
     await apiService.clearToken();
     await clearRoleSelected();
     _currentUser = null;
