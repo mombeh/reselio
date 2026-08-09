@@ -25,6 +25,19 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     'Cancelled',
   ];
 
+  final Map<String, List<String>> _allowedTransitions = {
+    'Pending': ['Confirmed', 'Preparing', 'Cancelled'],
+    'Confirmed': ['Preparing', 'Ready for Pickup', 'Delivered', 'Cancelled'],
+    'Preparing': ['Ready for Pickup', 'Delivered', 'Cancelled'],
+    'Ready for Pickup': ['Delivered', 'Cancelled'],
+    'Delivered': [],
+    'Cancelled': [],
+  };
+
+  List<String> get _allowedStatuses => _allowedTransitions[widget.order.status] ?? [];
+
+  bool get _canUpdateStatus => _allowedStatuses.isNotEmpty;
+
   @override
   void initState() {
     super.initState();
@@ -152,37 +165,37 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                       ),
                     ],
                   ),
-                  if (widget.order.status != 'Cancelled' && widget.order.status != 'Delivered') ...[
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: DropdownButtonFormField<String>(
-                            initialValue: _selectedStatus,
-                            decoration: const InputDecoration(
-                              labelText: 'Update Status',
-                              border: OutlineInputBorder(),
-                            ),
-                            items: _statuses
-                                .map((s) => DropdownMenuItem(value: s, child: Text(s)))
-                                .toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                setState(() => _selectedStatus = value);
-                              }
-                            },
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        IconButton(
-                          icon: _isUpdating
-                              ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
-                              : const Icon(Icons.save_outlined, color: Colors.green),
-                          onPressed: _updateStatus,
-                        ),
-                      ],
-                    ),
-                  ],
+                   if (_canUpdateStatus) ...[
+                     const SizedBox(height: 12),
+                     Row(
+                       children: [
+                         Expanded(
+                           child: DropdownButtonFormField<String>(
+                             initialValue: _selectedStatus,
+                             decoration: const InputDecoration(
+                               labelText: 'Update Status',
+                               border: OutlineInputBorder(),
+                             ),
+                             items: _allowedStatuses
+                                 .map((s) => DropdownMenuItem(value: s, child: Text(s)))
+                                 .toList(),
+                             onChanged: (value) {
+                               if (value != null) {
+                                 setState(() => _selectedStatus = value);
+                               }
+                             },
+                           ),
+                         ),
+                         const SizedBox(width: 8),
+                         IconButton(
+                           icon: _isUpdating
+                               ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                               : const Icon(Icons.save_outlined, color: Colors.green),
+                           onPressed: _updateStatus,
+                         ),
+                       ],
+                     ),
+                   ],
                 ],
               ),
             ),

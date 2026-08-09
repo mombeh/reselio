@@ -443,6 +443,10 @@ class ApiService {
     await prefs.remove(tokenKey);
   }
 
+  Future<void> logout() async {
+    await dio.post('/auth/logout');
+  }
+
   Future<String?> getToken() async {
     return prefs.getString(tokenKey);
   }
