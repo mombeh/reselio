@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty, IsNumber, IsArray, Min, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsArray, Min, IsOptional, MinLength } from 'class-validator';
 
 export class CreateOrderItemDto {
   @IsString()
@@ -16,8 +16,8 @@ export class CreateOrderDto {
   customerId: string;
 
   @IsArray()
-  @IsOptional()
-  items?: CreateOrderItemDto[];
+  @MinLength(1, { message: 'Order must contain at least one item' })
+  items: CreateOrderItemDto[];
 
   @IsNumber()
   @IsOptional()
