@@ -122,12 +122,24 @@ export class OrdersService {
       });
       await orderItem.save();
 
-      await this.productModel.findByIdAndUpdate(item.productId, {
-        $inc: { quantity: -item.quantity },
-      });
+      const updatedProduct = await this.productModel.findByIdAndUpdate(
+        item.productId,
+        { $inc: { quantity: -item.quantity } },
+        { new: true },
+      );
 
-      const updatedProduct = await this.productModel.findById(item.productId);
-      if (updatedProduct && updatedProduct.quantity < LOW_STOCK_THRESHOLD) {
+      if (!updatedProduct || updatedProduct.quantity < 0) {
+        await this.productModel.findByIdAndUpdate(item.productId, {
+          $inc: { quantity: item.quantity },
+        });
+        await this.orderItemModel.deleteMany({ orderId: savedOrder._id });
+        await this.orderModel.findByIdAndDelete(savedOrder._id);
+        throw new ConflictException(
+          `Insufficient stock for product ${item.productId}. Stock cannot be negative.`,
+        );
+      }
+
+      if (updatedProduct.quantity < LOW_STOCK_THRESHOLD) {
         await this.notificationsService.createLowStockNotification(
           storeId,
           item.productId,

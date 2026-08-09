@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Customer, CustomerDocument } from './schemas/customer.schema';
@@ -12,6 +12,14 @@ export class CustomersService {
   ) {}
 
   async create(storeId: string, createCustomerDto: CreateCustomerDto) {
+    const existingPhone = await this.customerModel.findOne({
+      storeId,
+      phoneNumber: createCustomerDto.phoneNumber,
+    });
+    if (existingPhone) {
+      throw new ConflictException('Phone number is already registered');
+    }
+
     const customer = new this.customerModel({
       ...createCustomerDto,
       storeId,
@@ -36,6 +44,15 @@ export class CustomersService {
     storeId: string,
     updateCustomerDto: UpdateCustomerDto,
   ) {
+    const existingPhone = await this.customerModel.findOne({
+      storeId,
+      phoneNumber: updateCustomerDto.phoneNumber,
+      _id: { $ne: id },
+    });
+    if (existingPhone) {
+      throw new ConflictException('Phone number is already registered');
+    }
+
     const customer = await this.customerModel.findOneAndUpdate(
       { _id: id, storeId },
       { $set: updateCustomerDto },

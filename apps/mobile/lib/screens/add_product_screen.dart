@@ -172,6 +172,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     if (price == null || price < 0) {
                       return 'Please enter a valid price';
                     }
+                    if (price > 10000000) {
+                      return 'Price must not exceed 10,000,000';
+                    }
                     return null;
                   },
                 ),
@@ -191,6 +194,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
                     final qty = int.tryParse(value);
                     if (qty == null || qty < 0) {
                       return 'Please enter a valid quantity';
+                    }
+                    if (qty > 1000000) {
+                      return 'Quantity must not exceed 1,000,000';
                     }
                     return null;
                   },

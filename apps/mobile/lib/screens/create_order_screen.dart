@@ -77,6 +77,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       return;
     }
 
+    final products = await _productsFuture;
+    final productMap = {for (var p in products) p.id: p};
+    for (final item in _items) {
+      final product = productMap[item.productId];
+      if (product != null && item.quantity > product.quantity) {
+        setState(() => _error = 'Insufficient stock for ${item.productName}. Available: ${product.quantity}');
+        return;
+      }
+    }
+
     setState(() {
       _error = null;
       _isSubmitting = true;
@@ -185,6 +195,17 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 );
               }
               final customers = snapshot.data ?? [];
+              if (customers.isEmpty) {
+                return Center(
+                  child: Column(
+                    children: [
+                      const Icon(Icons.people_outline, size: 48, color: Colors.grey),
+                      const SizedBox(height: 12),
+                      Text('No customers found', style: TextStyle(color: Colors.grey.shade600)),
+                    ],
+                  ),
+                );
+              }
               return DropdownButtonFormField<Customer>(
                 initialValue: _selectedCustomer,
                 decoration: const InputDecoration(
@@ -246,19 +267,31 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 );
               }
               final products = snapshot.data ?? [];
+              if (products.isEmpty) {
+                return Center(
+                  child: Column(
+                    children: [
+                      const Icon(Icons.inventory_2_outlined, size: 48, color: Colors.grey),
+                      const SizedBox(height: 12),
+                      Text('No products found', style: TextStyle(color: Colors.grey.shade600)),
+                    ],
+                  ),
+                );
+              }
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: products.map((product) {
                   final inOrder = _items.any((item) => item.productId == product.id);
+                  final isOutOfStock = product.quantity <= 0;
                   return ActionChip(
                     label: Text(product.name),
                     avatar: Icon(
-                      inOrder ? Icons.check_circle : Icons.add_circle_outline,
+                      inOrder ? Icons.check_circle : isOutOfStock ? Icons.block : Icons.add_circle_outline,
                       size: 18,
                     ),
-                    backgroundColor: inOrder ? Colors.green.shade100 : null,
-                    onPressed: () => _addItem(product),
+                    backgroundColor: inOrder ? Colors.green.shade100 : isOutOfStock ? Colors.grey.shade200 : null,
+                    onPressed: isOutOfStock ? null : () => _addItem(product),
                   );
                 }).toList(),
               );

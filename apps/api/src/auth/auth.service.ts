@@ -13,7 +13,11 @@ export class AuthService {
   ) {}
 
   async validateUser(email: string, password: string) {
-    return this.usersService.validateUser(email, password);
+    const user = await this.usersService.validateUser(email, password);
+    if (!user) {
+      this.logger.warn(`Failed login attempt for email: ${email}`);
+    }
+    return user;
   }
 
   async login(user: any) {

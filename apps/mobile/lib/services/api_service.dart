@@ -76,7 +76,11 @@ class ApiService {
     if (error is String) {
       return error;
     }
-    return error.toString().replaceFirst('Exception: ', '');
+    final message = error.toString();
+    if (message.startsWith('Exception: ')) {
+      return message.replaceFirst('Exception: ', '');
+    }
+    return message;
   }
 
   Future<AuthResponse> register({

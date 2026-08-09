@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsOptional, Min } from 'class-validator';
+import { IsString, IsNumber, IsOptional, Min, Max, IsInt } from 'class-validator';
 
 export class UpdateProductDto {
   @IsString()
@@ -10,11 +10,15 @@ export class UpdateProductDto {
   description?: string;
 
   @IsNumber()
+  @Min(0, { message: 'Price must be greater than or equal to 0' })
+  @Max(10000000, { message: 'Price must not exceed 10,000,000' })
   @IsOptional()
   price?: number;
 
   @IsNumber()
+  @IsInt()
   @Min(0, { message: 'Quantity must be greater than or equal to 0' })
+  @Max(1000000, { message: 'Quantity must not exceed 1,000,000' })
   @IsOptional()
   quantity?: number;
 
