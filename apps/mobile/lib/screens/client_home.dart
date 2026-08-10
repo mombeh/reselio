@@ -4,6 +4,7 @@ import 'package:mobile/screens/order_list_screen.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:mobile/screens/dashboard_screen.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/screens/product_list_screen.dart';
 class ClientHome extends StatefulWidget {
   final AuthService authService;
 
@@ -36,10 +37,8 @@ class _ClientHomeState extends State<ClientHome> {
       OrderListScreen(
         authService: widget.authService,
       ),
-      _PlaceholderTab(
-        icon: Icons.inventory_2_outlined,
-        title: 'Products',
-        message: 'Manage your products here.',
+      ProductListScreen(
+        authService: widget.authService,
       ),
       const SizedBox(),
     ];
