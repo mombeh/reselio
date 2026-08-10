@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 
+import 'package:mobile/screens/order_list_screen.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:mobile/screens/dashboard_screen.dart';
 import 'package:mobile/services/auth_service.dart';
-import 'package:mobile/widgets/notification_icon_badge.dart';
-
 class ClientHome extends StatefulWidget {
   final AuthService authService;
 
@@ -22,7 +21,6 @@ class _ClientHomeState extends State<ClientHome> {
 
   static const Color primary = Color(0xFF6C3FC5);
   static const Color background = Color(0xFFF9F7FC);
-  static const Color textPrimary = Color(0xFF242029);
   static const Color textSecondary = Color(0xFF77727F);
 
   late final List<Widget> _pages;
@@ -35,10 +33,8 @@ class _ClientHomeState extends State<ClientHome> {
       DashboardScreen(
         authService: widget.authService,
       ),
-      _PlaceholderTab(
-        icon: Icons.receipt_long_rounded,
-        title: 'Orders',
-        message: 'Your orders will appear here.',
+      OrderListScreen(
+        authService: widget.authService,
       ),
       _PlaceholderTab(
         icon: Icons.inventory_2_outlined,

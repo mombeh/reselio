@@ -16,14 +16,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   late String _selectedStatus;
   bool _isUpdating = false;
 
-  final List<String> _statuses = [
-    'Pending',
-    'Confirmed',
-    'Preparing',
-    'Ready for Pickup',
-    'Delivered',
-    'Cancelled',
-  ];
+  // final List<String> _statuses = [
+  //   'Pending',
+  //   'Confirmed',
+  //   'Preparing',
+  //   'Ready for Pickup',
+  //   'Delivered',
+  //   'Cancelled',
+  // ];
 
   final Map<String, List<String>> _allowedTransitions = {
     'Pending': ['Confirmed', 'Preparing', 'Cancelled'],
