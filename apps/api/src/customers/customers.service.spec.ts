@@ -37,6 +37,7 @@ describe('CustomersService', () => {
 
   describe('create', () => {
     it('should create a new customer', async () => {
+      mockCustomerModel.findOne.mockResolvedValue(null);
       const saveMock = jest.fn().mockResolvedValue({
         _id: 'cust1',
         storeId: 'store1',
@@ -57,6 +58,17 @@ describe('CustomersService', () => {
 
       expect(result._id).toBe('cust1');
       expect(result.fullName).toBe('John Doe');
+    });
+
+    it('should throw ConflictException for duplicate phone number', async () => {
+      mockCustomerModel.findOne.mockResolvedValue({ _id: 'cust2', phoneNumber: '1234567890' });
+
+      await expect(
+        service.create('store1', {
+          fullName: 'John Doe',
+          phoneNumber: '1234567890',
+        }),
+      ).rejects.toThrow('Phone number is already registered');
     });
   });
 
@@ -98,6 +110,7 @@ describe('CustomersService', () => {
 
   describe('update', () => {
     it('should update and return the customer', async () => {
+      mockCustomerModel.findOne.mockResolvedValue(null);
       const mockCustomer = {
         _id: 'cust1',
         fullName: 'Jane Doe',
@@ -116,7 +129,16 @@ describe('CustomersService', () => {
       );
     });
 
+    it('should throw ConflictException for duplicate phone on update', async () => {
+      mockCustomerModel.findOne.mockResolvedValue({ _id: 'cust2', phoneNumber: '9999999999' });
+
+      await expect(
+        service.update('cust1', 'store1', { phoneNumber: '9999999999' }),
+      ).rejects.toThrow('Phone number is already registered');
+    });
+
     it('should throw NotFoundException if customer not found', async () => {
+      mockCustomerModel.findOne.mockResolvedValue(null);
       model.findOneAndUpdate.mockResolvedValue(null);
 
       await expect(

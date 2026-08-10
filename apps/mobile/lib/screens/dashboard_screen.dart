@@ -97,7 +97,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
             }
 
             if (snapshot.hasError) {
-              return Center(child: Text('Error: ${snapshot.error}'));
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    children: [
+                      const Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      Text(
+                        widget.authService.apiService.getErrorMessage(snapshot.error),
+                        textAlign: TextAlign.center,
+                        style: TextStyle(color: Colors.grey.shade600),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: _refresh,
+                        icon: const Icon(Icons.refresh),
+                        label: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                ),
+              );
             }
 
             final data = snapshot.data ?? {};

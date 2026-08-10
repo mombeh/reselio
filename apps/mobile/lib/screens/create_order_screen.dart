@@ -77,6 +77,16 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       return;
     }
 
+    final products = await _productsFuture;
+    final productMap = {for (var p in products) p.id: p};
+    for (final item in _items) {
+      final product = productMap[item.productId];
+      if (product != null && item.quantity > product.quantity) {
+        setState(() => _error = 'Insufficient stock for ${item.productName}. Available: ${product.quantity}');
+        return;
+      }
+    }
+
     setState(() {
       _error = null;
       _isSubmitting = true;
@@ -106,7 +116,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
       Navigator.pop(context);
     } catch (e) {
       setState(() {
-        _error = e.toString().replaceFirst('Exception: ', '');
+        _error = widget.authService.apiService.getErrorMessage(e);
         _isSubmitting = false;
       });
     }
@@ -156,7 +166,46 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.wifi_off_rounded, size: 36, color: Colors.grey),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.authService.apiService.getErrorMessage(snapshot.error),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _customersFuture = widget.authService.apiService.getCustomersForOrder();
+                            });
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
               final customers = snapshot.data ?? [];
+              if (customers.isEmpty) {
+                return Center(
+                  child: Column(
+                    children: [
+                      const Icon(Icons.people_outline, size: 48, color: Colors.grey),
+                      const SizedBox(height: 12),
+                      Text('No customers found', style: TextStyle(color: Colors.grey.shade600)),
+                    ],
+                  ),
+                );
+              }
               return DropdownButtonFormField<Customer>(
                 initialValue: _selectedCustomer,
                 decoration: const InputDecoration(
@@ -189,20 +238,60 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
               }
+              if (snapshot.hasError) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.wifi_off_rounded, size: 36, color: Colors.grey),
+                        const SizedBox(height: 8),
+                        Text(
+                          widget.authService.apiService.getErrorMessage(snapshot.error),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton.icon(
+                          onPressed: () {
+                            setState(() {
+                              _productsFuture = widget.authService.apiService.getProducts();
+                            });
+                          },
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
               final products = snapshot.data ?? [];
+              if (products.isEmpty) {
+                return Center(
+                  child: Column(
+                    children: [
+                      const Icon(Icons.inventory_2_outlined, size: 48, color: Colors.grey),
+                      const SizedBox(height: 12),
+                      Text('No products found', style: TextStyle(color: Colors.grey.shade600)),
+                    ],
+                  ),
+                );
+              }
               return Wrap(
                 spacing: 8,
                 runSpacing: 8,
                 children: products.map((product) {
                   final inOrder = _items.any((item) => item.productId == product.id);
+                  final isOutOfStock = product.quantity <= 0;
                   return ActionChip(
                     label: Text(product.name),
                     avatar: Icon(
-                      inOrder ? Icons.check_circle : Icons.add_circle_outline,
+                      inOrder ? Icons.check_circle : isOutOfStock ? Icons.block : Icons.add_circle_outline,
                       size: 18,
                     ),
-                    backgroundColor: inOrder ? Colors.green.shade100 : null,
-                    onPressed: () => _addItem(product),
+                    backgroundColor: inOrder ? Colors.green.shade100 : isOutOfStock ? Colors.grey.shade200 : null,
+                    onPressed: isOutOfStock ? null : () => _addItem(product),
                   );
                 }).toList(),
               );

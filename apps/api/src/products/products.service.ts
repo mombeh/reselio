@@ -1,15 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { randomBytes } from 'crypto';
 import { Product, ProductDocument } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { OrderItem, OrderItemDocument } from '../orders/schemas/order-item.schema';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(OrderItem.name) private orderItemModel: Model<OrderItemDocument>,
   ) {}
 
   private generatePublicId(): string {
@@ -80,6 +82,14 @@ export class ProductsService {
     if (!product) {
       throw new NotFoundException('Product not found');
     }
+
+    const hasOrders = await this.orderItemModel.findOne({ productId: id });
+    if (hasOrders) {
+      throw new ConflictException(
+        'Cannot delete product that is associated with existing orders',
+      );
+    }
+
     return product;
   }
 

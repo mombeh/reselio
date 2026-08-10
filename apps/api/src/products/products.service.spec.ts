@@ -12,6 +12,10 @@ describe('ProductsService', () => {
   mockProductModel.findOneAndUpdate = jest.fn();
   mockProductModel.findOneAndDelete = jest.fn();
 
+  const mockOrderItemModel = {
+    findOne: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -19,6 +23,10 @@ describe('ProductsService', () => {
         {
           provide: getModelToken('Product'),
           useValue: mockProductModel,
+        },
+        {
+          provide: getModelToken('OrderItem'),
+          useValue: mockOrderItemModel,
         },
       ],
     }).compile();
@@ -162,6 +170,7 @@ describe('ProductsService', () => {
         storeId: 'store1',
       };
       model.findOneAndDelete.mockResolvedValue(mockProduct);
+      mockOrderItemModel.findOne.mockResolvedValue(null);
 
       const result = await service.remove('prod1', 'store1');
       expect(result).toEqual(mockProduct);
@@ -176,6 +185,15 @@ describe('ProductsService', () => {
 
       await expect(service.remove('prod1', 'store1')).rejects.toThrow(
         'Product not found',
+      );
+    });
+
+    it('should throw ConflictException if product has associated orders', async () => {
+      model.findOneAndDelete.mockResolvedValue({ _id: 'prod1', name: 'Red Dress', storeId: 'store1' });
+      mockOrderItemModel.findOne.mockResolvedValue({ _id: 'item1', productId: 'prod1' });
+
+      await expect(service.remove('prod1', 'store1')).rejects.toThrow(
+        'Cannot delete product that is associated with existing orders',
       );
     });
   });

@@ -118,16 +118,28 @@ export class OrdersService {
     for (const item of orderItems) {
       const orderItem = new this.orderItemModel({
         ...item,
-        orderId: savedOrder._id,
+        orderId: savedOrder._id.toString(),
       });
       await orderItem.save();
 
-      await this.productModel.findByIdAndUpdate(item.productId, {
-        $inc: { quantity: -item.quantity },
-      });
+      const updatedProduct = await this.productModel.findByIdAndUpdate(
+        item.productId,
+        { $inc: { quantity: -item.quantity } },
+        { new: true },
+      );
 
-      const updatedProduct = await this.productModel.findById(item.productId);
-      if (updatedProduct && updatedProduct.quantity < LOW_STOCK_THRESHOLD) {
+      if (!updatedProduct || updatedProduct.quantity < 0) {
+        await this.productModel.findByIdAndUpdate(item.productId, {
+          $inc: { quantity: item.quantity },
+        });
+        await this.orderItemModel.deleteMany({ orderId: savedOrder._id.toString() });
+        await this.orderModel.findByIdAndDelete(savedOrder._id);
+        throw new ConflictException(
+          `Insufficient stock for product ${item.productId}. Stock cannot be negative.`,
+        );
+      }
+
+      if (updatedProduct.quantity < LOW_STOCK_THRESHOLD) {
         await this.notificationsService.createLowStockNotification(
           storeId,
           item.productId,
@@ -343,8 +355,9 @@ export class OrdersService {
     const orders = await this.orderModel.find({ storeId, status: { $ne: 'Cancelled' } });
 
     const totalOrders = orders.length;
-    const totalRevenue = orders.reduce((sum, o) => sum + o.total, 0);
-    const totalProfit = orders.reduce((sum, o) => sum + (o.profit || 0), 0);
+    const deliveredOrders = orders.filter((o) => o.status === 'Delivered');
+    const totalRevenue = deliveredOrders.reduce((sum, o) => sum + o.total, 0);
+    const totalProfit = deliveredOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
     const pendingDeliveries = orders.filter(
       (o) => !['Delivered', 'Cancelled'].includes(o.status),
     ).length;
@@ -364,7 +377,7 @@ export class OrdersService {
 
   async getCustomersSummary(storeId: string) {
     return this.orderModel.aggregate([
-      { $match: { storeId } },
+      { $match: { storeId, status: 'Delivered' } },
       {
         $lookup: {
           from: 'customers',
@@ -395,7 +408,7 @@ export class OrdersService {
 
   async getMonthlyAnalytics(storeId: string) {
     return this.orderModel.aggregate([
-      { $match: { storeId, status: { $ne: 'Cancelled' } } },
+      { $match: { storeId, status: 'Delivered' } },
       {
         $group: {
           _id: {

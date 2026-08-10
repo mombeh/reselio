@@ -81,7 +81,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       setState(() => _isUpdating = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to update status: $e'),
+          content: Text(widget.authService.apiService.getErrorMessage(e)),
           backgroundColor: Colors.red,
         ),
       );
@@ -123,7 +123,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         if (!mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to cancel: $e'),
+            content: Text(widget.authService.apiService.getErrorMessage(e)),
             backgroundColor: Colors.red,
           ),
         );

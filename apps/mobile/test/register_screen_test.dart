@@ -11,6 +11,7 @@ void main() {
     late AuthService authService;
 
     setUp(() async {
+      SharedPreferences.setMockInitialValues({});
       final prefs = await SharedPreferences.getInstance();
       apiService = ApiService(prefs);
       authService = AuthService(apiService);

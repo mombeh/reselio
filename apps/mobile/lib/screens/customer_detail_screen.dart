@@ -126,9 +126,25 @@ class _CustomerDetailScreenState extends State<CustomerDetailScreen> {
 
               if (snapshot.hasError) {
                 return Center(
-                  child: Text(
-                    'Error loading orders: ${snapshot.error}',
-                    style: TextStyle(color: Colors.grey.shade600),
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      children: [
+                        const Icon(Icons.wifi_off_rounded, size: 48, color: Colors.grey),
+                        const SizedBox(height: 16),
+                        Text(
+                          widget.authService!.apiService.getErrorMessage(snapshot.error),
+                          textAlign: TextAlign.center,
+                          style: TextStyle(color: Colors.grey.shade600),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton.icon(
+                          onPressed: _loadOrders,
+                          icon: const Icon(Icons.refresh),
+                          label: const Text('Retry'),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }

@@ -40,10 +40,12 @@ UserSchema.virtual('userId').get(function () {
 UserSchema.set('toJSON', {
   virtuals: true,
   transform: (_doc, ret) => {
-    ret.id = ret._id;
-    delete ret._id;
-    delete ret.__v;
-    delete ret.password;
+    if (ret && typeof ret === 'object') {
+      (ret as any).id = (ret as any)._id;
+      delete (ret as any)._id;
+      delete (ret as any).__v;
+      delete (ret as any).password;
+    }
     return ret;
   },
 });
@@ -51,10 +53,12 @@ UserSchema.set('toJSON', {
 UserSchema.set('toObject', {
   virtuals: true,
   transform: (_doc, ret) => {
-    ret.id = ret._id;
-    delete ret._id;
-    delete ret.__v;
-    delete ret.password;
+    if (ret && typeof ret === 'object') {
+      (ret as any).id = (ret as any)._id;
+      delete (ret as any)._id;
+      delete (ret as any).__v;
+      delete (ret as any).password;
+    }
     return ret;
   },
 });

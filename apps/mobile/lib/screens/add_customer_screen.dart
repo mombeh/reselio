@@ -152,6 +152,10 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a phone number';
                     }
+                    final phoneRegex = RegExp(r'^[+]?[\d\s()-]{7,20}$');
+                    if (!phoneRegex.hasMatch(value)) {
+                      return 'Please enter a valid phone number';
+                    }
                     return null;
                   },
                 ),

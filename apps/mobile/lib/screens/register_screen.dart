@@ -54,7 +54,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
         arguments: {'authService': widget.authService},
       );
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      setState(() => _error = widget.authService.apiService.getErrorMessage(e));
     }
   }
 
