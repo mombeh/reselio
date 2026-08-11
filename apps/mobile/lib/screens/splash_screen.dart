@@ -28,8 +28,8 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (isLoggedIn) {
-      final user = authService.currentUser;
-      final hasRole = user != null && user.role != null && user.role!.isNotEmpty;
+      final user = authService.currentUser!;
+      final hasRole = user.role.isNotEmpty;
       if (!mounted) return;
 
       if (!hasRole) {
@@ -41,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
         return;
       }
 
-      final role = user!.role!;
+      final role = user.role;
       if (!mounted) return;
 
       if (role == 'customer') {

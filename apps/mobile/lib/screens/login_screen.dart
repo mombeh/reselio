@@ -39,7 +39,7 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       final user = response.user;
-      final hasRole = user.role != null && user.role!.isNotEmpty;
+      final hasRole = user.role.isNotEmpty;
       if (!mounted) return;
 
       if (!hasRole) {
@@ -51,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      final role = user.role!;
+      final role = user.role;
       if (!mounted) return;
 
       if (role == 'customer') {
