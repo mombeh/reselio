@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:mobile/screens/order_list_screen.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:mobile/screens/dashboard_screen.dart';
-import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/screens/order_list_screen.dart';
 import 'package:mobile/screens/product_list_screen.dart';
+import 'package:mobile/services/auth_service.dart';
+
 class ClientHome extends StatefulWidget {
   final AuthService authService;
 
@@ -40,7 +41,7 @@ class _ClientHomeState extends State<ClientHome> {
       ProductListScreen(
         authService: widget.authService,
       ),
-      const SizedBox(),
+      const SizedBox.shrink(),
     ];
   }
 
@@ -48,6 +49,7 @@ class _ClientHomeState extends State<ClientHome> {
     showModalBottomSheet<void>(
       context: context,
       backgroundColor: Colors.transparent,
+      isScrollControlled: true,
       builder: (context) {
         return _MoreMenu(
           authService: widget.authService,
@@ -59,6 +61,10 @@ class _ClientHomeState extends State<ClientHome> {
   void _onNavigationTap(int index) {
     if (index == 3) {
       _openMore();
+      return;
+    }
+
+    if (_currentIndex == index) {
       return;
     }
 
@@ -95,7 +101,6 @@ class _ClientHomeState extends State<ClientHome> {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(12, 8, 12, 8),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
               _navItem(
                 index: 0,
@@ -211,87 +216,98 @@ class _MoreMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.82,
+      ),
       decoration: const BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.vertical(
           top: Radius.circular(28),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
       child: SafeArea(
         top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 40,
-              height: 4,
-              margin: const EdgeInsets.only(bottom: 22),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade300,
-                borderRadius: BorderRadius.circular(20),
-              ),
-            ),
-
-            const Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'More',
-                style: TextStyle(
-                  color: textPrimary,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w700,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(
+            20,
+            12,
+            20,
+            24,
+          ),
+          child: Column(
+            children: [
+              // Drag handle
+              Container(
+                width: 40,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: 20),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(20),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 18),
+              // Header
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  'More',
+                  style: TextStyle(
+                    color: textPrimary,
+                    fontSize: 22,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
 
-            _menuItem(
-              context,
-              icon: Icons.people_outline_rounded,
-              title: 'Customers',
-              subtitle: 'Manage your customers',
-              color: const Color(0xFF0D9D8C),
-              route: AppRouter.customerList,
-            ),
+              const SizedBox(height: 16),
 
-            _menuItem(
-              context,
-              icon: Icons.bar_chart_rounded,
-              title: 'Reports',
-              subtitle: 'View business performance',
-              color: primary,
-              route: AppRouter.reports,
-            ),
+              _menuItem(
+                context,
+                icon: Icons.people_outline_rounded,
+                title: 'Customers',
+                subtitle: 'Manage your customers',
+                color: const Color(0xFF0D9D8C),
+                route: AppRouter.customerList,
+              ),
 
-            _menuItem(
-              context,
-              icon: Icons.notifications_none_rounded,
-              title: 'Notifications',
-              subtitle: 'View your notifications',
-              color: const Color(0xFFF59E0B),
-              route: AppRouter.notifications,
-            ),
+              _menuItem(
+                context,
+                icon: Icons.bar_chart_rounded,
+                title: 'Reports',
+                subtitle: 'View business performance',
+                color: primary,
+                route: AppRouter.reports,
+              ),
 
-            _menuItem(
-              context,
-              icon: Icons.store_outlined,
-              title: 'My Store',
-              subtitle: 'Manage your store',
-              color: const Color(0xFF2589EF),
-              route: AppRouter.myStore,
-            ),
+              _menuItem(
+                context,
+                icon: Icons.notifications_none_rounded,
+                title: 'Notifications',
+                subtitle: 'View your notifications',
+                color: const Color(0xFFF59E0B),
+                route: AppRouter.notifications,
+              ),
 
-            _menuItem(
-              context,
-              icon: Icons.person_outline_rounded,
-              title: 'Profile',
-              subtitle: 'Manage your account',
-              color: const Color(0xFF8B5CF6),
-              route: AppRouter.profile,
-            ),
-          ],
+              _menuItem(
+                context,
+                icon: Icons.store_outlined,
+                title: 'My Store',
+                subtitle: 'Manage your store',
+                color: const Color(0xFF2589EF),
+                route: AppRouter.myStore,
+              ),
+
+              _menuItem(
+                context,
+                icon: Icons.person_outline_rounded,
+                title: 'Profile',
+                subtitle: 'Manage your account',
+                color: const Color(0xFF8B5CF6),
+                route: AppRouter.profile,
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -306,7 +322,7 @@ class _MoreMenu extends StatelessWidget {
     required String route,
   }) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
+      padding: const EdgeInsets.only(bottom: 6),
       child: Material(
         color: Colors.transparent,
         child: InkWell(
@@ -315,24 +331,26 @@ class _MoreMenu extends StatelessWidget {
           child: Padding(
             padding: const EdgeInsets.symmetric(
               horizontal: 4,
-              vertical: 10,
+              vertical: 8,
             ),
             child: Row(
               children: [
                 Container(
-                  width: 46,
-                  height: 46,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.10),
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(13),
                   ),
                   child: Icon(
                     icon,
                     color: color,
-                    size: 22,
+                    size: 21,
                   ),
                 ),
-                const SizedBox(width: 14),
+
+                const SizedBox(width: 13),
+
                 Expanded(
                   child: Column(
                     crossAxisAlignment:
@@ -346,7 +364,7 @@ class _MoreMenu extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                         ),
                       ),
-                      const SizedBox(height: 3),
+                      const SizedBox(height: 2),
                       Text(
                         subtitle,
                         style: const TextStyle(
@@ -357,6 +375,7 @@ class _MoreMenu extends StatelessWidget {
                     ],
                   ),
                 ),
+
                 const Icon(
                   Icons.chevron_right_rounded,
                   color: textSecondary,
@@ -369,53 +388,3 @@ class _MoreMenu extends StatelessWidget {
     );
   }
 }
-
-// class _PlaceholderTab extends StatelessWidget {
-//   final IconData icon;
-//   final String title;
-//   final String message;
-
-//   const _PlaceholderTab({
-//     required this.icon,
-//     required this.title,
-//     required this.message,
-//   });
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       backgroundColor: const Color(0xFFF9F7FC),
-//       appBar: AppBar(
-//         automaticallyImplyLeading: false,
-//         backgroundColor: const Color(0xFFF9F7FC),
-//         elevation: 0,
-//         title: Text(
-//           title,
-//           style: const TextStyle(
-//             color: Color(0xFF242029),
-//             fontWeight: FontWeight.w700,
-//           ),
-//         ),
-//       ),
-//       body: Center(
-//         child: Column(
-//           mainAxisSize: MainAxisSize.min,
-//           children: [
-//             Icon(
-//               icon,
-//               size: 48,
-//               color: const Color(0xFF6C3FC5),
-//             ),
-//             const SizedBox(height: 14),
-//             Text(
-//               message,
-//               style: const TextStyle(
-//                 color: Color(0xFF77727F),
-//               ),
-//             ),
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
