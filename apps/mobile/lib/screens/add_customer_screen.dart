@@ -99,120 +99,298 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Customer' : 'Add Customer'),
+@override
+Widget build(BuildContext context) {
+  final theme = Theme.of(context);
+
+  return Scaffold(
+    appBar: AppBar(
+      title: Text(
+        _isEditing ? 'Edit Customer' : 'Add Customer',
+        style: const TextStyle(fontWeight: FontWeight.w700),
       ),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              children: [
-                if (_error != null)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Text(
-                      _error!,
-                      style: TextStyle(color: Colors.red.shade700),
-                    ),
-                  ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: _fullNameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Full Name',
-                    prefixIcon: Icon(Icons.person_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a full name';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _phoneController,
-                  keyboardType: TextInputType.phone,
-                  decoration: const InputDecoration(
-                    labelText: 'Phone Number',
-                    prefixIcon: Icon(Icons.phone_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a phone number';
-                    }
-                    final phoneRegex = RegExp(r'^[+]?[\d\s()-]{7,20}$');
-                    if (!phoneRegex.hasMatch(value)) {
-                      return 'Please enter a valid phone number';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _emailController,
-                  keyboardType: TextInputType.emailAddress,
-                  decoration: const InputDecoration(
-                    labelText: 'Email (optional)',
-                    prefixIcon: Icon(Icons.email_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _addressController,
-                  decoration: const InputDecoration(
-                    labelText: 'Address (optional)',
-                    prefixIcon: Icon(Icons.location_on_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 2,
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _notesController,
-                  decoration: const InputDecoration(
-                    labelText: 'Notes (optional)',
-                    prefixIcon: Icon(Icons.notes_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: widget.authService.isLoading
-                      ? null
-                      : _handleSubmit,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                  child: widget.authService.isLoading
-                      ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : Text(
-                          _isEditing ? 'Update Customer' : 'Add Customer',
-                          style: const TextStyle(fontSize: 16),
+      centerTitle: false,
+    ),
+    body: SafeArea(
+      child: Form(
+        key: _formKey,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 32),
+          children: [
+            // Customer preview
+            Center(
+              child: Column(
+                children: [
+                  ValueListenableBuilder<TextEditingValue>(
+                    valueListenable: _fullNameController,
+                    builder: (context, value, _) {
+                      final name = value.text.trim();
+                      final initial =
+                          name.isNotEmpty ? name[0].toUpperCase() : '?';
+
+                      return CircleAvatar(
+                        radius: 42,
+                        backgroundColor: theme.colorScheme.primaryContainer,
+                        child: Text(
+                          initial,
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.w700,
+                            color: theme.colorScheme.primary,
+                          ),
                         ),
-                ),
-              ],
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    _isEditing ? 'Update customer information' : 'New customer',
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    _isEditing
+                        ? 'Keep the customer details up to date'
+                        : 'Add a customer to your Reselio business',
+                    textAlign: TextAlign.center,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
+
+            const SizedBox(height: 28),
+
+            // Error message
+            if (_error != null) ...[
+              Container(
+                padding: const EdgeInsets.all(14),
+                decoration: BoxDecoration(
+                  color: Colors.red.shade50,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: Colors.red.shade100),
+                ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.error_outline,
+                      color: Colors.red.shade700,
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        _error!,
+                        style: TextStyle(
+                          color: Colors.red.shade700,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+            ],
+
+            // Basic information
+            const Text(
+              'Basic Information',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            _buildFormCard(
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _fullNameController,
+                    textCapitalization: TextCapitalization.words,
+                    decoration: const InputDecoration(
+                      labelText: 'Full Name',
+                      hintText: 'Enter customer name',
+                      prefixIcon: Icon(Icons.person_outline),
+                      border: InputBorder.none,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a full name';
+                      }
+                      return null;
+                    },
+                  ),
+                  const Divider(height: 1),
+                  TextFormField(
+                    controller: _phoneController,
+                    keyboardType: TextInputType.phone,
+                    decoration: const InputDecoration(
+                      labelText: 'Phone Number',
+                      hintText: '+237 6XX XXX XXX',
+                      prefixIcon: Icon(Icons.phone_outlined),
+                      border: InputBorder.none,
+                    ),
+                    validator: (value) {
+                      if (value == null || value.trim().isEmpty) {
+                        return 'Please enter a phone number';
+                      }
+
+                      final phoneRegex =
+                          RegExp(r'^[+]?[\d\s()-]{7,20}$');
+
+                      if (!phoneRegex.hasMatch(value.trim())) {
+                        return 'Please enter a valid phone number';
+                      }
+
+                      return null;
+                    },
+                  ),
+                  const Divider(height: 1),
+                  TextFormField(
+                    controller: _emailController,
+                    keyboardType: TextInputType.emailAddress,
+                    decoration: const InputDecoration(
+                      labelText: 'Email',
+                      hintText: 'customer@example.com',
+                      prefixIcon: Icon(Icons.email_outlined),
+                      suffixText: 'Optional',
+                      border: InputBorder.none,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 24),
+
+            // Additional information
+            const Text(
+              'Additional Information',
+              style: TextStyle(
+                fontSize: 17,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            _buildFormCard(
+              child: Column(
+                children: [
+                  TextFormField(
+                    controller: _addressController,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: const InputDecoration(
+                      labelText: 'Address',
+                      hintText: 'Enter customer address',
+                      prefixIcon: Icon(Icons.location_on_outlined),
+                      suffixText: 'Optional',
+                      border: InputBorder.none,
+                    ),
+                    maxLines: 2,
+                  ),
+                  const Divider(height: 1),
+                  TextFormField(
+                    controller: _notesController,
+                    textCapitalization: TextCapitalization.sentences,
+                    decoration: const InputDecoration(
+                      labelText: 'Notes',
+                      hintText: 'Add any useful information...',
+                      prefixIcon: Icon(Icons.notes_outlined),
+                      suffixText: 'Optional',
+                      border: InputBorder.none,
+                    ),
+                    maxLines: 3,
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 28),
+
+            // Submit button
+            SizedBox(
+              width: double.infinity,
+              height: 54,
+              child: ElevatedButton.icon(
+                onPressed: widget.authService.isLoading
+                    ? null
+                    : _handleSubmit,
+                icon: widget.authService.isLoading
+                    ? const SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                        ),
+                      )
+                    : Icon(
+                        _isEditing
+                            ? Icons.save_outlined
+                            : Icons.person_add_outlined,
+                      ),
+                label: Text(
+                  widget.authService.isLoading
+                      ? (_isEditing ? 'Updating...' : 'Adding...')
+                      : (_isEditing
+                          ? 'Update Customer'
+                          : 'Add Customer'),
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            Center(
+              child: Text(
+                'Required fields are marked above',
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+            ),
+          ],
         ),
       ),
-    );
-  }
+    ),
+  );
+}
+
+Widget _buildFormCard({
+  required Widget child,
+}) {
+  return Container(
+    decoration: BoxDecoration(
+      color: Theme.of(context).cardColor,
+      borderRadius: BorderRadius.circular(16),
+      border: Border.all(
+        color: Colors.grey.shade200,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.03),
+          blurRadius: 10,
+          offset: const Offset(0, 3),
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: const EdgeInsets.symmetric(
+        horizontal: 8,
+        vertical: 4,
+      ),
+      child: child,
+    ),
+  );
+}
 }
