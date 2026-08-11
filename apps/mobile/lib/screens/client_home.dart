@@ -370,52 +370,52 @@ class _MoreMenu extends StatelessWidget {
   }
 }
 
-class _PlaceholderTab extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String message;
+// class _PlaceholderTab extends StatelessWidget {
+//   final IconData icon;
+//   final String title;
+//   final String message;
 
-  const _PlaceholderTab({
-    required this.icon,
-    required this.title,
-    required this.message,
-  });
+//   const _PlaceholderTab({
+//     required this.icon,
+//     required this.title,
+//     required this.message,
+//   });
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF9F7FC),
-      appBar: AppBar(
-        automaticallyImplyLeading: false,
-        backgroundColor: const Color(0xFFF9F7FC),
-        elevation: 0,
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Color(0xFF242029),
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 48,
-              color: const Color(0xFF6C3FC5),
-            ),
-            const SizedBox(height: 14),
-            Text(
-              message,
-              style: const TextStyle(
-                color: Color(0xFF77727F),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       backgroundColor: const Color(0xFFF9F7FC),
+//       appBar: AppBar(
+//         automaticallyImplyLeading: false,
+//         backgroundColor: const Color(0xFFF9F7FC),
+//         elevation: 0,
+//         title: Text(
+//           title,
+//           style: const TextStyle(
+//             color: Color(0xFF242029),
+//             fontWeight: FontWeight.w700,
+//           ),
+//         ),
+//       ),
+//       body: Center(
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Icon(
+//               icon,
+//               size: 48,
+//               color: const Color(0xFF6C3FC5),
+//             ),
+//             const SizedBox(height: 14),
+//             Text(
+//               message,
+//               style: const TextStyle(
+//                 color: Color(0xFF77727F),
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
