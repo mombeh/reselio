@@ -6,7 +6,11 @@ class AddProductScreen extends StatefulWidget {
   final AuthService authService;
   final Product? product;
 
-  const AddProductScreen({super.key, required this.authService, this.product});
+  const AddProductScreen({
+    super.key,
+    required this.authService,
+    this.product,
+  });
 
   @override
   State<AddProductScreen> createState() => _AddProductScreenState();
@@ -14,27 +18,36 @@ class AddProductScreen extends StatefulWidget {
 
 class _AddProductScreenState extends State<AddProductScreen> {
   final _formKey = GlobalKey<FormState>();
+
   final _nameController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController();
   final _categoryController = TextEditingController();
   final _imageUrlController = TextEditingController();
+
   String? _error;
   bool _isEditing = false;
+  bool _isSubmitting = false;
 
   @override
   void initState() {
     super.initState();
+
     _isEditing = widget.product != null;
+
     if (_isEditing) {
-      _nameController.text = widget.product!.name;
-      _descriptionController.text = widget.product!.description;
-      _priceController.text = widget.product!.price.toString();
-      _quantityController.text = widget.product!.quantity.toString();
-      _categoryController.text = widget.product!.category;
-      _imageUrlController.text = widget.product!.imageUrl ?? '';
+      final product = widget.product!;
+
+      _nameController.text = product.name;
+      _descriptionController.text = product.description;
+      _priceController.text = product.price.toString();
+      _quantityController.text = product.quantity.toString();
+      _categoryController.text = product.category;
+      _imageUrlController.text = product.imageUrl ?? '';
     }
+
+    _imageUrlController.addListener(_onImageUrlChanged);
   }
 
   @override
@@ -48,14 +61,27 @@ class _AddProductScreenState extends State<AddProductScreen> {
     super.dispose();
   }
 
-  Future<void> _handleSubmit() async {
-    if (!_formKey.currentState!.validate()) return;
+  void _onImageUrlChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
 
-    setState(() => _error = null);
+  Future<void> _handleSubmit() async {
+    if (!_formKey.currentState!.validate()) {
+      return;
+    }
+
+    setState(() {
+      _error = null;
+      _isSubmitting = true;
+    });
 
     try {
-      final price = double.tryParse(_priceController.text.trim()) ?? 0.0;
-      final quantity = int.tryParse(_quantityController.text.trim()) ?? 0;
+      final price = double.parse(_priceController.text.trim());
+      final quantity = int.parse(_quantityController.text.trim());
+
+      final imageUrl = _imageUrlController.text.trim();
 
       if (_isEditing) {
         await widget.authService.apiService.updateProduct(
@@ -65,9 +91,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           price: price,
           quantity: quantity,
           category: _categoryController.text.trim(),
-          imageUrl: _imageUrlController.text.trim().isNotEmpty
-              ? _imageUrlController.text.trim()
-              : null,
+          imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
         );
       } else {
         await widget.authService.apiService.createProduct(
@@ -76,9 +100,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           price: price,
           quantity: quantity,
           category: _categoryController.text.trim(),
-          imageUrl: _imageUrlController.text.trim().isNotEmpty
-              ? _imageUrlController.text.trim()
-              : null,
+          imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
         );
       }
 
@@ -87,165 +109,483 @@ class _AddProductScreenState extends State<AddProductScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            _isEditing ? 'Product updated successfully' : 'Product added successfully',
+            _isEditing
+                ? 'Product updated successfully'
+                : 'Product added successfully',
           ),
           backgroundColor: Colors.green,
         ),
       );
 
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (e) {
-      setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
+      if (!mounted) return;
+
+      setState(() {
+        _error = widget.authService.apiService.getErrorMessage(e);
+        _isSubmitting = false;
+      });
     }
+  }
+
+  InputDecoration _inputDecoration({
+    required String label,
+    required IconData icon,
+    String? hint,
+  }) {
+    return InputDecoration(
+      labelText: label,
+      hintText: hint,
+      prefixIcon: Icon(icon),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(
+          color: Colors.deepPurple,
+          width: 2,
+        ),
+      ),
+      filled: true,
+      fillColor: Colors.grey.shade50,
+    );
+  }
+
+  Widget _buildSectionTitle({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: Colors.deepPurple.shade50,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            color: Colors.deepPurple,
+            size: 22,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 3),
+              Text(
+                subtitle,
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildImagePreview() {
+    final imageUrl = _imageUrlController.text.trim();
+
+    if (imageUrl.isEmpty) {
+      return Container(
+        height: 180,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(
+            color: Colors.grey.shade300,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.image_outlined,
+              size: 48,
+              color: Colors.grey.shade400,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Product image preview',
+              style: TextStyle(
+                color: Colors.grey.shade500,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(14),
+      child: Image.network(
+        imageUrl,
+        width: double.infinity,
+        height: 180,
+        fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Container(
+            height: 180,
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: Colors.red.shade50,
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.broken_image_outlined,
+                  size: 42,
+                  color: Colors.red.shade300,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Unable to load image',
+                  style: TextStyle(
+                    color: Colors.red.shade600,
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final title = _isEditing ? 'Edit Product' : 'Add Product';
+
     return Scaffold(
       appBar: AppBar(
-        title: Text(_isEditing ? 'Edit Product' : 'Add Product'),
+        title: Text(title),
+        actions: [
+          if (_isSubmitting)
+            const Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Center(
+                child: SizedBox(
+                  width: 20,
+                  height: 20,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(24.0),
-          child: Form(
-            key: _formKey,
-            child: ListView(
-              children: [
-                if (_error != null)
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.red.shade50,
-                      borderRadius: BorderRadius.circular(8),
+        child: Form(
+          key: _formKey,
+          child: ListView(
+            padding: const EdgeInsets.all(20),
+            children: [
+              // Header
+              Text(
+                _isEditing
+                    ? 'Update your product'
+                    : 'Add a new product',
+                style: const TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                _isEditing
+                    ? 'Make changes to your product information below.'
+                    : 'Enter the details of the product you want to add to your store.',
+                style: TextStyle(
+                  color: Colors.grey.shade600,
+                  height: 1.4,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Error
+              if (_error != null) ...[
+                Container(
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: Colors.red.shade50,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: Colors.red.shade200,
                     ),
-                    child: Text(
-                      _error!,
-                      style: TextStyle(color: Colors.red.shade700),
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(
+                        Icons.error_outline,
+                        color: Colors.red.shade700,
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: Text(
+                          _error!,
+                          style: TextStyle(
+                            color: Colors.red.shade700,
+                            height: 1.4,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 20),
+              ],
+
+              // Product information
+              _buildSectionTitle(
+                title: 'Product Information',
+                subtitle: 'Basic information about your product.',
+                icon: Icons.inventory_2_outlined,
+              ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _nameController,
+                textCapitalization: TextCapitalization.words,
+                decoration: _inputDecoration(
+                  label: 'Product Name',
+                  icon: Icons.shopping_bag_outlined,
+                  hint: 'e.g. Wireless Headphones',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a product name';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _descriptionController,
+                textCapitalization: TextCapitalization.sentences,
+                maxLines: 4,
+                decoration: _inputDecoration(
+                  label: 'Description',
+                  icon: Icons.description_outlined,
+                  hint: 'Describe your product...',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a description';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 16),
+
+              TextFormField(
+                controller: _categoryController,
+                textCapitalization: TextCapitalization.words,
+                decoration: _inputDecoration(
+                  label: 'Category',
+                  icon: Icons.category_outlined,
+                  hint: 'e.g. Electronics',
+                ),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'Please enter a category';
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 28),
+
+              // Pricing and inventory
+              _buildSectionTitle(
+                title: 'Pricing & Inventory',
+                subtitle: 'Set the selling price and available stock.',
+                icon: Icons.payments_outlined,
+              ),
+
+              const SizedBox(height: 16),
+
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: TextFormField(
+                      controller: _priceController,
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
+                      decoration: _inputDecoration(
+                        label: 'Price',
+                        icon: Icons.attach_money_outlined,
+                        hint: '0.00',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Enter price';
+                        }
+
+                        final price = double.tryParse(value.trim());
+
+                        if (price == null || price < 0) {
+                          return 'Invalid price';
+                        }
+
+                        if (price > 10000000) {
+                          return 'Max 10,000,000';
+                        }
+
+                        return null;
+                      },
                     ),
                   ),
-                const SizedBox(height: 24),
-                TextFormField(
-                  controller: _nameController,
-                  decoration: const InputDecoration(
-                    labelText: 'Product Name',
-                    prefixIcon: Icon(Icons.spellcheck_outlined),
-                    border: OutlineInputBorder(),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: TextFormField(
+                      controller: _quantityController,
+                      keyboardType: TextInputType.number,
+                      decoration: _inputDecoration(
+                        label: 'Quantity',
+                        icon: Icons.numbers_outlined,
+                        hint: '0',
+                      ),
+                      validator: (value) {
+                        if (value == null || value.trim().isEmpty) {
+                          return 'Enter quantity';
+                        }
+
+                        final quantity = int.tryParse(value.trim());
+
+                        if (quantity == null || quantity < 0) {
+                          return 'Invalid quantity';
+                        }
+
+                        if (quantity > 1000000) {
+                          return 'Max 1,000,000';
+                        }
+
+                        return null;
+                      },
+                    ),
                   ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a product name';
-                    }
-                    return null;
-                  },
+                ],
+              ),
+
+              const SizedBox(height: 28),
+
+              // Image
+              _buildSectionTitle(
+                title: 'Product Image',
+                subtitle: 'Add an image URL to display your product.',
+                icon: Icons.image_outlined,
+              ),
+
+              const SizedBox(height: 16),
+
+              _buildImagePreview(),
+
+              const SizedBox(height: 12),
+
+              TextFormField(
+                controller: _imageUrlController,
+                keyboardType: TextInputType.url,
+                decoration: _inputDecoration(
+                  label: 'Image URL',
+                  icon: Icons.link_outlined,
+                  hint: 'https://...',
                 ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _descriptionController,
-                  decoration: const InputDecoration(
-                    labelText: 'Description',
-                    prefixIcon: Icon(Icons.description_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  maxLines: 3,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a description';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _priceController,
-                  keyboardType: TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(
-                    labelText: 'Price',
-                    prefixIcon: Icon(Icons.attach_money_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a price';
-                    }
-                    final price = double.tryParse(value);
-                    if (price == null || price < 0) {
-                      return 'Please enter a valid price';
-                    }
-                    if (price > 10000000) {
-                      return 'Price must not exceed 10,000,000';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _quantityController,
-                  keyboardType: TextInputType.number,
-                  decoration: const InputDecoration(
-                    labelText: 'Quantity',
-                    prefixIcon: Icon(Icons.numbers_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a quantity';
-                    }
-                    final qty = int.tryParse(value);
-                    if (qty == null || qty < 0) {
-                      return 'Please enter a valid quantity';
-                    }
-                    if (qty > 1000000) {
-                      return 'Quantity must not exceed 1,000,000';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _categoryController,
-                  decoration: const InputDecoration(
-                    labelText: 'Category',
-                    prefixIcon: Icon(Icons.category_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter a category';
-                    }
-                    return null;
-                  },
-                ),
-                const SizedBox(height: 16),
-                TextFormField(
-                  controller: _imageUrlController,
-                  decoration: const InputDecoration(
-                    labelText: 'Image URL (optional)',
-                    prefixIcon: Icon(Icons.image_outlined),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: widget.authService.isLoading
-                      ? null
-                      : _handleSubmit,
+              ),
+
+              const SizedBox(height: 28),
+
+              // Submit
+              SizedBox(
+                height: 54,
+                child: ElevatedButton(
+                  onPressed: _isSubmitting ? null : _handleSubmit,
                   style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    backgroundColor: Colors.deepPurple,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    elevation: 0,
                   ),
-                  child: widget.authService.isLoading
+                  child: _isSubmitting
                       ? const SizedBox(
-                          height: 20,
-                          width: 20,
-                          child: CircularProgressIndicator(strokeWidth: 2),
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.5,
+                            color: Colors.white,
+                          ),
                         )
-                      : Text(
-                          _isEditing ? 'Update Product' : 'Add Product',
-                          style: const TextStyle(fontSize: 16),
+                      : Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              _isEditing
+                                  ? Icons.save_outlined
+                                  : Icons.add_circle_outline,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              _isEditing
+                                  ? 'Update Product'
+                                  : 'Add Product',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ],
                         ),
                 ),
-              ],
-            ),
+              ),
+
+              const SizedBox(height: 12),
+
+              Text(
+                _isEditing
+                    ? 'Your changes will be saved to your store.'
+                    : 'You can edit this product later from your product list.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey.shade500,
+                ),
+              ),
+
+              const SizedBox(height: 20),
+            ],
           ),
         ),
       ),
