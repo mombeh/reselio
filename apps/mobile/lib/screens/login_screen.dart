@@ -38,10 +38,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      final hasSelectedRole = await widget.authService.hasSelectedRole;
+      final user = response.user;
+      final hasRole = user.role != null && user.role!.isNotEmpty;
       if (!mounted) return;
 
-      if (!hasSelectedRole) {
+      if (!hasRole) {
         Navigator.pushReplacementNamed(
           context,
           AppRouter.roleSelection,
@@ -50,7 +51,7 @@ class _LoginScreenState extends State<LoginScreen> {
         return;
       }
 
-      final role = response.user.role;
+      final role = user.role!;
       if (!mounted) return;
 
       if (role == 'customer') {

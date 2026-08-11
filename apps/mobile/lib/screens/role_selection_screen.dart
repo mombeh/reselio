@@ -10,7 +10,6 @@ class RoleSelectionScreen extends StatelessWidget {
   Future<void> _selectRole(BuildContext context, String role) async {
     try {
       await authService.updateRole(role);
-      await authService.setRoleSelected();
 
       if (!context.mounted) return;
 

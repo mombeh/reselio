@@ -28,10 +28,11 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (isLoggedIn) {
-      final hasSelectedRole = await authService.hasSelectedRole;
+      final user = authService.currentUser;
+      final hasRole = user != null && user.role != null && user.role!.isNotEmpty;
       if (!mounted) return;
 
-      if (!hasSelectedRole) {
+      if (!hasRole) {
         Navigator.pushReplacementNamed(
           context,
           AppRouter.roleSelection,
@@ -40,7 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
         return;
       }
 
-      final role = authService.currentUser?.role ?? 'customer';
+      final role = user!.role!;
       if (!mounted) return;
 
       if (role == 'customer') {
