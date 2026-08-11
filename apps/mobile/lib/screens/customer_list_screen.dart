@@ -127,7 +127,11 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         'authService': widget.authService,
         'customer': customer,
       },
-    );
+    ).then((result) {
+      if (result == true) {
+        _refresh();
+      }
+    });
   }
 
   void _editCustomer(Customer customer) {
@@ -138,7 +142,11 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
         'authService': widget.authService,
         'customer': customer,
       },
-    );
+    ).then((result) {
+      if (result == true) {
+        _refresh();
+      }
+    });
   }
 
   void _addCustomer() {
@@ -148,7 +156,11 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       arguments: {
         'authService': widget.authService,
       },
-    );
+    ).then((result) {
+      if (result == true) {
+        _refresh();
+      }
+    });
   }
 
   @override

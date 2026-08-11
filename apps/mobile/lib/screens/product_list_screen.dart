@@ -141,7 +141,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
       arguments: {
         'authService': widget.authService,
       },
-    );
+    ).then((result) {
+      if (result == true) {
+        _refresh();
+      }
+    });
   }
 
   void _openProductDetails(Product product) {
@@ -163,7 +167,11 @@ class _ProductListScreenState extends State<ProductListScreen> {
         'authService': widget.authService,
         'product': product,
       },
-    );
+    ).then((result) {
+      if (result == true) {
+        _refresh();
+      }
+    });
   }
 
   @override

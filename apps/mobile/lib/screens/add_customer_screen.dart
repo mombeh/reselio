@@ -93,7 +93,7 @@ class _AddCustomerScreenState extends State<AddCustomerScreen> {
         ),
       );
 
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (e) {
       setState(() => _error = e.toString().replaceFirst('Exception: ', ''));
     }

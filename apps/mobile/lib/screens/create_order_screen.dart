@@ -180,7 +180,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
         ),
       );
 
-      Navigator.pop(context);
+      Navigator.pop(context, true);
     } catch (e) {
       if (!mounted) return;
 
