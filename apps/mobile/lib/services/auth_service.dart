@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user.dart';
 import '../models/auth_response.dart';
 import 'api_service.dart';
@@ -8,28 +7,12 @@ class AuthService extends ChangeNotifier {
   final ApiService apiService;
   User? _currentUser;
   bool _isLoading = false;
-  static const String _roleSelectedKey = 'has_selected_role';
 
   User? get currentUser => _currentUser;
   bool get isAuthenticated => _currentUser != null;
   bool get isLoading => _isLoading;
 
   AuthService(this.apiService);
-
-  Future<bool> get hasSelectedRole async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getBool(_roleSelectedKey) ?? false;
-  }
-
-  Future<void> setRoleSelected() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool(_roleSelectedKey, true);
-  }
-
-  Future<void> clearRoleSelected() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(_roleSelectedKey);
-  }
 
   Future<bool> loadUser() async {
     final token = await apiService.getToken();
@@ -148,7 +131,6 @@ class AuthService extends ChangeNotifier {
       // Ignore logout errors, still clear local data
     }
     await apiService.clearToken();
-    await clearRoleSelected();
     _currentUser = null;
     notifyListeners();
   }

@@ -102,7 +102,11 @@ class _OrderListScreenState extends State<OrderListScreen> {
       arguments: {
         'authService': widget.authService,
       },
-    );
+    ).then((result) {
+      if (result == true) {
+        _refresh();
+      }
+    });
   }
 
   void _openOrder(Order order) {
@@ -113,7 +117,11 @@ class _OrderListScreenState extends State<OrderListScreen> {
         'authService': widget.authService,
         'order': order,
       },
-    );
+    ).then((result) {
+      if (result == true) {
+        _refresh();
+      }
+    });
   }
 
   Color _statusColor(String status) {
