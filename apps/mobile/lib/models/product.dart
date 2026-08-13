@@ -10,6 +10,10 @@ class Product {
   final String? publicId;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final String? storeName;
+  final String? storeAddress;
+  final String? storePhone;
+  final String? storeLogo;
 
   Product({
     required this.id,
@@ -23,6 +27,10 @@ class Product {
     this.publicId,
     this.createdAt,
     this.updatedAt,
+    this.storeName,
+    this.storeAddress,
+    this.storePhone,
+    this.storeLogo,
   });
 
   factory Product.fromJson(Map<String, dynamic> json) {
@@ -46,6 +54,10 @@ class Product {
       updatedAt: json['updatedAt'] != null
           ? DateTime.tryParse(json['updatedAt'])
           : null,
+      storeName: json['storeName'],
+      storeAddress: json['storeAddress'],
+      storePhone: json['storePhone'],
+      storeLogo: json['storeLogo'],
     );
   }
 
@@ -62,6 +74,10 @@ class Product {
       'publicId': publicId,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'storeName': storeName,
+      'storeAddress': storeAddress,
+      'storePhone': storePhone,
+      'storeLogo': storeLogo,
     };
   }
 }

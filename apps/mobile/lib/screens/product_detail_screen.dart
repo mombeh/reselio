@@ -213,77 +213,111 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                     ),
             ),
 
-            const SizedBox(height: 20),
+             const SizedBox(height: 20),
 
-            // Name + stock
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: Text(
-                    product.name,
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                _buildStockBadge(),
-              ],
-            ),
+             // Name + stock
+             Row(
+               crossAxisAlignment: CrossAxisAlignment.start,
+               children: [
+                 Expanded(
+                   child: Text(
+                     product.name,
+                     style: const TextStyle(
+                       fontSize: 24,
+                       fontWeight: FontWeight.bold,
+                     ),
+                   ),
+                 ),
+                 const SizedBox(width: 12),
+                 _buildStockBadge(),
+               ],
+             ),
 
-            const SizedBox(height: 8),
+             const SizedBox(height: 8),
 
-            // Category
-            Row(
-              children: [
-                Icon(
-                  Icons.category_outlined,
-                  size: 18,
-                  color: Colors.grey.shade600,
-                ),
-                const SizedBox(width: 6),
-                Text(
-                  product.category,
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-              ],
-            ),
+             // Category
+             Row(
+               children: [
+                 Icon(
+                   Icons.category_outlined,
+                   size: 18,
+                   color: Colors.grey.shade600,
+                 ),
+                 const SizedBox(width: 6),
+                 Text(
+                   product.category,
+                   style: TextStyle(
+                     fontSize: 14,
+                     color: Colors.grey.shade600,
+                   ),
+                 ),
+               ],
+             ),
 
-            const SizedBox(height: 20),
+             const SizedBox(height: 20),
 
-            // Price
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.deepPurple.shade50,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Selling Price',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  Text(
-                    '\$${product.price.toStringAsFixed(2)}',
-                    style: const TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.deepPurple,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+             // Price
+             Container(
+               padding: const EdgeInsets.all(20),
+               decoration: BoxDecoration(
+                 color: Colors.deepPurple.shade50,
+                 borderRadius: BorderRadius.circular(16),
+               ),
+               child: Row(
+                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                 children: [
+                   const Text(
+                     'Selling Price',
+                     style: TextStyle(
+                       fontSize: 15,
+                       fontWeight: FontWeight.w500,
+                     ),
+                   ),
+                   Text(
+                     '${product.price.toStringAsFixed(0)} FCFA',
+                     style: const TextStyle(
+                       fontSize: 26,
+                       fontWeight: FontWeight.bold,
+                       color: Colors.deepPurple,
+                     ),
+                   ),
+                 ],
+               ),
+             ),
+
+             if (product.storeName != null &&
+                 product.storeName!.isNotEmpty) ...[
+               const SizedBox(height: 12),
+               _buildSection(
+                 title: 'Seller Information',
+                 icon: Icons.store_outlined,
+                 child: Column(
+                   crossAxisAlignment: CrossAxisAlignment.start,
+                   children: [
+                     _buildInfoRow(
+                       'Store',
+                       product.storeName!,
+                     ),
+                     if (product.storePhone != null &&
+                         product.storePhone!.isNotEmpty) ...[
+                       const Divider(height: 24),
+                       _buildInfoRow(
+                         'Phone',
+                         product.storePhone!,
+                       ),
+                     ],
+                     if (product.storeAddress != null &&
+                         product.storeAddress!.isNotEmpty) ...[
+                       const Divider(height: 24),
+                       _buildInfoRow(
+                         'Address',
+                         product.storeAddress!,
+                       ),
+                     ],
+                   ],
+                 ),
+               ),
+             ],
 
             const SizedBox(height: 20),
 

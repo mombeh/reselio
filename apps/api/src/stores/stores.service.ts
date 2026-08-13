@@ -47,4 +47,18 @@ export class StoresService {
     }
     return store;
   }
+
+  async getPublicStore(userId: string) {
+    const store = await this.storeModel.findOne({ userId });
+    if (!store) {
+      return null;
+    }
+    return {
+      name: store.name,
+      description: store.description,
+      phone: store.phone,
+      address: store.address,
+      logo: store.logo,
+    };
+  }
 }

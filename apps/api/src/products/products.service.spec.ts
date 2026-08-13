@@ -16,6 +16,11 @@ describe('ProductsService', () => {
     findOne: jest.fn(),
   };
 
+  const mockStoreModel = {
+    find: jest.fn(),
+    findOne: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -27,6 +32,10 @@ describe('ProductsService', () => {
         {
           provide: getModelToken('OrderItem'),
           useValue: mockOrderItemModel,
+        },
+        {
+          provide: getModelToken('Store'),
+          useValue: mockStoreModel,
         },
       ],
     }).compile();

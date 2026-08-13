@@ -42,6 +42,39 @@ export class ProductsController {
     return this.productsService.create(req.user.userId, createProductDto);
   }
 
+  @Get('public')
+  async findAllPublic(
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ) {
+    return this.productsService.findAllPublic(search, category);
+  }
+
+  @Get('public/:publicId')
+  async getPublicProduct(@Param('publicId') publicId: string) {
+    const product = await this.productsService.findByPublicId(publicId);
+    if (!product) {
+      return {
+        name: null,
+        description: null,
+        price: null,
+        imageUrl: null,
+        storeName: null,
+        quantity: 0,
+        availability: 'Out of Stock',
+      };
+    }
+    return {
+      name: product.name,
+      description: product.description,
+      price: product.price,
+      imageUrl: product.imageUrl,
+      storeName: (product as any).storeId?.name || null,
+      quantity: product.quantity,
+      availability: this.productsService.getStockStatus(product.quantity),
+    };
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Get()
   findAll(@Req() req: any, @Query('search') search?: string, @Query('category') category?: string) {
@@ -74,31 +107,6 @@ export class ProductsController {
   @Get(':id/share')
   getShareUrl(@Param('id') id: string, @Req() req: any) {
     return this.productsService.getShareUrl(id, req.user.userId);
-  }
-
-  @Get('public/:publicId')
-  async getPublicProduct(@Param('publicId') publicId: string) {
-    const product = await this.productsService.findByPublicId(publicId);
-    if (!product) {
-      return {
-        name: null,
-        description: null,
-        price: null,
-        imageUrl: null,
-        storeName: null,
-        quantity: 0,
-        availability: 'Out of Stock',
-      };
-    }
-    return {
-      name: product.name,
-      description: product.description,
-      price: product.price,
-      imageUrl: product.imageUrl,
-      storeName: (product as any).storeId?.name || null,
-      quantity: product.quantity,
-      availability: this.productsService.getStockStatus(product.quantity),
-    };
   }
 
   @UseGuards(AuthGuard('jwt'))
