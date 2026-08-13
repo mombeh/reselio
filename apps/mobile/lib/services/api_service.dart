@@ -204,6 +204,20 @@ class ApiService {
     return data.map((item) => Product.fromJson(item)).toList();
   }
 
+  Future<List<Product>> getPublicProducts({String? search, String? category}) async {
+    final params = <String, dynamic>{};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (category != null && category.isNotEmpty) params['category'] = category;
+    final response = await dio.get('/products/public', queryParameters: params);
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => Product.fromJson(item)).toList();
+  }
+
+  Future<Map<String, dynamic>> getPublicStore(String userId) async {
+    final response = await dio.get('/stores/public/$userId');
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<Product> createProduct({
     required String name,
     required String description,
