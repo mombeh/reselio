@@ -5,10 +5,12 @@ import 'package:mobile/services/auth_service.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final AuthService authService;
+  final List<Map<String, dynamic>>? initialItems;
 
   const CreateOrderScreen({
     super.key,
     required this.authService,
+    this.initialItems,
   });
 
   @override
@@ -37,6 +39,20 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
     _productsFuture =
         widget.authService.apiService.getProducts();
+
+    if (widget.initialItems != null) {
+      for (final item in widget.initialItems!) {
+        _items.add(
+          OrderItemData(
+            productId: item['productId'] as String,
+            productName: item['productName'] as String,
+            unitPrice: (item['unitPrice'] as num).toDouble(),
+            quantity: item['quantity'] as int,
+            productImageUrl: item['productImageUrl'] as String?,
+          ),
+        );
+      }
+    }
 
     _advanceController.addListener(() {
       setState(() {});

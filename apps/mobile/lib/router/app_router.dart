@@ -193,7 +193,10 @@ class AppRouter {
         );
       case createOrder:
         return MaterialPageRoute(
-          builder: (_) => CreateOrderScreen(authService: authService!),
+          builder: (_) => CreateOrderScreen(
+            authService: authService!,
+            initialItems: args['initialItems'] as List<Map<String, dynamic>>?,
+          ),
           settings: settings,
         );
       case orderDetail:
