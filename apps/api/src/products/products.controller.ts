@@ -101,6 +101,14 @@ export class ProductsController {
     };
   }
 
+  @Get('public')
+  async findAllPublic(
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ) {
+    return this.productsService.findAllPublic(search, category);
+  }
+
   @UseGuards(AuthGuard('jwt'))
   @Post('upload')
   @UseInterceptors(FileInterceptor('file', { storage }))

@@ -6,12 +6,14 @@ import { Product, ProductDocument } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { OrderItem, OrderItemDocument } from '../orders/schemas/order-item.schema';
+import { Store, StoreDocument } from '../stores/schemas/store.schema';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(OrderItem.name) private orderItemModel: Model<OrderItemDocument>,
+    @InjectModel(Store.name) private storeModel: Model<StoreDocument>,
   ) {}
 
   private generatePublicId(): string {
@@ -114,5 +116,46 @@ export class ProductsService {
     if (quantity <= 0) return 'Out of Stock';
     if (quantity < 5) return 'Low Stock';
     return 'In Stock';
+  }
+
+  async findAllPublic(search?: string, category?: string) {
+    const filter: Record<string, unknown> = {};
+
+    if (category && category.length > 0) {
+      filter.category = category;
+    }
+
+    if (search && search.length > 0) {
+      filter.name = { $regex: search, $options: 'i' };
+    }
+
+    const products = await this.productModel.find(filter).sort({ createdAt: -1 });
+
+    const storeIds = [...new Set(products.map((p) => p.storeId))];
+    const stores = await this.storeModel
+      .find({ userId: { $in: storeIds } })
+      .select('name address phone logo description');
+
+    const storeMap = new Map(stores.map((s) => [s.userId, s]));
+
+    return products.map((p) => {
+      const store = storeMap.get(p.storeId);
+      return {
+        _id: p._id,
+        storeId: p.storeId,
+        name: p.name,
+        description: p.description,
+        price: p.price,
+        quantity: p.quantity,
+        category: p.category,
+        imageUrl: p.imageUrl,
+        publicId: p.publicId,
+        storeName: store?.name || null,
+        storeAddress: store?.address || null,
+        storePhone: store?.phone || null,
+        storeLogo: store?.logo || null,
+        availability: this.getStockStatus(p.quantity),
+      };
+    });
   }
 }

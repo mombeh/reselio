@@ -6,6 +6,7 @@ import {
   Req,
   Get,
   Patch,
+  Param,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { StoresService } from './stores.service';
@@ -32,5 +33,10 @@ export class StoresController {
   @Patch('my-store')
   updateStore(@Body() updateStoreDto: UpdateStoreDto, @Req() req: any) {
     return this.storesService.updateStore(req.user.userId, updateStoreDto);
+  }
+
+  @Get('public/:userId')
+  async getPublicStore(@Param('userId') userId: string) {
+    return this.storesService.getPublicStore(userId);
   }
 }
