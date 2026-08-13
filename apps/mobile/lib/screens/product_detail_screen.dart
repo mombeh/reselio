@@ -24,6 +24,8 @@ class ProductDetailScreen extends StatefulWidget {
 class _ProductDetailScreenState extends State<ProductDetailScreen> {
   String? _cachedShareUrl;
   bool _isFetchingShareUrl = false;
+  int _selectedQuantity = 1;
+  bool _isFavorite = false;
 
   Future<void> _ensureShareUrl() async {
     if (_cachedShareUrl != null) return;
@@ -116,6 +118,74 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
       widget.authService != null ||
       widget.shareUrl != null ||
       widget.product.publicId != null;
+
+  bool get _isCustomer =>
+      widget.authService?.currentUser?.role == 'customer';
+
+  bool get _isSellerOrAdmin =>
+      widget.authService != null &&
+      (widget.authService!.currentUser?.role == 'client' ||
+          widget.authService!.currentUser?.role == 'admin');
+
+  void _incrementQuantity() {
+    if (_selectedQuantity < widget.product.quantity) {
+      setState(() {
+        _selectedQuantity++;
+      });
+    }
+  }
+
+  void _decrementQuantity() {
+    if (_selectedQuantity > 1) {
+      setState(() {
+        _selectedQuantity--;
+      });
+    }
+  }
+
+  void _toggleFavorite() {
+    setState(() {
+      _isFavorite = !_isFavorite;
+    });
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          _isFavorite ? 'Added to favorites' : 'Removed from favorites',
+        ),
+        duration: const Duration(seconds: 1),
+      ),
+    );
+  }
+
+  Future<void> _prepareOrder() async {
+    if (_selectedQuantity > widget.product.quantity) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Selected quantity exceeds available stock'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    await Navigator.pushNamed(
+      context,
+      AppRouter.createOrder,
+      arguments: {
+        'authService': widget.authService!,
+        'initialItems': [
+          {
+            'productId': widget.product.id,
+            'productName': widget.product.name,
+            'unitPrice': widget.product.price,
+            'quantity': _selectedQuantity,
+            'productImageUrl': widget.product.imageUrl,
+          },
+        ],
+      },
+    );
+  }
 
   Color get _stockColor {
     if (widget.product.quantity == 0) {
@@ -384,40 +454,122 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               ),
             ),
 
-            const SizedBox(height: 24),
+             const SizedBox(height: 24),
 
-            // Edit button
-            if (widget.authService != null)
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton.icon(
-                  onPressed: () async {
-                    await Navigator.pushNamed(
-                      context,
-                      AppRouter.addProduct,
-                      arguments: {
-                        'authService': widget.authService,
-                        'product': product,
-                      },
-                    );
+             if (_isCustomer)
+               Column(
+                 children: [
+                   Row(
+                     children: [
+                       Expanded(
+                         child: _buildQuantitySelector(),
+                       ),
+                       const SizedBox(width: 12),
+                       IconButton(
+                         onPressed: _toggleFavorite,
+                         icon: Icon(
+                           _isFavorite
+                               ? Icons.favorite
+                               : Icons.favorite_border,
+                           color: _isFavorite
+                               ? Colors.red
+                               : Colors.grey,
+                         ),
+                         tooltip: 'Favorite',
+                       ),
+                     ],
+                   ),
+                   const SizedBox(height: 12),
+                   SizedBox(
+                     width: double.infinity,
+                     height: 56,
+                     child: ElevatedButton.icon(
+                       onPressed: widget.product.quantity > 0
+                           ? _prepareOrder
+                           : null,
+                       icon: const Icon(Icons.shopping_bag_outlined),
+                       label: Text(
+                         widget.product.quantity > 0
+                             ? 'Prepare Order'
+                             : 'Out of Stock',
+                       ),
+                       style: ElevatedButton.styleFrom(
+                         backgroundColor: Colors.deepPurple,
+                         foregroundColor: Colors.white,
+                         shape: RoundedRectangleBorder(
+                           borderRadius: BorderRadius.circular(18),
+                         ),
+                         elevation: 0,
+                       ),
+                     ),
+                   ),
+                 ],
+               )
+             else if (_isSellerOrAdmin)
+               SizedBox(
+                 width: double.infinity,
+                 child: ElevatedButton.icon(
+                   onPressed: () async {
+                     await Navigator.pushNamed(
+                       context,
+                       AppRouter.addProduct,
+                       arguments: {
+                         'authService': widget.authService,
+                         'product': product,
+                       },
+                     );
 
-                    if (!mounted) return;
+                     if (!mounted) return;
 
-                    // The list screen can refresh when the user returns.
-                    setState(() {});
-                  },
-                  icon: const Icon(Icons.edit_outlined),
-                  label: const Text(
-                    'Edit Product',
-                    style: TextStyle(fontSize: 16),
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-              ),
+                     setState(() {});
+                   },
+                   icon: const Icon(Icons.edit_outlined),
+                   label: const Text(
+                     'Edit Product',
+                     style: TextStyle(fontSize: 16),
+                   ),
+                   style: ElevatedButton.styleFrom(
+                     padding: const EdgeInsets.symmetric(vertical: 16),
+                   ),
+                 ),
+               ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildQuantitySelector() {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: Colors.grey.shade300),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          IconButton(
+            onPressed: _decrementQuantity,
+            icon: const Icon(Icons.remove_circle_outline),
+            color: Colors.deepPurple,
+          ),
+          Text(
+            '$_selectedQuantity',
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          IconButton(
+            onPressed: _incrementQuantity,
+            icon: const Icon(Icons.add_circle_outline),
+            color: _selectedQuantity >= widget.product.quantity
+                ? Colors.grey
+                : Colors.deepPurple,
+          ),
+        ],
       ),
     );
   }
