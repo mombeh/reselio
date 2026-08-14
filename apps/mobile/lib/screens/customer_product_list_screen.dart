@@ -19,6 +19,7 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
   String _searchQuery = '';
   String? _selectedCategory;
   late Future<List<Product>> _productsFuture;
+  final Set<String> _favoriteProductIds = {};
 
   final List<Map<String, String?>> _categories = [
     {'label': 'All', 'value': null},
@@ -32,6 +33,7 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
   void initState() {
     super.initState();
     _loadProducts();
+    _loadFavorites();
   }
 
   void _loadProducts() {
@@ -41,10 +43,54 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
     );
   }
 
+  Future<void> _loadFavorites() async {
+    try {
+      final favorites = await widget.authService.apiService.getFavorites();
+      if (mounted) {
+        setState(() {
+          _favoriteProductIds.clear();
+          _favoriteProductIds.addAll(
+            favorites.map((f) => f['productId'] as String),
+          );
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> _toggleFavorite(String productId) async {
+    final isFavorite = _favoriteProductIds.contains(productId);
+    try {
+      if (isFavorite) {
+        await widget.authService.apiService.removeFavorite(productId);
+        setState(() {
+          _favoriteProductIds.remove(productId);
+        });
+      } else {
+        await widget.authService.apiService.addFavorite(productId);
+        setState(() {
+          _favoriteProductIds.add(productId);
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.authService.apiService.getErrorMessage(e),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   void _refresh() {
     setState(() {
       _loadProducts();
     });
+    _loadFavorites();
   }
 
   void _applyFilter(String? category) {
@@ -299,6 +345,7 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
 
   Widget _buildProductCard(Product product) {
     final availability = _availabilityInfo(product.quantity);
+    final isFavorite = _favoriteProductIds.contains(product.id);
 
     return GestureDetector(
       onTap: () => _openProductDetails(product),
@@ -321,7 +368,32 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Expanded(
-              child: _buildProductImage(product),
+              child: Stack(
+                children: [
+                  _buildProductImage(product),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: () => _toggleFavorite(product.id),
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.9),
+                          shape: BoxShape.circle,
+                        ),
+                        child: Icon(
+                          isFavorite
+                              ? Icons.favorite
+                              : Icons.favorite_border,
+                          color: isFavorite ? Colors.red : Colors.grey,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             Padding(
               padding: const EdgeInsets.all(12),

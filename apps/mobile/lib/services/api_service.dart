@@ -496,6 +496,38 @@ class ApiService {
     await dio.post('/auth/logout');
   }
 
+  Future<void> addFavorite(String productId) async {
+    await dio.post('/favorites', data: {'productId': productId});
+  }
+
+  Future<void> removeFavorite(String productId) async {
+    await dio.delete('/favorites/$productId');
+  }
+
+  Future<List<Map<String, dynamic>>> getFavorites() async {
+    final response = await dio.get('/favorites');
+    return response.data as List<Map<String, dynamic>>;
+  }
+
+  Future<Map<String, dynamic>> getMyOrders({String? status, int page = 1, int limit = 10}) async {
+    final params = <String, dynamic>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+    if (status != null && status.isNotEmpty) params['status'] = status;
+
+    final response = await dio.get('/orders/my-orders', queryParameters: params);
+    final data = response.data as Map<String, dynamic>;
+    final List<dynamic> ordersList = data['data'] as List;
+    return {
+      'orders': ordersList.map((item) => Order.fromJson(item)).toList(),
+      'total': data['total'] as int,
+      'page': data['page'] as int,
+      'limit': data['limit'] as int,
+      'totalPages': data['totalPages'] as int,
+    };
+  }
+
   Future<String?> getToken() async {
     return prefs.getString(tokenKey);
   }

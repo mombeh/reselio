@@ -12,6 +12,8 @@ import 'package:mobile/screens/create_store_screen.dart';
 import 'package:mobile/screens/my_store_screen.dart';
 import 'package:mobile/screens/product_list_screen.dart';
 import 'package:mobile/screens/customer_product_list_screen.dart';
+import 'package:mobile/screens/favorites_screen.dart';
+import 'package:mobile/screens/my_products_screen.dart';
 import 'package:mobile/screens/add_product_screen.dart';
 import 'package:mobile/screens/product_detail_screen.dart';
 import 'package:mobile/screens/customer_list_screen.dart';
@@ -44,6 +46,8 @@ class AppRouter {
   static const String myStore = '/my-store';
   static const String productList = '/product-list';
   static const String customerProductList = '/customer-product-list';
+  static const String favorites = '/favorites';
+  static const String myProducts = '/my-products';
   static const String addProduct = '/add-product';
   static const String productDetail = '/product-detail';
   static const String customerList = '/customer-list';
@@ -134,6 +138,16 @@ class AppRouter {
       case customerProductList:
         return MaterialPageRoute(
           builder: (_) => CustomerProductListScreen(authService: authService!),
+          settings: settings,
+        );
+      case favorites:
+        return MaterialPageRoute(
+          builder: (_) => FavoritesScreen(authService: authService!),
+          settings: settings,
+        );
+      case myProducts:
+        return MaterialPageRoute(
+          builder: (_) => MyProductsScreen(authService: authService!),
           settings: settings,
         );
       case addProduct:

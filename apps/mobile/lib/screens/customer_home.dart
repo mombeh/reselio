@@ -63,14 +63,14 @@ class CustomerHome extends StatelessWidget {
             const SizedBox(height: 12),
             Card(
               child: ListTile(
-                leading: const Icon(Icons.notifications_outlined, color: Colors.deepOrange),
-                title: const Text('Notifications'),
-                subtitle: const Text('View your notifications'),
+                leading: const Icon(Icons.favorite, color: Colors.red),
+                title: const Text('Favorites'),
+                subtitle: const Text('View your saved products'),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
                   Navigator.pushNamed(
                     context,
-                    AppRouter.notifications,
+                    AppRouter.favorites,
                     arguments: {'authService': authService},
                   );
                 },
@@ -80,12 +80,14 @@ class CustomerHome extends StatelessWidget {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.shopping_bag, color: Colors.blue),
-                title: const Text('My Orders'),
-                subtitle: const Text('View and track your orders'),
+                title: const Text('My Products'),
+                subtitle: const Text('Products you have purchased'),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Orders feature coming soon')),
+                  Navigator.pushNamed(
+                    context,
+                    AppRouter.myProducts,
+                    arguments: {'authService': authService},
                   );
                 },
               ),
@@ -93,13 +95,15 @@ class CustomerHome extends StatelessWidget {
             const SizedBox(height: 12),
             Card(
               child: ListTile(
-                leading: const Icon(Icons.favorite_border, color: Colors.red),
-                title: const Text('Favorites'),
-                subtitle: const Text('Your saved items'),
+                leading: const Icon(Icons.notifications_outlined, color: Colors.deepOrange),
+                title: const Text('Notifications'),
+                subtitle: const Text('View your notifications'),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Favorites feature coming soon')),
+                  Navigator.pushNamed(
+                    context,
+                    AppRouter.notifications,
+                    arguments: {'authService': authService},
                   );
                 },
               ),
