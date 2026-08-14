@@ -23,6 +23,7 @@ import 'package:mobile/screens/order_list_screen.dart';
 import 'package:mobile/screens/create_order_screen.dart';
 import 'package:mobile/screens/notification_screen.dart';
 import 'package:mobile/screens/order_detail_screen.dart';
+import 'package:mobile/screens/order_confirmation_screen.dart';
 import 'package:mobile/screens/dashboard_screen.dart';
 import 'package:mobile/screens/reports_screen.dart';
 import 'package:mobile/screens/shared_product_screen.dart';
@@ -56,6 +57,7 @@ class AppRouter {
   static const String orderList = '/order-list';
   static const String createOrder = '/create-order';
   static const String orderDetail = '/order-detail';
+  static const String orderConfirmation = '/order-confirmation';
   static const String dashboard = '/dashboard';
   static const String reports = '/reports';
   static const String sharedProduct = '/shared-product';
@@ -216,6 +218,14 @@ class AppRouter {
       case orderDetail:
         return MaterialPageRoute(
           builder: (_) => OrderDetailScreen(
+            authService: authService!,
+            order: args['order'] as Order,
+          ),
+          settings: settings,
+        );
+      case orderConfirmation:
+        return MaterialPageRoute(
+          builder: (_) => OrderConfirmationScreen(
             authService: authService!,
             order: args['order'] as Order,
           ),

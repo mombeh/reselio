@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/models/customer.dart';
 import 'package:mobile/models/product.dart';
+import 'package:mobile/router/app_router.dart';
 import 'package:mobile/services/auth_service.dart';
 
 class CreateOrderScreen extends StatefulWidget {
@@ -181,7 +182,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           )
           .toList();
 
-      await widget.authService.apiService.createOrder(
+      final order = await widget.authService.apiService.createOrder(
         customerId: _selectedCustomer!.id,
         items: items,
         advancePaid: _advance,
@@ -189,14 +190,29 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Order created successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      setState(() {
+        _isSubmitting = false;
+      });
 
-      Navigator.pop(context, true);
+      if (widget.initialItems != null) {
+        Navigator.pushReplacementNamed(
+          context,
+          AppRouter.orderConfirmation,
+          arguments: {
+            'authService': widget.authService,
+            'order': order,
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Order created successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pop(context, true);
+      }
     } catch (e) {
       if (!mounted) return;
 
