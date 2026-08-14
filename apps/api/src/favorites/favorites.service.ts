@@ -37,22 +37,24 @@ export class FavoritesService {
   async findByUser(userId: string) {
     const favorites = await this.favoriteModel
       .find({ userId })
-      .sort({ createdAt: -1 });
+      .sort({ createdAt: -1 })
+      .lean();
 
     const productIds = favorites.map((f) => f.productId);
     const products = await this.productModel
       .find({ _id: { $in: productIds } })
-      .select('name description price quantity category imageUrl publicId');
+      .select('name description price quantity category imageUrl publicId')
+      .lean();
 
     const productMap = new Map(products.map((p) => [p._id.toString(), p]));
 
     return favorites
-      .filter((f) => productMap.has(f.productId))
+      .filter((f) => productMap.has(f.productId.toString()))
       .map((f) => ({
         _id: f._id,
-        productId: f.productId,
-        createdAt: (f as any).createdAt,
-        product: productMap.get(f.productId),
+        productId: f.productId.toString(),
+        createdAt: f.createdAt,
+        product: productMap.get(f.productId.toString()),
       }));
   }
 }
