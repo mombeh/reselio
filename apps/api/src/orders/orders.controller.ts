@@ -35,7 +35,7 @@ export class OrdersController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  getMyOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
+  getAllOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
     return this.ordersService.findAllByStore(req.user.userId, query);
   }
 

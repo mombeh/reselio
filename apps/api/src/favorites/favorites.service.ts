@@ -51,7 +51,7 @@ export class FavoritesService {
       .map((f) => ({
         _id: f._id,
         productId: f.productId,
-        createdAt: f.createdAt,
+        createdAt: (f as any).createdAt,
         product: productMap.get(f.productId),
       }));
   }
