@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/models/customer.dart';
 import 'package:mobile/models/product.dart';
+import 'package:mobile/router/app_router.dart';
 import 'package:mobile/services/auth_service.dart';
 
 class CreateOrderScreen extends StatefulWidget {
@@ -29,13 +30,22 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
   String? _error;
   bool _isSubmitting = false;
+  bool _isCustomer = false;
+  String? _resolvedCustomerId;
+  bool _isResolvingCustomer = false;
 
   @override
   void initState() {
     super.initState();
 
-    _customersFuture =
-        widget.authService.apiService.getCustomersForOrder();
+    _isCustomer = widget.authService.currentUser?.role == 'customer';
+
+    if (_isCustomer) {
+      _resolveCustomerProfile();
+    } else {
+      _customersFuture =
+          widget.authService.apiService.getCustomersForOrder();
+    }
 
     _productsFuture =
         widget.authService.apiService.getProducts();
@@ -57,6 +67,32 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     _advanceController.addListener(() {
       setState(() {});
     });
+  }
+
+  Future<void> _resolveCustomerProfile() async {
+    setState(() {
+      _isResolvingCustomer = true;
+    });
+
+    try {
+      final customers = await widget.authService.apiService.getCustomersForOrder();
+      final profile = customers.firstWhereOrNull(
+        (c) => c.storeId == widget.authService.currentUser?.id,
+      );
+
+      if (mounted) {
+        setState(() {
+          _resolvedCustomerId = profile?.id;
+          _isResolvingCustomer = false;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _isResolvingCustomer = false;
+        });
+      }
+    }
   }
 
   @override
@@ -126,7 +162,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   }
 
   Future<void> _submit() async {
-    if (_selectedCustomer == null) {
+    if (!_isCustomer && _selectedCustomer == null) {
       setState(() {
         _error = 'Please select a customer';
       });
@@ -181,22 +217,37 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           )
           .toList();
 
-      await widget.authService.apiService.createOrder(
-        customerId: _selectedCustomer!.id,
+      final order = await widget.authService.apiService.createOrder(
+        customerId: _resolvedCustomerId,
         items: items,
         advancePaid: _advance,
       );
 
       if (!mounted) return;
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Order created successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
+      setState(() {
+        _isSubmitting = false;
+      });
 
-      Navigator.pop(context, true);
+      if (widget.initialItems != null) {
+        Navigator.pushReplacementNamed(
+          context,
+          AppRouter.orderConfirmation,
+          arguments: {
+            'authService': widget.authService,
+            'order': order,
+          },
+        );
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Order created successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+
+        Navigator.pop(context, true);
+      }
     } catch (e) {
       if (!mounted) return;
 
@@ -343,18 +394,20 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
-        title: const Column(
+        title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'New Order',
-              style: TextStyle(
+              _isCustomer ? 'Place Order' : 'New Order',
+              style: const TextStyle(
                 fontWeight: FontWeight.bold,
               ),
             ),
             Text(
-              'Create a new customer order',
-              style: TextStyle(
+              _isCustomer
+                  ? 'Place your order'
+                  : 'Create a new customer order',
+              style: const TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.normal,
               ),
@@ -397,9 +450,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                             mainAxisAlignment:
                                 MainAxisAlignment.center,
                             children: [
-                              const Text(
-                                'Create Order',
-                                style: TextStyle(
+                              Text(
+                                _isCustomer ? 'Place Order' : 'Create Order',
+                                style: const TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -424,9 +477,20 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
             const SizedBox(height: 16),
           ],
 
-          _buildCustomerSection(),
-
-          const SizedBox(height: 24),
+          if (!_isCustomer) ...[
+            _buildCustomerSection(),
+            const SizedBox(height: 24),
+          ] else if (_isResolvingCustomer) ...[
+            _buildSectionCard(
+              child: const SizedBox(
+                height: 60,
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
 
           _buildProductsSection(),
 

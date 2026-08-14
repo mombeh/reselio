@@ -397,12 +397,12 @@ class ApiService {
   }
 
   Future<Order> createOrder({
-    required String customerId,
+    String? customerId,
     required List<Map<String, dynamic>> items,
     double advancePaid = 0,
   }) async {
     final data = <String, dynamic>{
-      'customerId': customerId,
+      if (customerId != null) 'customerId': customerId,
       'items': items,
       'advancePaid': advancePaid,
     };
