@@ -53,7 +53,7 @@ export class FavoritesService {
       .map((f) => ({
         _id: f._id,
         productId: f.productId.toString(),
-        createdAt: f.createdAt,
+        createdAt: (f as any).createdAt,
         product: productMap.get(f.productId.toString()),
       }));
   }

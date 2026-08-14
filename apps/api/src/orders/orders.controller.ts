@@ -119,23 +119,6 @@ export class OrdersController {
   findOne(@Param('id') id: string, @Req() req: any) {
     return this.ordersService.findOne(id, req.user.userId);
   }
-  updateStatus(
-    @Param('id') orderId: string,
-    @Body() body: UpdateOrderStatusDto,
-    @Req() req: any,
-  ) {
-    return this.ordersService.updateStatus(
-      orderId,
-      body.status,
-      req.user.userId,
-    );
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get(':id')
-  findOne(@Param('id') id: string, @Req() req: any) {
-    return this.ordersService.findOne(id, req.user.userId);
-  }
 
   @UseGuards(AuthGuard('jwt'))
   @Patch(':id/status')
@@ -157,7 +140,6 @@ export class OrdersController {
     return this.ordersService.cancelOrder(orderId, req.user.userId);
   }
 
-  // Customer endpoints
   @UseGuards(AuthGuard('jwt'))
   @Post('customers')
   createCustomer(@Body() body: CreateCustomerDto, @Req() req: any) {
@@ -184,11 +166,5 @@ export class OrdersController {
   @Delete('customers/:id')
   deleteCustomer(@Param('id') id: string, @Req() req: any) {
     return this.customersService.remove(id, req.user.userId);
-  }
-
-  @UseGuards(AuthGuard('jwt'))
-  @Get('my-orders')
-  getMyOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
-    return this.ordersService.findMyOrders(req.user.userId, query);
   }
 }
