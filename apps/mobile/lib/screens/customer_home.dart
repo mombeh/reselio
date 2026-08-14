@@ -80,8 +80,8 @@ class CustomerHome extends StatelessWidget {
             Card(
               child: ListTile(
                 leading: const Icon(Icons.shopping_bag, color: Colors.blue),
-                title: const Text('My Products'),
-                subtitle: const Text('Products you have purchased'),
+                title: const Text('My Orders'),
+                subtitle: const Text('View your order history'),
                 trailing: const Icon(Icons.arrow_forward_ios),
                 onTap: () {
                   Navigator.pushNamed(

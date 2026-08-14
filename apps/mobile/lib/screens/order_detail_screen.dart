@@ -19,6 +19,7 @@ class OrderDetailScreen extends StatefulWidget {
 class _OrderDetailScreenState extends State<OrderDetailScreen> {
   late String _selectedStatus;
   bool _isUpdating = false;
+  bool _isCustomer = false;
 
   final Map<String, List<String>> _allowedTransitions = {
     'Pending': ['Confirmed', 'Preparing', 'Cancelled'],
@@ -43,6 +44,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   void initState() {
     super.initState();
     _selectedStatus = widget.order.status;
+    _isCustomer = widget.authService.currentUser?.role == 'customer';
   }
 
   Color _statusColor(String status) {
@@ -245,7 +247,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ],
         ),
         actions: [
-          if (order.status != 'Cancelled' &&
+          if (!_isCustomer &&
+              order.status != 'Cancelled' &&
               order.status != 'Delivered')
             IconButton(
               tooltip: 'Cancel order',
@@ -272,11 +275,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             _buildPaymentSummary(order),
             const SizedBox(height: 16),
             _buildOrderInformation(order),
-            if (_canUpdateStatus) ...[
+            if (!_isCustomer && _canUpdateStatus) ...[
               const SizedBox(height: 24),
               _buildStatusUpdateSection(),
             ],
-            if (order.status != 'Cancelled' &&
+            if (!_isCustomer &&
+                order.status != 'Cancelled' &&
                 order.status != 'Delivered') ...[
               const SizedBox(height: 16),
               _buildCancelButton(),
@@ -651,7 +655,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             valueColor:
                 order.balance > 0 ? Colors.orange : Colors.green,
           ),
-          if (order.profit != 0) ...[
+          if (!_isCustomer && order.profit != 0) ...[
             const SizedBox(height: 14),
             Container(
               padding: const EdgeInsets.symmetric(
