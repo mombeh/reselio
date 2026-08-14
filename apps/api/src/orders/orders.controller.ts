@@ -109,6 +109,29 @@ export class OrdersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('my-orders')
+  getMyOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
+    return this.ordersService.findMyOrders(req.user.userId, query);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get(':id')
+  findOne(@Param('id') id: string, @Req() req: any) {
+    return this.ordersService.findOne(id, req.user.userId);
+  }
+  updateStatus(
+    @Param('id') orderId: string,
+    @Body() body: UpdateOrderStatusDto,
+    @Req() req: any,
+  ) {
+    return this.ordersService.updateStatus(
+      orderId,
+      body.status,
+      req.user.userId,
+    );
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req: any) {
     return this.ordersService.findOne(id, req.user.userId);

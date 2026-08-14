@@ -31,9 +31,9 @@ export class CustomersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get(':id')
-  findOne(@Param('id') id: string, @Req() req: any) {
-    return this.customersService.findOne(id, req.user.userId);
+  @Get('me')
+  me(@Req() req: any) {
+    return this.customersService.findByUserId(req.user.userId);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -53,8 +53,8 @@ export class CustomersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Get('me')
-  me(@Req() req: any) {
-    return this.customersService.findByUserId(req.user.userId);
+  @Get(':id')
+  findOne(@Param('id') id: string, @Req() req: any) {
+    return this.customersService.findOne(id, req.user.userId);
   }
 }
