@@ -115,15 +115,71 @@ class CustomerHome extends StatelessWidget {
   }
 }
 
-class _ProductSection extends StatelessWidget {
+class _ProductSection extends StatefulWidget {
   final AuthService authService;
 
   const _ProductSection({required this.authService});
 
   @override
+  State<_ProductSection> createState() => __ProductSectionState();
+}
+
+class __ProductSectionState extends State<_ProductSection> {
+  final Set<String> _favoriteProductIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavorites();
+  }
+
+  Future<void> _loadFavorites() async {
+    try {
+      final favorites = await widget.authService.apiService.getFavorites();
+      if (mounted) {
+        setState(() {
+          _favoriteProductIds.clear();
+          _favoriteProductIds.addAll(
+            favorites.map((f) => f['productId'] as String),
+          );
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  Future<void> _toggleFavorite(String productId) async {
+    final isFavorite = _favoriteProductIds.contains(productId);
+    try {
+      if (isFavorite) {
+        await widget.authService.apiService.removeFavorite(productId);
+        setState(() {
+          _favoriteProductIds.remove(productId);
+        });
+      } else {
+        await widget.authService.apiService.addFavorite(productId);
+        setState(() {
+          _favoriteProductIds.add(productId);
+        });
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.authService.apiService.getErrorMessage(e),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return FutureBuilder<List<Product>>(
-      future: authService.apiService.getPublicProducts(),
+      future: widget.authService.apiService.getPublicProducts(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return const _ProductLoadingState();
@@ -137,7 +193,7 @@ class _ProductSection extends StatelessWidget {
                 (context as Element).markNeedsBuild();
               }
             },
-            errorMessage: authService.apiService.getErrorMessage(snapshot.error),
+            errorMessage: widget.authService.apiService.getErrorMessage(snapshot.error),
           );
         }
 
@@ -147,7 +203,12 @@ class _ProductSection extends StatelessWidget {
           return _ProductEmptyState();
         }
 
-        return _ProductGrid(products: products, authService: authService);
+        return _ProductGrid(
+          products: products,
+          authService: widget.authService,
+          favoriteProductIds: _favoriteProductIds,
+          onFavoriteToggle: _toggleFavorite,
+        );
       },
     );
   }
@@ -288,8 +349,15 @@ class _ProductEmptyState extends StatelessWidget {
 class _ProductGrid extends StatelessWidget {
   final List<Product> products;
   final AuthService authService;
+  final Set<String> favoriteProductIds;
+  final ValueChanged<String> onFavoriteToggle;
 
-  const _ProductGrid({required this.products, required this.authService});
+  const _ProductGrid({
+    required this.products,
+    required this.authService,
+    required this.favoriteProductIds,
+    required this.onFavoriteToggle,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -313,6 +381,7 @@ class _ProductGrid extends StatelessWidget {
             separatorBuilder: (_, _) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final product = products[index];
+              final isFavorite = favoriteProductIds.contains(product.id);
               return GestureDetector(
                 onTap: () {
                   Navigator.pushNamed(
@@ -333,50 +402,75 @@ class _ProductGrid extends StatelessWidget {
                       color: const Color(0xFFECEAF0),
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  child: Stack(
                     children: [
-                      Expanded(
-                        child: _buildProductImage(product),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(10),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              product.name,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w700,
-                                color: Color(0xFF202027),
-                              ),
-                            ),
-                            if (product.storeName != null &&
-                                product.storeName!.isNotEmpty) ...[
-                              const SizedBox(height: 3),
-                              Text(
-                                product.storeName!,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontSize: 10,
-                                  color: Color(0xFF888892),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: _buildProductImage(product),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.all(10),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  product.name,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w700,
+                                    color: Color(0xFF202027),
+                                  ),
                                 ),
-                              ),
-                            ],
-                            const SizedBox(height: 6),
-                            Text(
-                              _formatCurrency(product.price),
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: Color(0xFF6C4AB6),
-                              ),
+                                if (product.storeName != null &&
+                                    product.storeName!.isNotEmpty) ...[
+                                  const SizedBox(height: 3),
+                                  Text(
+                                    product.storeName!,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      color: Color(0xFF888892),
+                                    ),
+                                  ),
+                                ],
+                                const SizedBox(height: 6),
+                                Text(
+                                  _formatCurrency(product.price),
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w800,
+                                    color: Color(0xFF6C4AB6),
+                                  ),
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
+                        ],
+                      ),
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: GestureDetector(
+                          onTap: () => onFavoriteToggle(product.id),
+                          child: Container(
+                            padding: const EdgeInsets.all(6),
+                            decoration: BoxDecoration(
+                              color: Colors.white.withValues(alpha: 0.9),
+                              shape: BoxShape.circle,
+                            ),
+                            child: Icon(
+                              isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isFavorite ? Colors.red : Colors.grey,
+                              size: 18,
+                            ),
+                          ),
                         ),
                       ),
                     ],
