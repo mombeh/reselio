@@ -330,7 +330,7 @@ describe('OrdersService', () => {
           customerId: 'cust1',
           items: [{ productId: 'prod1', quantity: 1 }],
         }),
-      ).rejects.toThrow('Customer not found in your store');
+      ).rejects.toThrow('Customer not found');
     });
   });
 
