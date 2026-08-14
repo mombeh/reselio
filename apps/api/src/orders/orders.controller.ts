@@ -35,7 +35,7 @@ export class OrdersController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  getMyOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
+  getAllOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
     return this.ordersService.findAllByStore(req.user.userId, query);
   }
 
@@ -109,6 +109,12 @@ export class OrdersController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Get('my-orders')
+  getMyOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
+    return this.ordersService.findMyOrders(req.user.userId, query);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   findOne(@Param('id') id: string, @Req() req: any) {
     return this.ordersService.findOne(id, req.user.userId);
@@ -134,7 +140,6 @@ export class OrdersController {
     return this.ordersService.cancelOrder(orderId, req.user.userId);
   }
 
-  // Customer endpoints
   @UseGuards(AuthGuard('jwt'))
   @Post('customers')
   createCustomer(@Body() body: CreateCustomerDto, @Req() req: any) {

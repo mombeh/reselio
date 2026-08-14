@@ -26,6 +26,31 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
   bool _isFetchingShareUrl = false;
   int _selectedQuantity = 1;
   bool _isFavorite = false;
+  final Set<String> _favoriteProductIds = {};
+
+  @override
+  void initState() {
+    super.initState();
+    _loadFavoriteStatus();
+  }
+
+  Future<void> _loadFavoriteStatus() async {
+    if (widget.authService == null) return;
+    try {
+      final favorites = await widget.authService!.apiService.getFavorites();
+      if (mounted) {
+        setState(() {
+          _favoriteProductIds.clear();
+          _favoriteProductIds.addAll(
+            favorites.map((f) => f['productId'] as String),
+          );
+          _isFavorite = _favoriteProductIds.contains(widget.product.id);
+        });
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
 
   Future<void> _ensureShareUrl() async {
     if (_cachedShareUrl != null) return;
@@ -143,19 +168,46 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
   }
 
-  void _toggleFavorite() {
-    setState(() {
-      _isFavorite = !_isFavorite;
-    });
+  Future<void> _toggleFavorite() async {
+    if (widget.authService == null) return;
 
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(
-          _isFavorite ? 'Added to favorites' : 'Removed from favorites',
+    final isFavorite = _favoriteProductIds.contains(widget.product.id);
+
+    try {
+      if (isFavorite) {
+        await widget.authService!.apiService.removeFavorite(widget.product.id);
+        setState(() {
+          _favoriteProductIds.remove(widget.product.id);
+          _isFavorite = false;
+        });
+      } else {
+        await widget.authService!.apiService.addFavorite(widget.product.id);
+        setState(() {
+          _favoriteProductIds.add(widget.product.id);
+          _isFavorite = true;
+        });
+      }
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            _isFavorite ? 'Added to favorites' : 'Removed from favorites',
+          ),
+          duration: const Duration(seconds: 1),
         ),
-        duration: const Duration(seconds: 1),
-      ),
-    );
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            widget.authService!.apiService.getErrorMessage(e),
+          ),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
   }
 
   Future<void> _prepareOrder() async {

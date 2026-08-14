@@ -548,4 +548,39 @@ export class OrdersService {
     const parser = new Parser({ fields });
     return parser.parse(orders.data);
   }
+
+  async findMyOrders(userId: string, query: any) {
+    const customer = await this.customerModel.findOne({ userId });
+    if (!customer) {
+      return { data: [], total: 0, page: 1, limit: 10, totalPages: 0 };
+    }
+
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const filter: any = { customerId: customer._id };
+
+    if (query.status) {
+      filter.status = query.status;
+    }
+
+    const total = await this.orderModel.countDocuments(filter);
+
+    const orders = await this.orderModel
+      .find(filter)
+      .populate('customerId', 'fullName phoneNumber email')
+      .populate('orderItems.productId', 'name price imageUrl')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return {
+      data: orders,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
 }
