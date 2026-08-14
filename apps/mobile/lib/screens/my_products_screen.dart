@@ -149,8 +149,8 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final status = statuses[index];
-          final value = status['value'] as String?;
-          final label = status['label'] as String;
+          final value = status['value'];
+          final label = status['label']!;
           final isSelected = _selectedStatus == value;
 
           return GestureDetector(
