@@ -506,7 +506,7 @@ class ApiService {
 
   Future<List<Map<String, dynamic>>> getFavorites() async {
     final response = await dio.get('/favorites');
-    return response.data as List<Map<String, dynamic>>;
+    return List<Map<String, dynamic>>.from(response.data);
   }
 
   Future<Map<String, dynamic>> getMyOrders({String? status, int page = 1, int limit = 10}) async {

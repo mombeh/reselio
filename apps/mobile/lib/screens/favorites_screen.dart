@@ -16,7 +16,8 @@ class FavoritesScreen extends StatefulWidget {
 }
 
 class _FavoritesScreenState extends State<FavoritesScreen> {
-  late Future<List<Map<String, dynamic>>> _favoritesFuture;
+  late Future<List<Product>> _favoritesFuture;
+  final Set<String> _favoriteProductIds = {};
 
   @override
   void initState() {
@@ -24,10 +25,31 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     _loadFavorites();
   }
 
-  void _loadFavorites() {
-    setState(() {
-      _favoritesFuture = widget.authService.apiService.getFavorites();
-    });
+  Future<void> _loadFavorites() async {
+    try {
+      final favorites = await widget.authService.apiService.getFavorites();
+      final productIds = favorites
+          .map((f) => f['productId'] as String)
+          .toSet();
+
+      final products = await widget.authService.apiService.getPublicProducts();
+
+      if (mounted) {
+        setState(() {
+          _favoriteProductIds.clear();
+          _favoriteProductIds.addAll(productIds);
+          _favoritesFuture = Future.value(
+            products.where((p) => _favoriteProductIds.contains(p.id)).toList(),
+          );
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _favoritesFuture = Future.error(e);
+        });
+      }
+    }
   }
 
   Future<void> _removeFavorite(String productId) async {
@@ -90,7 +112,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           ],
         ),
       ),
-      body: FutureBuilder<List<Map<String, dynamic>>>(
+      body: FutureBuilder<List<Product>>(
         future: _favoritesFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -110,13 +132,10 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
           return ListView(
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-            children: favorites.map((favorite) {
-              final product = Product.fromJson(
-                (favorite['product'] as Map<String, dynamic>? ?? {}),
-              );
+            children: favorites.map((product) {
               return Padding(
                 padding: const EdgeInsets.only(bottom: 12),
-                child: _buildFavoriteCard(favorite['productId'] as String, product),
+                child: _buildFavoriteCard(product),
               );
             }).toList(),
           );
@@ -125,7 +144,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  Widget _buildFavoriteCard(String productId, Product product) {
+  Widget _buildFavoriteCard(Product product) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -198,7 +217,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
             ),
           ),
           IconButton(
-            onPressed: () => _removeFavorite(productId),
+            onPressed: () => _removeFavorite(product.id),
             icon: const Icon(
               Icons.favorite,
               color: Colors.red,
