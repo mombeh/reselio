@@ -22,6 +22,9 @@ export class Customer {
 
   @Prop()
   notes: string;
+
+  @Prop({ index: true })
+  userId: string;
 }
 
 export const CustomerSchema = SchemaFactory.createForClass(Customer);

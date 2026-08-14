@@ -12,6 +12,7 @@ import { CustomersModule } from './customers/customers.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportsModule } from './reports/reports.module';
 import { NotificationsModule } from './notifications/notifications.module';
+import { FavoritesModule } from './favorites/favorites.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { NotificationsModule } from './notifications/notifications.module';
     DashboardModule,
     ReportsModule,
     NotificationsModule,
+    FavoritesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

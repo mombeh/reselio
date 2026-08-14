@@ -51,4 +51,10 @@ export class CustomersController {
   remove(@Param('id') id: string, @Req() req: any) {
     return this.customersService.remove(id, req.user.userId);
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('me')
+  me(@Req() req: any) {
+    return this.customersService.findByUserId(req.user.userId);
+  }
 }

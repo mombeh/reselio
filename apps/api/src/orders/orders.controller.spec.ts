@@ -25,6 +25,7 @@ describe('OrdersController', () => {
     findCustomerById: jest.fn(),
     updateCustomer: jest.fn(),
     deleteCustomer: jest.fn(),
+    findMyOrders: jest.fn(),
   };
 
   const mockCustomersService = {
@@ -79,8 +80,8 @@ describe('OrdersController', () => {
   });
 
   describe('getMyOrders', () => {
-    it('should call service.findAllByStore with userId from request', async () => {
-      mockOrdersService.findAllByStore.mockResolvedValue({
+    it('should call service.findMyOrders with userId from request', async () => {
+      mockOrdersService.findMyOrders.mockResolvedValue({
         data: [{ _id: 'ord1' }],
         total: 1,
         page: 1,
@@ -89,13 +90,12 @@ describe('OrdersController', () => {
       });
 
       const result = await controller.getMyOrders(
-        { user: { userId: 'store1' } },
-        { page: '1', limit: '10' },
+        { user: { userId: 'user1' } },
+        { status: 'Delivered' },
       );
 
-      expect(mockOrdersService.findAllByStore).toHaveBeenCalledWith('store1', {
-        page: '1',
-        limit: '10',
+      expect(mockOrdersService.findMyOrders).toHaveBeenCalledWith('user1', {
+        status: 'Delivered',
       });
       expect(result.data[0]._id).toBe('ord1');
     });

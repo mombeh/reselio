@@ -162,4 +162,10 @@ export class OrdersController {
   deleteCustomer(@Param('id') id: string, @Req() req: any) {
     return this.customersService.remove(id, req.user.userId);
   }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Get('my-orders')
+  getMyOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
+    return this.ordersService.findMyOrders(req.user.userId, query);
+  }
 }

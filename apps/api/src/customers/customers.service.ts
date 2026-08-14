@@ -74,4 +74,8 @@ export class CustomersService {
     }
     return customer;
   }
+
+  async findByUserId(userId: string) {
+    return this.customerModel.findOne({ userId });
+  }
 }
