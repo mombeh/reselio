@@ -31,21 +31,29 @@ export class OrdersService {
   async create(storeId: string, createOrderDto: CreateOrderDto) {
     const { customerId, items = [], advancePaid = 0 } = createOrderDto;
 
-    const customer = await this.customerModel.findOne({
-      _id: customerId,
-      storeId,
-    });
-    if (!customer) {
-      throw new NotFoundException('Customer not found in your store');
+    let customer;
+    if (customerId) {
+      customer = await this.customerModel.findOne({
+        _id: customerId,
+        storeId,
+      });
+    } else {
+      customer = await this.customerModel.findOne({ userId: storeId });
     }
+
+    if (!customer) {
+      throw new NotFoundException('Customer not found');
+    }
+
+    const actualStoreId = customer.storeId;
 
     if (items.length === 0) {
       throw new ConflictException('Order must contain at least one item');
     }
 
     const recentPendingOrder = await this.orderModel.findOne({
-      storeId,
-      customerId,
+      storeId: actualStoreId,
+      customerId: customer._id.toString(),
       status: 'Pending',
       createdAt: { $gte: new Date(Date.now() - 2 * 60 * 1000) },
     });
@@ -63,7 +71,7 @@ export class OrdersService {
     for (const item of items) {
       const product = await this.productModel.findOne({
         _id: item.productId,
-        storeId,
+        storeId: actualStoreId,
       });
       if (!product) {
         throw new NotFoundException(`Product ${item.productId} not found`);
@@ -94,8 +102,8 @@ export class OrdersService {
     const orderNumber = this.generateOrderNumber();
 
     const order = new this.orderModel({
-      storeId,
-      customerId,
+      storeId: actualStoreId,
+      customerId: customer._id.toString(),
       orderNumber,
       status: 'Pending',
       subtotal,
@@ -107,7 +115,7 @@ export class OrdersService {
 
     const savedOrder = await order.save();
 
-    await this.notificationsService.create(storeId, {
+    await this.notificationsService.create(actualStoreId, {
       type: NotificationType.ORDER_CREATED,
       title: 'New Order Received',
       message: `Order ${orderNumber} has been created successfully.`,
@@ -141,7 +149,7 @@ export class OrdersService {
 
       if (updatedProduct.quantity < LOW_STOCK_THRESHOLD) {
         await this.notificationsService.createLowStockNotification(
-          storeId,
+          actualStoreId,
           item.productId,
           updatedProduct.name,
           updatedProduct.quantity,
@@ -559,7 +567,7 @@ export class OrdersService {
     const limit = parseInt(query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const filter: any = { customerId: customer._id };
+    const filter: any = { customerId: customer._id.toString() };
 
     if (query.status) {
       filter.status = query.status;

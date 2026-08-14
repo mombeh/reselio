@@ -12,8 +12,8 @@ export class CreateOrderItemDto {
 
 export class CreateOrderDto {
   @IsString()
-  @IsNotEmpty({ message: 'Customer ID is required' })
-  customerId: string;
+  @IsOptional()
+  customerId?: string;
 
   @IsArray()
   @MinLength(1, { message: 'Order must contain at least one item' })
