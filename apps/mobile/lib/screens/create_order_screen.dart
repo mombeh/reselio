@@ -217,8 +217,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           )
           .toList();
 
+      final customerId = _isCustomer
+          ? _resolvedCustomerId
+          : _selectedCustomer?.id;
+
       final order = await widget.authService.apiService.createOrder(
-        customerId: _resolvedCustomerId,
+        customerId: customerId,
         items: items,
         advancePaid: _advance,
       );

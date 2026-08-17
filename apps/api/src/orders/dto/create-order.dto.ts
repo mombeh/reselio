@@ -1,4 +1,5 @@
-import { IsString, IsNotEmpty, IsNumber, IsArray, Min, IsOptional, MinLength } from 'class-validator';
+import { IsString, IsNotEmpty, IsNumber, IsArray, Min, IsOptional, MinLength, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
 
 export class CreateOrderItemDto {
   @IsString()
@@ -17,6 +18,8 @@ export class CreateOrderDto {
 
   @IsArray()
   @MinLength(1, { message: 'Order must contain at least one item' })
+  @ValidateNested({ each: true })
+  @Type(() => CreateOrderItemDto)
   items: CreateOrderItemDto[];
 
   @IsNumber()
