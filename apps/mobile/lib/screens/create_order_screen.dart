@@ -221,8 +221,6 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           ? _resolvedCustomerId
           : _selectedCustomer?.id;
 
-      debugPrint('Submitting order: customerId=$customerId, items=$items, advance=$_advance');
-
       final order = await widget.authService.apiService.createOrder(
         customerId: customerId,
         items: items,
