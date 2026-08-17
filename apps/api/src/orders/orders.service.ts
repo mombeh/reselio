@@ -51,6 +51,15 @@ export class OrdersService {
       throw new ConflictException('Order must contain at least one item');
     }
 
+    for (const item of items) {
+      if (!item.productId || typeof item.productId !== 'string') {
+        throw new ConflictException('Product ID is required for each item');
+      }
+      if (typeof item.quantity !== 'number' || item.quantity < 1) {
+        throw new ConflictException('Quantity must be at least 1 for each item');
+      }
+    }
+
     const recentPendingOrder = await this.orderModel.findOne({
       storeId: actualStoreId,
       customerId: customer._id.toString(),

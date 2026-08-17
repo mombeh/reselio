@@ -402,10 +402,12 @@ class ApiService {
     double advancePaid = 0,
   }) async {
     final data = <String, dynamic>{
-      if (customerId != null) 'customerId': customerId,
       'items': items,
       'advancePaid': advancePaid,
     };
+    if (customerId != null) {
+      data['customerId'] = customerId;
+    }
 
     final response = await dio.post('/orders', data: data);
     return Order.fromJson(response.data);
