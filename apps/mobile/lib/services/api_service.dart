@@ -276,13 +276,13 @@ class ApiService {
 
   Future<List<NotificationModel>> getNotifications() async {
     final response = await dio.get('/notifications');
-    final List<dynamic> data = response.data as List;
-    return data.map((item) => NotificationModel.fromJson(item)).toList();
+    final data = List<dynamic>.from(response.data);
+    return data.map((item) => NotificationModel.fromJson(item as Map<String, dynamic>)).toList();
   }
 
   Future<int> getUnreadNotificationCount() async {
     final response = await dio.get('/notifications');
-    final List<dynamic> data = response.data as List;
+    final data = List<dynamic>.from(response.data);
     return data.where((item) => item['isRead'] != true).length;
   }
 

@@ -15,7 +15,7 @@ class NotificationScreen extends StatefulWidget {
 }
 
 class _NotificationScreenState extends State<NotificationScreen> {
-  late Future<List> _notificationsFuture;
+  late Future<List<NotificationModel>> _notificationsFuture;
   bool _isRefreshing = false;
   bool _isMarkingAllRead = false;
 
@@ -29,7 +29,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
 
   void _loadNotifications() {
     _notificationsFuture =
-        _authService?.apiService.getNotifications() ?? Future.value([]);
+        _authService?.apiService.getNotifications() ?? Future.value(const <NotificationModel>[]);
   }
 
   Future<void> _refresh() async {
@@ -112,11 +112,8 @@ class _NotificationScreenState extends State<NotificationScreen> {
     });
   }
 
-  int _unreadCount(List notifications) {
-    return notifications.where((item) {
-      final notification = item as NotificationModel;
-      return !notification.isRead;
-    }).length;
+  int _unreadCount(List<NotificationModel> notifications) {
+    return notifications.where((item) => !item.isRead).length;
   }
 
   @override
@@ -166,7 +163,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
             ),
         ],
       ),
-      body: FutureBuilder<List>(
+      body: FutureBuilder<List<NotificationModel>>(
         future: _notificationsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
@@ -196,9 +193,7 @@ class _NotificationScreenState extends State<NotificationScreen> {
                 ),
                 const SizedBox(height: 20),
                 ...notifications.map(
-                  (item) {
-                    final notification = item as NotificationModel;
-
+                  (notification) {
                     return Padding(
                       padding: const EdgeInsets.only(bottom: 12),
                       child: NotificationTile(

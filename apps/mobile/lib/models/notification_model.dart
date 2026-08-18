@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 enum NotificationType {
   orderCreated,
   orderConfirmed,
+  orderPreparing,
   orderDelivered,
   orderCancelled,
   lowStock,
@@ -15,6 +16,8 @@ extension NotificationTypeExtension on NotificationType {
         return 'ORDER_CREATED';
       case NotificationType.orderConfirmed:
         return 'ORDER_CONFIRMED';
+      case NotificationType.orderPreparing:
+        return 'ORDER_PREPARING';
       case NotificationType.orderDelivered:
         return 'ORDER_DELIVERED';
       case NotificationType.orderCancelled:
@@ -30,6 +33,8 @@ extension NotificationTypeExtension on NotificationType {
         return Colors.blue;
       case NotificationType.orderConfirmed:
         return Colors.orange;
+      case NotificationType.orderPreparing:
+        return Colors.purple;
       case NotificationType.orderDelivered:
         return Colors.green;
       case NotificationType.orderCancelled:
@@ -45,6 +50,8 @@ extension NotificationTypeExtension on NotificationType {
         return Icons.shopping_bag_outlined;
       case NotificationType.orderConfirmed:
         return Icons.check_circle_outline;
+      case NotificationType.orderPreparing:
+        return Icons.inventory_2_outlined;
       case NotificationType.orderDelivered:
         return Icons.local_shipping_outlined;
       case NotificationType.orderCancelled:
@@ -105,6 +112,8 @@ class NotificationModel {
         return NotificationType.orderCreated;
       case 'ORDER_CONFIRMED':
         return NotificationType.orderConfirmed;
+      case 'ORDER_PREPARING':
+        return NotificationType.orderPreparing;
       case 'ORDER_DELIVERED':
         return NotificationType.orderDelivered;
       case 'ORDER_CANCELLED':
