@@ -77,7 +77,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     try {
       final customers = await widget.authService.apiService.getCustomersForOrder();
       final profile = customers.firstWhereOrNull(
-        (c) => c.storeId == widget.authService.currentUser?.id,
+        (c) => c.userId == widget.authService.currentUser?.id,
       );
 
       if (mounted) {

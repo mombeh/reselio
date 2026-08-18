@@ -1,6 +1,7 @@
 class Customer {
   final String id;
   final String storeId;
+  final String userId;
   final String fullName;
   final String phoneNumber;
   final String? email;
@@ -12,6 +13,7 @@ class Customer {
   Customer({
     required this.id,
     required this.storeId,
+    required this.userId,
     required this.fullName,
     required this.phoneNumber,
     this.email,
@@ -25,6 +27,7 @@ class Customer {
     return Customer(
       id: json['_id'] ?? json['id'] ?? '',
       storeId: json['storeId'] ?? '',
+      userId: json['userId'] ?? '',
       fullName: json['fullName'] ?? '',
       phoneNumber: json['phoneNumber'] ?? '',
       email: json['email'],
@@ -43,6 +46,7 @@ class Customer {
     return {
       'id': id,
       'storeId': storeId,
+      'userId': userId,
       'fullName': fullName,
       'phoneNumber': phoneNumber,
       'email': email,
