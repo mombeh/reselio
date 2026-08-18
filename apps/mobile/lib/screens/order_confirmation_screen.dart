@@ -183,16 +183,103 @@ class OrderConfirmationScreen extends StatelessWidget {
         ],
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _detailRow(Icons.tag_rounded, 'Order Number', order.orderNumber),
           const SizedBox(height: 16),
           _detailRow(Icons.person_outline_rounded, 'Customer', order.customerName),
+          if (order.customerPhone != null && order.customerPhone!.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            _detailRow(Icons.phone_outlined, 'Phone', order.customerPhone!),
+          ],
           const SizedBox(height: 16),
           _detailRow(Icons.shopping_bag_outlined, 'Items', '$itemCount item${itemCount == 1 ? '' : 's'}'),
           const SizedBox(height: 16),
           _detailRow(Icons.payments_outlined, 'Total', '${order.total.toStringAsFixed(0)} FCFA'),
           const SizedBox(height: 16),
           _detailRow(Icons.calendar_today_outlined, 'Date', date),
+          const SizedBox(height: 20),
+          const Text(
+            'Order Items',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Color(0xFF202027),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ...order.items.map((item) {
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 10),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(8),
+                    child: item.productImageUrl != null && item.productImageUrl!.isNotEmpty
+                        ? Image.network(
+                            item.productImageUrl!,
+                            width: 40,
+                            height: 40,
+                            fit: BoxFit.cover,
+                            errorBuilder: (context, error, stackTrace) {
+                              return Container(
+                                width: 40,
+                                height: 40,
+                                color: Colors.grey.shade100,
+                                child: const Icon(
+                                  Icons.inventory_2_outlined,
+                                  size: 20,
+                                  color: Colors.grey,
+                                ),
+                              );
+                            },
+                          )
+                        : Container(
+                            width: 40,
+                            height: 40,
+                            color: Colors.grey.shade100,
+                            child: const Icon(
+                              Icons.inventory_2_outlined,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          item.productName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                        ),
+                        Text(
+                          'x${item.quantity}',
+                          style: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Text(
+                    '${item.totalPrice.toStringAsFixed(0)} FCFA',
+                    style: const TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
         ],
       ),
     );

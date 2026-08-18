@@ -23,6 +23,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   late Future<List<Product>> _productsFuture;
 
   Customer? _selectedCustomer;
+  Customer? _resolvedCustomer;
   final List<OrderItemData> _items = [];
 
   final TextEditingController _advanceController =
@@ -82,6 +83,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
 
       if (mounted) {
         setState(() {
+          _resolvedCustomer = profile;
           _resolvedCustomerId = profile?.id;
           _isResolvingCustomer = false;
         });
@@ -89,6 +91,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
     } catch (e) {
       if (mounted) {
         setState(() {
+          _resolvedCustomer = null;
+          _resolvedCustomerId = null;
           _isResolvingCustomer = false;
         });
       }
@@ -494,6 +498,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
               ),
             ),
             const SizedBox(height: 24),
+          ] else if (_isCustomer && _resolvedCustomer != null) ...[
+            _buildResolvedCustomerInfo(),
+            const SizedBox(height: 24),
+          ] else if (_isCustomer && _resolvedCustomer == null) ...[
+            _buildCustomerResolutionError(),
+            const SizedBox(height: 24),
           ],
 
           _buildProductsSection(),
@@ -708,6 +718,102 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildResolvedCustomerInfo() {
+    final customer = _resolvedCustomer!;
+
+    return _buildSectionCard(
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 26,
+            backgroundColor: Colors.deepPurple.shade50,
+            child: Icon(
+              Icons.person,
+              color: Colors.deepPurple,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  customer.fullName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 16,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  customer.phoneNumber,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 13,
+                  ),
+                ),
+                if (customer.email != null && customer.email!.isNotEmpty)
+                  Text(
+                    customer.email!,
+                    style: TextStyle(
+                      color: Colors.grey.shade600,
+                      fontSize: 13,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          Container(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10,
+              vertical: 6,
+            ),
+            decoration: BoxDecoration(
+              color: Colors.green.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Text(
+              'Verified',
+              style: TextStyle(
+                color: Colors.green,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCustomerResolutionError() {
+    return _buildSectionCard(
+      child: Column(
+        children: [
+          const Icon(
+            Icons.wifi_off_rounded,
+            size: 38,
+            color: Colors.grey,
+          ),
+          const SizedBox(height: 10),
+          const Text(
+            'Unable to load your profile',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 10),
+          OutlinedButton.icon(
+            onPressed: _resolveCustomerProfile,
+            icon: const Icon(Icons.refresh),
+            label: const Text('Retry'),
+          ),
+        ],
+      ),
     );
   }
 

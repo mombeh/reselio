@@ -5,6 +5,8 @@ export class CreateOrderDto {
   @IsOptional()
   customerId?: string;
 
+  @IsOptional()
+  @IsArray()
   items: { productId: string; quantity: number }[];
 
   @IsNumber()
