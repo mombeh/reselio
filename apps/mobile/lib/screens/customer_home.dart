@@ -408,6 +408,24 @@ class _CustomerHomeState extends State<CustomerHome> {
       return;
     }
 
+    if (index == 1) {
+      Navigator.pushNamed(
+        context,
+        AppRouter.myProducts,
+        arguments: {'authService': widget.authService},
+      );
+      return;
+    }
+
+    if (index == 2) {
+      Navigator.pushNamed(
+        context,
+        AppRouter.customerProductList,
+        arguments: {'authService': widget.authService},
+      );
+      return;
+    }
+
     if (_currentIndex == index) {
       return;
     }
@@ -991,15 +1009,13 @@ class _MoreMenu extends StatelessWidget {
                 label: 'Logout',
                 color: Colors.red,
                 onTap: () async {
-                  Navigator.pop(context);
                   await authService.logout();
-                  if (context.mounted) {
-                    Navigator.pushReplacementNamed(
-                      context,
-                      AppRouter.login,
-                      arguments: {'authService': authService},
-                    );
-                  }
+                  final navigator = Navigator.of(context, rootNavigator: true);
+                  Navigator.pop(context);
+                  navigator.pushReplacementNamed(
+                    AppRouter.login,
+                    arguments: {'authService': authService},
+                  );
                 },
               ),
             ],
