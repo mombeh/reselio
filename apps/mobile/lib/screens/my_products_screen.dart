@@ -66,7 +66,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'My Products',
+              'My Orders',
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w800,
@@ -75,7 +75,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
             ),
             SizedBox(height: 2),
             Text(
-              'Products you have purchased',
+              'Your order history',
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w400,
@@ -137,6 +137,8 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
       {'label': 'All', 'value': null},
       {'label': 'Pending', 'value': 'Pending'},
       {'label': 'Confirmed', 'value': 'Confirmed'},
+      {'label': 'Preparing', 'value': 'Preparing'},
+      {'label': 'Ready', 'value': 'Ready for Pickup'},
       {'label': 'Delivered', 'value': 'Delivered'},
       {'label': 'Cancelled', 'value': 'Cancelled'},
     ];
@@ -352,7 +354,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
             ),
             const SizedBox(height: 20),
             const Text(
-              'No purchases yet',
+              'No orders yet',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 19,
@@ -362,7 +364,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
             ),
             const SizedBox(height: 8),
             Text(
-              'Products you order will appear here.',
+              'Orders you place will appear here.',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 13,

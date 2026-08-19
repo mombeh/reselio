@@ -276,13 +276,13 @@ class ApiService {
 
   Future<List<NotificationModel>> getNotifications() async {
     final response = await dio.get('/notifications');
-    final List<dynamic> data = response.data as List;
-    return data.map((item) => NotificationModel.fromJson(item)).toList();
+    final data = List<dynamic>.from(response.data);
+    return data.map((item) => NotificationModel.fromJson(item as Map<String, dynamic>)).toList();
   }
 
   Future<int> getUnreadNotificationCount() async {
     final response = await dio.get('/notifications');
-    final List<dynamic> data = response.data as List;
+    final data = List<dynamic>.from(response.data);
     return data.where((item) => item['isRead'] != true).length;
   }
 
@@ -349,8 +349,10 @@ class ApiService {
 
   Future<List<Customer>> getCustomersForOrder() async {
     final response = await dio.get('/orders/customers/list');
-    final List<dynamic> data = response.data as List;
-    return data.map((item) => Customer.fromJson(item)).toList();
+    final data = List<dynamic>.from(response.data);
+    return data
+        .map((item) => Customer.fromJson(item as Map<String, dynamic>))
+        .toList();
   }
 
   Future<Map<String, dynamic>> getOrders({
@@ -402,10 +404,12 @@ class ApiService {
     double advancePaid = 0,
   }) async {
     final data = <String, dynamic>{
-      if (customerId != null) 'customerId': customerId,
       'items': items,
       'advancePaid': advancePaid,
     };
+    if (customerId != null) {
+      data['customerId'] = customerId;
+    }
 
     final response = await dio.post('/orders', data: data);
     return Order.fromJson(response.data);

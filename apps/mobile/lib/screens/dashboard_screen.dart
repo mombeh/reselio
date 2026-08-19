@@ -479,7 +479,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             onTap: () {
               Navigator.pushNamed(
                 context,
-                AppRouter.orderList,
+                AppRouter.createOrder,
                 arguments: {
                   'authService': widget.authService,
                 },

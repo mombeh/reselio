@@ -50,6 +50,7 @@ class ProfileScreen extends StatelessWidget {
 
     final email = user?.email ?? '';
     final role = user?.role ?? 'customer';
+    final isCustomer = role == 'customer';
 
     final initials = name.isNotEmpty ? name[0].toUpperCase() : '?';
 
@@ -142,8 +143,7 @@ class ProfileScreen extends StatelessWidget {
                     ),
                   ),
 
-                  if (user?.businessName != null &&
-                      user!.businessName!.trim().isNotEmpty) ...[
+                  if (!isCustomer && user?.businessName != null && user!.businessName!.trim().isNotEmpty) ...[
                     const SizedBox(height: 14),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
@@ -233,7 +233,7 @@ class ProfileScreen extends StatelessWidget {
                 value: user.phone!,
               ),
 
-            if (user?.address != null &&
+            if (!isCustomer && user?.address != null &&
                 user!.address!.trim().isNotEmpty)
               _buildInfoCard(
                 context: context,
@@ -243,48 +243,50 @@ class ProfileScreen extends StatelessWidget {
                 value: user.address!,
               ),
 
-            const SizedBox(height: 20),
+            if (!isCustomer) ...[
+              const SizedBox(height: 20),
 
-            // ----------------------------------------------------------
-            // BUSINESS INFORMATION
-            // ----------------------------------------------------------
-            const Text(
-              'Business Information',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
+              // ----------------------------------------------------------
+              // BUSINESS INFORMATION
+              // ----------------------------------------------------------
+              const Text(
+                'Business Information',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w800,
+                ),
               ),
-            ),
 
-            const SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-            if (user?.businessName != null &&
-                user!.businessName!.trim().isNotEmpty)
+              if (user?.businessName != null &&
+                  user!.businessName!.trim().isNotEmpty)
+                _buildInfoCard(
+                  context: context,
+                  icon: Icons.store_outlined,
+                  iconColor: Colors.orange,
+                  title: 'Store Name',
+                  value: user.businessName!,
+                ),
+
               _buildInfoCard(
                 context: context,
-                icon: Icons.store_outlined,
-                iconColor: Colors.orange,
-                title: 'Store Name',
-                value: user.businessName!,
+                icon: Icons.badge_outlined,
+                iconColor: Colors.indigo,
+                title: 'Account Role',
+                value: _capitalize(role),
               ),
 
-            _buildInfoCard(
-              context: context,
-              icon: Icons.badge_outlined,
-              iconColor: Colors.indigo,
-              title: 'Account Role',
-              value: _capitalize(role),
-            ),
-
-            if (user?.currency != null &&
-                user!.currency!.trim().isNotEmpty)
-              _buildInfoCard(
-                context: context,
-                icon: Icons.payments_outlined,
-                iconColor: Colors.teal,
-                title: 'Currency',
-                value: user.currency!,
-              ),
+              if (user?.currency != null &&
+                  user!.currency!.trim().isNotEmpty)
+                _buildInfoCard(
+                  context: context,
+                  icon: Icons.payments_outlined,
+                  iconColor: Colors.teal,
+                  title: 'Currency',
+                  value: user.currency!,
+                ),
+            ],
 
             const SizedBox(height: 28),
 

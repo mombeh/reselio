@@ -51,6 +51,15 @@ export class OrdersService {
       throw new ConflictException('Order must contain at least one item');
     }
 
+    for (const item of items) {
+      if (!item.productId || typeof item.productId !== 'string') {
+        throw new ConflictException('Product ID is required for each item');
+      }
+      if (typeof item.quantity !== 'number' || item.quantity < 1) {
+        throw new ConflictException('Quantity must be at least 1 for each item');
+      }
+    }
+
     const recentPendingOrder = await this.orderModel.findOne({
       storeId: actualStoreId,
       customerId: customer._id.toString(),
@@ -119,6 +128,14 @@ export class OrdersService {
       type: NotificationType.ORDER_CREATED,
       title: 'New Order Received',
       message: `Order ${orderNumber} has been created successfully.`,
+      referenceId: savedOrder._id.toString(),
+      referenceType: 'order',
+    });
+
+    await this.notificationsService.create(customer._id.toString(), {
+      type: NotificationType.ORDER_CREATED,
+      title: 'Order Placed',
+      message: `Your order ${orderNumber} has been placed successfully.`,
       referenceId: savedOrder._id.toString(),
       referenceType: 'order',
     });
@@ -302,6 +319,13 @@ export class OrdersService {
         referenceId: order._id.toString(),
         referenceType: 'order',
       });
+      await this.notificationsService.create(order.customerId.toString(), {
+        type: NotificationType.ORDER_DELIVERED,
+        title: 'Order Delivered',
+        message: `Your order ${order.orderNumber} has been delivered.`,
+        referenceId: order._id.toString(),
+        referenceType: 'order',
+      });
     } else if (status === 'Cancelled' && previousStatus !== 'Cancelled') {
       await this.notificationsService.create(storeId, {
         type: NotificationType.ORDER_CANCELLED,
@@ -310,11 +334,40 @@ export class OrdersService {
         referenceId: order._id.toString(),
         referenceType: 'order',
       });
+      await this.notificationsService.create(order.customerId.toString(), {
+        type: NotificationType.ORDER_CANCELLED,
+        title: 'Order Cancelled',
+        message: `Your order ${order.orderNumber} has been cancelled.`,
+        referenceId: order._id.toString(),
+        referenceType: 'order',
+      });
     } else if (previousStatus === 'Pending' && status === 'Confirmed') {
       await this.notificationsService.create(storeId, {
         type: NotificationType.ORDER_CONFIRMED,
         title: 'Order Confirmed',
         message: `Order ${order.orderNumber} has been confirmed.`,
+        referenceId: order._id.toString(),
+        referenceType: 'order',
+      });
+      await this.notificationsService.create(order.customerId.toString(), {
+        type: NotificationType.ORDER_CONFIRMED,
+        title: 'Order Confirmed',
+        message: `Your order ${order.orderNumber} has been confirmed.`,
+        referenceId: order._id.toString(),
+        referenceType: 'order',
+      });
+    } else if (status === 'Preparing' && previousStatus !== 'Preparing') {
+      await this.notificationsService.create(storeId, {
+        type: NotificationType.ORDER_PREPARING,
+        title: 'Order Preparing',
+        message: `Order ${order.orderNumber} is now being prepared.`,
+        referenceId: order._id.toString(),
+        referenceType: 'order',
+      });
+      await this.notificationsService.create(order.customerId.toString(), {
+        type: NotificationType.ORDER_PREPARING,
+        title: 'Order Preparing',
+        message: `Your order ${order.orderNumber} is now being prepared.`,
         referenceId: order._id.toString(),
         referenceType: 'order',
       });

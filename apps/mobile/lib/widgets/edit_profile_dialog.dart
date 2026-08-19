@@ -29,12 +29,15 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
   void initState() {
     super.initState();
     final user = widget.user;
+    final role = user?.role ?? 'customer';
+    final isCustomer = role == 'customer';
+
     _nameController = TextEditingController(text: user?.name ?? '');
     _emailController = TextEditingController(text: user?.email ?? '');
-    _businessNameController = TextEditingController(text: user?.businessName ?? '');
+    _businessNameController = TextEditingController(text: isCustomer ? '' : (user?.businessName ?? ''));
     _phoneController = TextEditingController(text: user?.phone ?? '');
-    _addressController = TextEditingController(text: user?.address ?? '');
-    _currencyController = TextEditingController(text: user?.currency ?? '');
+    _addressController = TextEditingController(text: isCustomer ? '' : (user?.address ?? ''));
+    _currencyController = TextEditingController(text: isCustomer ? '' : (user?.currency ?? ''));
   }
 
   @override
@@ -52,15 +55,19 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
     final authService = widget.authService;
     if (authService == null) return;
 
+    final user = widget.user;
+    final role = user?.role ?? 'customer';
+    final isCustomer = role == 'customer';
+
     setState(() => _isLoading = true);
     try {
       await authService.updateProfile(
         name: _nameController.text.isNotEmpty ? _nameController.text : null,
         email: _emailController.text.isNotEmpty ? _emailController.text : null,
-        businessName: _businessNameController.text.isNotEmpty ? _businessNameController.text : null,
+        businessName: isCustomer ? null : (_businessNameController.text.isNotEmpty ? _businessNameController.text : null),
         phone: _phoneController.text.isNotEmpty ? _phoneController.text : null,
-        address: _addressController.text.isNotEmpty ? _addressController.text : null,
-        currency: _currencyController.text.isNotEmpty ? _currencyController.text : null,
+        address: isCustomer ? null : (_addressController.text.isNotEmpty ? _addressController.text : null),
+        currency: isCustomer ? null : (_currencyController.text.isNotEmpty ? _currencyController.text : null),
       );
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -77,6 +84,10 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final user = widget.user;
+    final role = user?.role ?? 'customer';
+    final isCustomer = role == 'customer';
+
     return AlertDialog(
       title: const Text('Edit Profile'),
       content: SizedBox(
@@ -104,14 +115,6 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
               ),
               const SizedBox(height: 12),
               TextField(
-                controller: _businessNameController,
-                decoration: const InputDecoration(
-                  labelText: 'Store Name',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
                 controller: _phoneController,
                 decoration: const InputDecoration(
                   labelText: 'Phone',
@@ -119,22 +122,32 @@ class _EditProfileDialogState extends State<EditProfileDialog> {
                 ),
                 keyboardType: TextInputType.phone,
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _addressController,
-                decoration: const InputDecoration(
-                  labelText: 'Address',
-                  border: OutlineInputBorder(),
+              if (!isCustomer) ...[
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _businessNameController,
+                  decoration: const InputDecoration(
+                    labelText: 'Store Name',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _currencyController,
-                decoration: const InputDecoration(
-                  labelText: 'Currency',
-                  border: OutlineInputBorder(),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _addressController,
+                  decoration: const InputDecoration(
+                    labelText: 'Address',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _currencyController,
+                  decoration: const InputDecoration(
+                    labelText: 'Currency',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
