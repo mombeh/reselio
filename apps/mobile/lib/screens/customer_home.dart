@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile/models/order.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/router/app_router.dart';
+import 'package:mobile/screens/customer_product_list_screen.dart';
+import 'package:mobile/screens/my_products_screen.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/widgets/notification_icon_badge.dart';
 
@@ -35,8 +37,8 @@ class _CustomerHomeState extends State<CustomerHome> {
     super.initState();
     _pages = [
       _buildDashboardPage(),
-      const _OrdersPagePlaceholder(),
-      const _ProductsPagePlaceholder(),
+      MyProductsScreen(authService: widget.authService),
+      CustomerProductListScreen(authService: widget.authService),
       const SizedBox.shrink(),
     ];
     _loadDashboardData();
@@ -913,28 +915,6 @@ class _RecentOrderCard extends StatelessWidget {
   }
 }
 
-class _OrdersPagePlaceholder extends StatelessWidget {
-  const _OrdersPagePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Orders tab - coming soon'),
-    );
-  }
-}
-
-class _ProductsPagePlaceholder extends StatelessWidget {
-  const _ProductsPagePlaceholder();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Center(
-      child: Text('Products tab - coming soon'),
-    );
-  }
-}
-
 class _MoreMenu extends StatelessWidget {
   final AuthService authService;
 
@@ -1009,10 +989,44 @@ class _MoreMenu extends StatelessWidget {
                 label: 'Logout',
                 color: Colors.red,
                 onTap: () async {
-                  await authService.logout();
-                  final navigator = Navigator.of(context, rootNavigator: true);
                   Navigator.pop(context);
-                  navigator.pushReplacementNamed(
+                  final confirmed = await showDialog<bool>(
+                    context: context,
+                    builder: (dialogContext) {
+                      return AlertDialog(
+                        title: const Text(
+                          'Logout',
+                          style: TextStyle(
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                        content: const Text(
+                          'Are you sure you want to logout from your Reselio account?',
+                        ),
+                        actions: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(dialogContext, false),
+                            child: const Text('Cancel'),
+                          ),
+                          ElevatedButton(
+                            onPressed: () => Navigator.pop(dialogContext, true),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.red,
+                              foregroundColor: Colors.white,
+                            ),
+                            child: const Text('Logout'),
+                          ),
+                        ],
+                      );
+                    },
+                  );
+
+                  if (confirmed != true) return;
+
+                  await authService.logout();
+                  if (!mounted) return;
+                  Navigator.pushReplacementNamed(
+                    context,
                     AppRouter.login,
                     arguments: {'authService': authService},
                   );
