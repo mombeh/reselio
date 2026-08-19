@@ -19,7 +19,6 @@ class CustomerHome extends StatefulWidget {
 class _CustomerHomeState extends State<CustomerHome> {
   int _currentIndex = 0;
   bool _isLoadingDashboard = true;
-  String? _dashboardError;
 
   int _ordersCount = 0;
   int _favoritesCount = 0;
@@ -47,7 +46,6 @@ class _CustomerHomeState extends State<CustomerHome> {
   Future<void> _loadDashboardData() async {
     setState(() {
       _isLoadingDashboard = true;
-      _dashboardError = null;
     });
 
     try {
@@ -76,7 +74,6 @@ class _CustomerHomeState extends State<CustomerHome> {
     } catch (e) {
       if (!mounted) return;
       setState(() {
-        _dashboardError = e.toString();
         _isLoadingDashboard = false;
       });
     }
@@ -299,7 +296,7 @@ class _CustomerHomeState extends State<CustomerHome> {
               scrollDirection: Axis.horizontal,
               itemCount: 4,
               separatorBuilder: (_, _) => const SizedBox(width: 12),
-              itemBuilder: (_, __) => const _ProductSkeleton(),
+              itemBuilder: (_, _) => const _ProductSkeleton(),
             ),
           )
         else if (_featuredProducts.isEmpty)
@@ -736,7 +733,7 @@ class _ProductCard extends StatelessWidget {
                         product.imageUrl!,
                         fit: BoxFit.cover,
                         width: double.infinity,
-                        errorBuilder: (_, __, ___) => const _ImagePlaceholder(),
+                        errorBuilder: (_, _, _) => const _ImagePlaceholder(),
                       )
                     : const _ImagePlaceholder(),
               ),
@@ -989,7 +986,7 @@ class _MoreMenu extends StatelessWidget {
                 label: 'Logout',
                 color: Colors.red,
                 onTap: () async {
-                  Navigator.pop(context);
+                  final navigator = Navigator.of(context);
                   final confirmed = await showDialog<bool>(
                     context: context,
                     builder: (dialogContext) {
@@ -1024,9 +1021,8 @@ class _MoreMenu extends StatelessWidget {
                   if (confirmed != true) return;
 
                   await authService.logout();
-                  if (!mounted) return;
-                  Navigator.pushReplacementNamed(
-                    context,
+                  if (!context.mounted) return;
+                  navigator.pushReplacementNamed(
                     AppRouter.login,
                     arguments: {'authService': authService},
                   );
