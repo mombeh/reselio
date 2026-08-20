@@ -187,26 +187,46 @@ export class OrdersService {
     const limit = parseInt(query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const filter: any = { storeId };
+    const match: any = { storeId };
 
     if (query.status) {
-      filter.status = query.status;
+      match.status = query.status;
     }
+
+    const pipeline: any[] = [
+      {
+        $lookup: {
+          from: 'customers',
+          localField: 'customerId',
+          foreignField: '_id',
+          as: 'customer',
+        },
+      },
+      { $unwind: { path: '$customer', preserveNullAndEmptyArrays: true } },
+      { $sort: { createdAt: -1 } },
+    ];
 
     if (query.search) {
-      filter.$or = [
-        { orderNumber: { $regex: query.search, $options: 'i' } },
-      ];
+      pipeline.unshift({
+        $match: {
+          ...match,
+          $or: [
+            { orderNumber: { $regex: query.search, $options: 'i' } },
+            { 'customer.fullName': { $regex: query.search, $options: 'i' } },
+          ],
+        },
+      });
+    } else {
+      pipeline.unshift({ $match: match });
     }
 
-    const total = await this.orderModel.countDocuments(filter);
+    const totalPipeline = [...pipeline, { $count: 'total' }];
+    const totalResult = await this.orderModel.aggregate(totalPipeline);
+    const total = totalResult[0]?.total || 0;
 
-    const orders = await this.orderModel
-      .find(filter)
-      .populate('customerId', 'fullName phoneNumber email')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    pipeline.push({ $skip: skip }, { $limit: limit });
+
+    const orders = await this.orderModel.aggregate(pipeline);
 
     return {
       data: orders,
@@ -622,21 +642,42 @@ export class OrdersService {
     const limit = parseInt(query.limit) || 10;
     const skip = (page - 1) * limit;
 
-    const filter: any = { customerId: customer._id.toString() };
+    const match: any = { customerId: customer._id.toString() };
 
     if (query.status) {
-      filter.status = query.status;
+      match.status = query.status;
     }
 
-    const total = await this.orderModel.countDocuments(filter);
+    const pipeline: any[] = [
+      { $match: match },
+      {
+        $lookup: {
+          from: 'customers',
+          localField: 'customerId',
+          foreignField: '_id',
+          as: 'customer',
+        },
+      },
+      { $unwind: { path: '$customer', preserveNullAndEmptyArrays: true } },
+      { $sort: { createdAt: -1 } },
+    ];
 
-    const orders = await this.orderModel
-      .find(filter)
-      .populate('customerId', 'fullName phoneNumber email')
-      .populate('orderItems.productId', 'name price imageUrl')
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    if (query.search) {
+      pipeline.unshift({
+        $match: {
+          ...match,
+          orderNumber: { $regex: query.search, $options: 'i' },
+        },
+      });
+    }
+
+    const totalPipeline = [...pipeline, { $count: 'total' }];
+    const totalResult = await this.orderModel.aggregate(totalPipeline);
+    const total = totalResult[0]?.total || 0;
+
+    pipeline.push({ $skip: skip }, { $limit: limit });
+
+    const orders = await this.orderModel.aggregate(pipeline);
 
     return {
       data: orders,

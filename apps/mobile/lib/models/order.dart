@@ -38,7 +38,11 @@ class Order {
   });
 
   factory Order.fromJson(Map<String, dynamic> json) {
-    final customer = json['customerId'] is Map ? json['customerId'] as Map<String, dynamic> : {};
+    final customer = json['customerId'] is Map
+        ? json['customerId'] as Map<String, dynamic>
+        : (json['customer'] is Map
+            ? json['customer'] as Map<String, dynamic>
+            : {});
     final itemsList = json['orderItems'] != null
         ? (json['orderItems'] as List).map((item) => OrderItem.fromJson(item)).toList()
         : <OrderItem>[];
