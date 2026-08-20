@@ -1,4 +1,7 @@
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/services/auth_service.dart';
 
@@ -29,6 +32,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String? _error;
   bool _isEditing = false;
   bool _isSubmitting = false;
+  Uint8List? _pickedImageBytes;
+  String? _pickedImageExtension;
 
   @override
   void initState() {
@@ -67,6 +72,42 @@ class _AddProductScreenState extends State<AddProductScreen> {
     }
   }
 
+  Future<void> _pickImage() async {
+    try {
+      final picker = ImagePicker();
+      final pickedFile = await picker.pickImage(
+        source: ImageSource.gallery,
+        maxWidth: 1200,
+        maxHeight: 1200,
+        imageQuality: 85,
+      );
+
+      if (pickedFile == null) return;
+
+      final bytes = await pickedFile.readAsBytes();
+      final extension = pickedFile.mimeType?.split('/').last ?? 'png';
+
+      setState(() {
+        _pickedImageBytes = bytes;
+        _pickedImageExtension = extension;
+      });
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to pick image: $e')),
+      );
+    }
+  }
+
+  String? _getImageUrl() {
+    if (_pickedImageBytes != null) {
+      final base64 = base64Encode(_pickedImageBytes!);
+      return 'data:image/$_pickedImageExtension;base64,$base64';
+    }
+    final url = _imageUrlController.text.trim();
+    return url.isEmpty ? null : url;
+  }
+
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -80,8 +121,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     try {
       final price = double.parse(_priceController.text.trim());
       final quantity = int.parse(_quantityController.text.trim());
-
-      final imageUrl = _imageUrlController.text.trim();
+      final imageUrl = _getImageUrl();
 
       if (_isEditing) {
         await widget.authService.apiService.updateProduct(
@@ -91,7 +131,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           price: price,
           quantity: quantity,
           category: _categoryController.text.trim(),
-          imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
+          imageUrl: imageUrl,
         );
       } else {
         await widget.authService.apiService.createProduct(
@@ -100,7 +140,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           price: price,
           quantity: quantity,
           category: _categoryController.text.trim(),
-          imageUrl: imageUrl.isNotEmpty ? imageUrl : null,
+          imageUrl: imageUrl,
         );
       }
 
@@ -203,10 +243,76 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   Widget _buildImagePreview() {
-    final imageUrl = _imageUrlController.text.trim();
+    final imageUrl = _getImageUrl();
 
-    if (imageUrl.isEmpty) {
-      return Container(
+    Widget preview;
+    if (_pickedImageBytes != null) {
+      preview = Image.memory(
+        _pickedImageBytes!,
+        width: double.infinity,
+        height: 180,
+        fit: BoxFit.cover,
+      );
+    } else if (imageUrl != null && imageUrl.isNotEmpty) {
+      preview = ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: Image.network(
+          imageUrl,
+          width: double.infinity,
+          height: 180,
+          fit: BoxFit.cover,
+          errorBuilder: (context, error, stackTrace) {
+            return Container(
+              height: 180,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(14),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.broken_image_outlined,
+                    size: 42,
+                    color: Colors.red.shade300,
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    'Unable to load image',
+                    style: TextStyle(
+                      color: Colors.red.shade600,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
+      );
+    } else {
+      preview = Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            Icons.image_outlined,
+            size: 48,
+            color: Colors.grey.shade400,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Product image preview',
+            style: TextStyle(
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      );
+    }
+
+    return GestureDetector(
+      onTap: _pickImage,
+      child: Container(
         height: 180,
         width: double.infinity,
         decoration: BoxDecoration(
@@ -216,60 +322,35 @@ class _AddProductScreenState extends State<AddProductScreen> {
             color: Colors.grey.shade300,
           ),
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+        child: Stack(
+          fit: StackFit.expand,
           children: [
-            Icon(
-              Icons.image_outlined,
-              size: 48,
-              color: Colors.grey.shade400,
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Product image preview',
-              style: TextStyle(
-                color: Colors.grey.shade500,
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(14),
-      child: Image.network(
-        imageUrl,
-        width: double.infinity,
-        height: 180,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return Container(
-            height: 180,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.red.shade50,
+            ClipRRect(
               borderRadius: BorderRadius.circular(14),
+              child: preview,
             ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.broken_image_outlined,
-                  size: 42,
-                  color: Colors.red.shade300,
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Unable to load image',
-                  style: TextStyle(
-                    color: Colors.red.shade600,
+            if (_pickedImageBytes != null || (imageUrl != null && imageUrl.isNotEmpty))
+              Positioned(
+                top: 8,
+                right: 8,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withValues(alpha: 0.6),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Text(
+                    'Tap to change',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
-              ],
-            ),
-          );
-        },
+              ),
+          ],
+        ),
       ),
     );
   }
@@ -511,6 +592,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
               const SizedBox(height: 16),
 
               _buildImagePreview(),
+
+              const SizedBox(height: 12),
+
+              OutlinedButton.icon(
+                onPressed: _pickImage,
+                icon: const Icon(Icons.upload_outlined),
+                label: const Text('Upload Image'),
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
 
               const SizedBox(height: 12),
 

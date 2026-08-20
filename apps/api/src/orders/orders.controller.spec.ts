@@ -91,11 +91,14 @@ describe('OrdersController', () => {
 
       const result = await controller.getMyOrders(
         { user: { userId: 'user1' } },
-        { status: 'Delivered' },
+        'Delivered',
       );
 
       expect(mockOrdersService.findMyOrders).toHaveBeenCalledWith('user1', {
         status: 'Delivered',
+        page: undefined,
+        limit: undefined,
+        search: undefined,
       });
       expect(result.data[0]._id).toBe('ord1');
     });
