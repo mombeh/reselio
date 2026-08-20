@@ -6,8 +6,10 @@ import { Order, OrderSchema } from './schemas/order.schema';
 import { OrderItem, OrderItemSchema } from './schemas/order-item.schema';
 import { Customer, CustomerSchema } from './schemas/customer.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
 import { CustomersModule } from '../customers/customers.module';
 import { ProductsModule } from '../products/products.module';
+import { UsersModule } from '../users/users.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 
 @Module({
@@ -17,9 +19,11 @@ import { NotificationsModule } from '../notifications/notifications.module';
       { name: OrderItem.name, schema: OrderItemSchema },
       { name: Customer.name, schema: CustomerSchema },
       { name: Product.name, schema: ProductSchema },
+      { name: User.name, schema: UserSchema },
     ]),
     CustomersModule,
     ProductsModule,
+    UsersModule,
     NotificationsModule,
   ],
   controllers: [OrdersController],
