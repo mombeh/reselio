@@ -112,7 +112,7 @@ export class OrdersService {
 
     const order = new this.orderModel({
       storeId: actualStoreId,
-      customerId: customer._id.toString(),
+      customerId: customer._id,
       orderNumber,
       status: 'Pending',
       subtotal,
