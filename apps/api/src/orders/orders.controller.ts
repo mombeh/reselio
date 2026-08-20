@@ -129,8 +129,8 @@ export class OrdersController {
   ) {
     return this.ordersService.updateStatus(
       orderId,
-      body.status,
       req.user.userId,
+      body.status,
     );
   }
 

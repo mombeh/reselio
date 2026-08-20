@@ -115,7 +115,7 @@ describe('OrdersController', () => {
   });
 
   describe('updateStatus', () => {
-    it('should call service.updateStatus with id, status, and userId from request', async () => {
+    it('should call service.updateStatus with id, userId from request, and status', async () => {
       mockOrdersService.updateStatus.mockResolvedValue({
         _id: 'ord1',
         status: 'Delivered',
@@ -129,8 +129,8 @@ describe('OrdersController', () => {
 
       expect(mockOrdersService.updateStatus).toHaveBeenCalledWith(
         'ord1',
-        'Delivered',
         'store1',
+        'Delivered',
       );
       expect(result.status).toBe('Delivered');
     });
