@@ -8,11 +8,13 @@ import { Model } from 'mongoose';
 import { Store, StoreDocument } from './schemas/store.schema';
 import { CreateStoreDto } from './dto/create-store.dto';
 import { UpdateStoreDto } from './dto/update-store.dto';
+import { User, UserDocument } from '../users/schemas/user.schema';
 
 @Injectable()
 export class StoresService {
   constructor(
     @InjectModel(Store.name) private storeModel: Model<StoreDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
   async create(storeData: CreateStoreDto, userId: string) {
@@ -25,7 +27,13 @@ export class StoresService {
       ...storeData,
       userId,
     });
-    return store.save();
+    const savedStore = await store.save();
+
+    await this.userModel.findByIdAndUpdate(userId, {
+      businessName: storeData.name,
+    });
+
+    return savedStore;
   }
 
   async getMyStore(userId: string) {
@@ -45,6 +53,13 @@ export class StoresService {
     if (!store) {
       throw new NotFoundException('Store not found');
     }
+
+    if (storeData.name) {
+      await this.userModel.findByIdAndUpdate(userId, {
+        businessName: storeData.name,
+      });
+    }
+
     return store;
   }
 

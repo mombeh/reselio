@@ -84,8 +84,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = widget.authService.currentUser;
+    final isSeller = user?.role == 'client';
     final userName =
-        widget.authService.currentUser?.name ?? 'User';
+        (isSeller && user?.businessName != null && user!.businessName!.trim().isNotEmpty)
+            ? user.businessName!.trim()
+            : (user?.name.trim().isNotEmpty == true ? user!.name.trim() : 'User');
 
     return Scaffold(
       backgroundColor: background,
