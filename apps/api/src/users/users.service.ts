@@ -23,7 +23,6 @@ export class UsersService {
     const newUser = new this.userModel({
       ...userData,
       password: hashedPassword,
-      role: userData.role ?? Role.Customer,
     });
     return newUser.save();
   }

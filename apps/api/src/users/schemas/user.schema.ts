@@ -27,7 +27,7 @@ export class User {
   @Prop()
   currency: string;
 
-  @Prop({ default: Role.Customer, enum: Object.values(Role), type: String })
+  @Prop({ enum: Object.values(Role), type: String })
   role: Role;
 }
 
