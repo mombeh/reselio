@@ -9,6 +9,7 @@ describe('OrdersService', () => {
   let orderItemModel: any;
   let customerModel: any;
   let productModel: any;
+  let userModel: any;
 
   const mockOrderModel = jest.fn();
   mockOrderModel.find = jest.fn();
@@ -34,6 +35,10 @@ describe('OrdersService', () => {
   const mockProductModel = {
     findOne: jest.fn(),
     findByIdAndUpdate: jest.fn(),
+  };
+
+  const mockUserModel = {
+    findById: jest.fn(),
   };
 
   const mockNotificationsService = {
@@ -62,6 +67,10 @@ describe('OrdersService', () => {
           useValue: mockProductModel,
         },
         {
+          provide: getModelToken('User'),
+          useValue: mockUserModel,
+        },
+        {
           provide: NotificationsService,
           useValue: mockNotificationsService,
         },
@@ -73,6 +82,7 @@ describe('OrdersService', () => {
     orderItemModel = module.get(getModelToken('OrderItem'));
     customerModel = module.get(getModelToken('Customer'));
     productModel = module.get(getModelToken('Product'));
+    userModel = module.get(getModelToken('User'));
   });
 
   afterEach(() => {
@@ -341,6 +351,10 @@ describe('OrdersService', () => {
         storeId: 'store1',
         status: 'Delivered',
       });
+      userModel.findById.mockResolvedValue({
+        _id: 'store1',
+        role: 'client',
+      });
 
       await expect(
         service.updateStatus('order1', 'store1', 'Cancelled'),
@@ -352,6 +366,10 @@ describe('OrdersService', () => {
         _id: 'order1',
         storeId: 'store1',
         status: 'Cancelled',
+      });
+      userModel.findById.mockResolvedValue({
+        _id: 'store1',
+        role: 'client',
       });
 
       await expect(
@@ -365,10 +383,54 @@ describe('OrdersService', () => {
         storeId: 'store1',
         status: 'Pending',
       });
+      userModel.findById.mockResolvedValue({
+        _id: 'store1',
+        role: 'client',
+      });
 
       await expect(
         service.updateStatus('order1', 'store1', 'Delivered'),
       ).rejects.toThrow('Invalid status transition from Pending to Delivered');
+    });
+
+    it('should throw ForbiddenException when client tries to update another store order', async () => {
+      orderModel.findOne.mockResolvedValue({
+        _id: 'order1',
+        storeId: 'store1',
+        status: 'Pending',
+      });
+      userModel.findById.mockResolvedValue({
+        _id: 'store2',
+        role: 'client',
+      });
+
+      await expect(
+        service.updateStatus('order1', 'store2', 'Confirmed'),
+      ).rejects.toThrow('You do not have permission to update this order');
+    });
+
+    it('should allow admin to update any order', async () => {
+      orderModel.findOne.mockResolvedValue({
+        _id: 'order1',
+        storeId: 'store1',
+        status: 'Pending',
+        customerId: 'cust1',
+        orderNumber: 'ORD-123',
+      });
+      userModel.findById.mockResolvedValue({
+        _id: 'admin1',
+        role: 'admin',
+      });
+      orderModel.findOneAndUpdate.mockResolvedValue({
+        _id: 'order1',
+        storeId: 'store1',
+        status: 'Confirmed',
+        customerId: 'cust1',
+        orderNumber: 'ORD-123',
+      });
+
+      const result = await service.updateStatus('order1', 'admin1', 'Confirmed');
+      expect(result.status).toBe('Confirmed');
     });
   });
 
@@ -385,6 +447,10 @@ describe('OrdersService', () => {
           status: 'Cancelled',
           orderNumber: 'ORD-123',
         }),
+      });
+      userModel.findById.mockResolvedValue({
+        _id: 'store1',
+        role: 'client',
       });
       orderItemModel.find.mockResolvedValue([
         { productId: 'prod1', quantity: 2 },
@@ -403,6 +469,10 @@ describe('OrdersService', () => {
         storeId: 'store1',
         status: 'Cancelled',
       });
+      userModel.findById.mockResolvedValue({
+        _id: 'store1',
+        role: 'client',
+      });
 
       await expect(service.cancelOrder('order1', 'store1')).rejects.toThrow(
         'Order is already cancelled',
@@ -415,9 +485,29 @@ describe('OrdersService', () => {
         storeId: 'store1',
         status: 'Delivered',
       });
+      userModel.findById.mockResolvedValue({
+        _id: 'store1',
+        role: 'client',
+      });
 
       await expect(service.cancelOrder('order1', 'store1')).rejects.toThrow(
         'Delivered orders cannot be cancelled',
+      );
+    });
+
+    it('should throw ForbiddenException when client tries to cancel another store order', async () => {
+      orderModel.findOne.mockResolvedValue({
+        _id: 'order1',
+        storeId: 'store1',
+        status: 'Pending',
+      });
+      userModel.findById.mockResolvedValue({
+        _id: 'store2',
+        role: 'client',
+      });
+
+      await expect(service.cancelOrder('order1', 'store2')).rejects.toThrow(
+        'You do not have permission to cancel this order',
       );
     });
   });

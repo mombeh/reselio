@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Parser } from 'json2csv';
@@ -6,6 +6,7 @@ import { Order, OrderDocument } from './schemas/order.schema';
 import { OrderItem, OrderItemDocument } from './schemas/order-item.schema';
 import { Customer, CustomerDocument } from './schemas/customer.schema';
 import { Product, ProductDocument } from '../products/schemas/product.schema';
+import { User, UserDocument } from '../users/schemas/user.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { NotificationsService } from '../notifications/notifications.service';
@@ -19,6 +20,7 @@ export class OrdersService {
     @InjectModel(OrderItem.name) private orderItemModel: Model<OrderItemDocument>,
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
     private notificationsService: NotificationsService,
   ) {}
 
@@ -265,12 +267,23 @@ export class OrdersService {
   }
 
   async updateStatus(id: string, storeId: string, status: string) {
-    const existingOrder = await this.orderModel.findOne({ _id: id, storeId });
-    if (!existingOrder) {
+    const order = await this.orderModel.findOne({ _id: id });
+
+    if (!order) {
       throw new NotFoundException('Order not found');
     }
 
-    const previousStatus = existingOrder.status;
+    const user = await this.userModel.findById(storeId);
+
+    if (!user) {
+      throw new ForbiddenException('You do not have permission to update this order');
+    }
+
+    if (user.role === 'client' && order.storeId !== storeId) {
+      throw new ForbiddenException('You do not have permission to update this order');
+    }
+
+    const previousStatus = order.status;
 
     if (previousStatus === 'Delivered' || previousStatus === 'Cancelled') {
       throw new ConflictException(
@@ -292,8 +305,8 @@ export class OrdersService {
       );
     }
 
-    const order = await this.orderModel.findOneAndUpdate(
-      { _id: id, storeId },
+    const updatedOrder = await this.orderModel.findOneAndUpdate(
+      { _id: id },
       { status },
       { new: true },
     );
@@ -373,13 +386,24 @@ export class OrdersService {
       });
     }
 
-    return order;
+    return updatedOrder;
   }
 
   async cancelOrder(id: string, storeId: string) {
-    const order = await this.orderModel.findOne({ _id: id, storeId });
+    const order = await this.orderModel.findOne({ _id: id });
+
     if (!order) {
       throw new NotFoundException('Order not found');
+    }
+
+    const user = await this.userModel.findById(storeId);
+
+    if (!user) {
+      throw new ForbiddenException('You do not have permission to cancel this order');
+    }
+
+    if (user.role === 'client' && order.storeId !== storeId) {
+      throw new ForbiddenException('You do not have permission to cancel this order');
     }
 
     if (order.status === 'Cancelled') {
