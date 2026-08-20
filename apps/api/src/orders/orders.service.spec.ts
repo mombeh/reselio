@@ -81,11 +81,18 @@ describe('OrdersService', () => {
 
   describe('findAllByStore', () => {
     it('should return paginated orders', async () => {
-      const mockOrders = [
-        { _id: 'ord1', orderNumber: 'ORD-1', customer: { fullName: 'Alice' } },
-      ];
+      const mockOrders = [{ orderNumber: 'ORD-1', customerId: { fullName: 'Alice' } }];
 
-      orderModel.aggregate.mockResolvedValueOnce([{ total: 1 }]).mockResolvedValueOnce(mockOrders);
+      orderModel.countDocuments.mockResolvedValue(1);
+      orderModel.find.mockReturnValue({
+        populate: jest.fn().mockReturnValue({
+          sort: () => ({
+            skip: () => ({
+              limit: () => mockOrders,
+            }),
+          }),
+        }),
+      });
 
       const result = await service.findAllByStore('user123', {
         page: '1',

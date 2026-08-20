@@ -18,22 +18,10 @@ class MyProductsScreen extends StatefulWidget {
 class _MyProductsScreenState extends State<MyProductsScreen> {
   late Future<Map<String, dynamic>> _ordersFuture;
   String? _selectedStatus;
-  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadOrders();
-    _searchController.addListener(_onSearchChanged);
-  }
-
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
-
-  void _onSearchChanged() {
     _loadOrders();
   }
 
@@ -41,7 +29,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     setState(() {
       _ordersFuture = widget.authService.apiService.getMyOrders(
         status: _selectedStatus,
-        search: _searchController.text.isEmpty ? null : _searchController.text,
         page: 1,
         limit: 20,
       );
@@ -121,8 +108,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
             children: [
-              _buildSearchBar(),
-              const SizedBox(height: 12),
               _buildStatusFilter(),
               const SizedBox(height: 16),
               Text(
@@ -143,49 +128,6 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
             ],
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFECEAF0)),
-      ),
-      child: TextField(
-        controller: _searchController,
-        textInputAction: TextInputAction.search,
-        decoration: InputDecoration(
-          hintText: 'Search by order number or customer name...',
-          hintStyle: const TextStyle(
-            color: Color(0xFF888892),
-            fontSize: 13,
-          ),
-          prefixIcon: const Icon(
-            Icons.search_rounded,
-            color: Color(0xFF888892),
-            size: 20,
-          ),
-          suffixIcon: _searchController.text.isNotEmpty
-              ? IconButton(
-                  onPressed: () {
-                    _searchController.clear();
-                  },
-                  icon: const Icon(
-                    Icons.close_rounded,
-                    size: 18,
-                    color: Color(0xFF888892),
-                  ),
-                )
-              : null,
-          border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 14,
-          ),
-        ),
       ),
     );
   }

@@ -513,13 +513,12 @@ class ApiService {
     return List<Map<String, dynamic>>.from(response.data);
   }
 
-  Future<Map<String, dynamic>> getMyOrders({String? status, String? search, int page = 1, int limit = 10}) async {
+  Future<Map<String, dynamic>> getMyOrders({String? status, int page = 1, int limit = 10}) async {
     final params = <String, dynamic>{
       'page': page.toString(),
       'limit': limit.toString(),
     };
     if (status != null && status.isNotEmpty) params['status'] = status;
-    if (search != null && search.isNotEmpty) params['search'] = search;
 
     final response = await dio.get('/orders/my-orders', queryParameters: params);
     final data = response.data as Map<String, dynamic>;
