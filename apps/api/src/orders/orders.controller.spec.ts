@@ -91,11 +91,14 @@ describe('OrdersController', () => {
 
       const result = await controller.getMyOrders(
         { user: { userId: 'user1' } },
-        { status: 'Delivered' },
+        'Delivered',
       );
 
       expect(mockOrdersService.findMyOrders).toHaveBeenCalledWith('user1', {
         status: 'Delivered',
+        page: undefined,
+        limit: undefined,
+        search: undefined,
       });
       expect(result.data[0]._id).toBe('ord1');
     });
@@ -115,7 +118,7 @@ describe('OrdersController', () => {
   });
 
   describe('updateStatus', () => {
-    it('should call service.updateStatus with id, status, and userId from request', async () => {
+    it('should call service.updateStatus with id, userId from request, and status', async () => {
       mockOrdersService.updateStatus.mockResolvedValue({
         _id: 'ord1',
         status: 'Delivered',
@@ -129,8 +132,8 @@ describe('OrdersController', () => {
 
       expect(mockOrdersService.updateStatus).toHaveBeenCalledWith(
         'ord1',
-        'Delivered',
         'store1',
+        'Delivered',
       );
       expect(result.status).toBe('Delivered');
     });

@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document } from 'mongoose';
+import { Customer } from '../../customers/schemas/customer.schema';
 
 export type OrderDocument = Order & Document;
 
@@ -8,7 +9,7 @@ export class Order {
   @Prop({ required: true })
   storeId: string;
 
-  @Prop({ required: true })
+  @Prop({ ref: Customer.name, required: true })
   customerId: string;
 
   @Prop({ required: true, unique: true })

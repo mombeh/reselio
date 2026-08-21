@@ -5,10 +5,14 @@ import { getModelToken } from '@nestjs/mongoose';
 describe('StoresService', () => {
   let service: StoresService;
   let model: any;
+  let userModel: any;
 
   const mockStoreModel: any = jest.fn();
   mockStoreModel.findOne = jest.fn();
   mockStoreModel.findOneAndUpdate = jest.fn();
+
+  const mockUserModel: any = jest.fn();
+  mockUserModel.findByIdAndUpdate = jest.fn();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -18,11 +22,16 @@ describe('StoresService', () => {
           provide: getModelToken('Store'),
           useValue: mockStoreModel,
         },
+        {
+          provide: getModelToken('User'),
+          useValue: mockUserModel,
+        },
       ],
     }).compile();
 
     service = module.get<StoresService>(StoresService);
     model = module.get(getModelToken('Store'));
+    userModel = module.get(getModelToken('User'));
   });
 
   afterEach(() => {
@@ -62,6 +71,9 @@ describe('StoresService', () => {
 
       expect(result._id).toBe('store1');
       expect(result.name).toBe('My Store');
+      expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith('user1', {
+        businessName: 'My Store',
+      });
     });
 
     it('should throw ConflictException if store already exists', async () => {
@@ -121,6 +133,9 @@ describe('StoresService', () => {
         { $set: { name: 'Updated Store' } },
         { new: true },
       );
+      expect(userModel.findByIdAndUpdate).toHaveBeenCalledWith('user1', {
+        businessName: 'Updated Store',
+      });
     });
 
     it('should throw NotFoundException if store not found', async () => {

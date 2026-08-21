@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Parser } from 'json2csv';
@@ -112,7 +112,7 @@ export class OrdersService {
 
     const order = new this.orderModel({
       storeId: actualStoreId,
-      customerId: customer._id.toString(),
+      customerId: customer._id,
       orderNumber,
       status: 'Pending',
       subtotal,
@@ -265,12 +265,13 @@ export class OrdersService {
   }
 
   async updateStatus(id: string, storeId: string, status: string) {
-    const existingOrder = await this.orderModel.findOne({ _id: id, storeId });
-    if (!existingOrder) {
+    const order = await this.orderModel.findOne({ _id: id, storeId });
+
+    if (!order) {
       throw new NotFoundException('Order not found');
     }
 
-    const previousStatus = existingOrder.status;
+    const previousStatus = order.status;
 
     if (previousStatus === 'Delivered' || previousStatus === 'Cancelled') {
       throw new ConflictException(
@@ -292,13 +293,13 @@ export class OrdersService {
       );
     }
 
-    const order = await this.orderModel.findOneAndUpdate(
+    const updatedOrder = await this.orderModel.findOneAndUpdate(
       { _id: id, storeId },
       { status },
       { new: true },
     );
 
-    if (!order) {
+    if (!updatedOrder) {
       throw new NotFoundException('Order not found');
     }
 
@@ -373,11 +374,12 @@ export class OrdersService {
       });
     }
 
-    return order;
+    return updatedOrder;
   }
 
   async cancelOrder(id: string, storeId: string) {
     const order = await this.orderModel.findOne({ _id: id, storeId });
+
     if (!order) {
       throw new NotFoundException('Order not found');
     }

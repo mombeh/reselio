@@ -188,9 +188,9 @@ class OrderConfirmationScreen extends StatelessWidget {
           _detailRow(Icons.tag_rounded, 'Order Number', order.orderNumber),
           const SizedBox(height: 16),
           _detailRow(Icons.person_outline_rounded, 'Customer', order.customerName),
-          if (order.customerPhone != null && order.customerPhone!.isNotEmpty) ...[
+          if (order.customerPhone.isNotEmpty) ...[
             const SizedBox(height: 12),
-            _detailRow(Icons.phone_outlined, 'Phone', order.customerPhone!),
+            _detailRow(Icons.phone_outlined, 'Phone', order.customerPhone),
           ],
           const SizedBox(height: 16),
           _detailRow(Icons.shopping_bag_outlined, 'Items', '$itemCount item${itemCount == 1 ? '' : 's'}'),
@@ -279,7 +279,7 @@ class OrderConfirmationScreen extends StatelessWidget {
                 ],
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

@@ -35,8 +35,19 @@ export class OrdersController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  getAllOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
-    return this.ordersService.findAllByStore(req.user.userId, query);
+  getAllOrders(
+    @Req() req: any,
+    @Query('status') status?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.ordersService.findAllByStore(req.user.userId, {
+      status,
+      page,
+      limit,
+      search,
+    });
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -110,8 +121,19 @@ export class OrdersController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get('my-orders')
-  getMyOrders(@Req() req: any, @Query() query: GetOrdersQueryDto) {
-    return this.ordersService.findMyOrders(req.user.userId, query);
+  getMyOrders(
+    @Req() req: any,
+    @Query('status') status?: string,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('search') search?: string,
+  ) {
+    return this.ordersService.findMyOrders(req.user.userId, {
+      status,
+      page,
+      limit,
+      search,
+    });
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -129,8 +151,8 @@ export class OrdersController {
   ) {
     return this.ordersService.updateStatus(
       orderId,
-      body.status,
       req.user.userId,
+      body.status,
     );
   }
 
