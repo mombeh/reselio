@@ -16,7 +16,7 @@ class CustomerHome extends StatefulWidget {
   State<CustomerHome> createState() => _CustomerHomeState();
 }
 
-class _CustomerHomeState extends State<CustomerHome> {
+class _CustomerHomeState extends State<CustomerHome> with WidgetsBindingObserver {
   int _currentIndex = 0;
   bool _isLoadingDashboard = true;
 
@@ -26,7 +26,7 @@ class _CustomerHomeState extends State<CustomerHome> {
   List<Order> _recentOrders = [];
   List<Product> _featuredProducts = [];
 
-  late final List<Widget> _pages;
+  List<Widget> _pages = [];
 
   static const Color primary = Color(0xFF6C4AB6);
   static const Color background = Color(0xFFF7F7FA);
@@ -34,6 +34,7 @@ class _CustomerHomeState extends State<CustomerHome> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _pages = [
       _buildDashboardPage(),
       MyProductsScreen(authService: widget.authService),
@@ -41,6 +42,19 @@ class _CustomerHomeState extends State<CustomerHome> {
       const SizedBox.shrink(),
     ];
     _loadDashboardData();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _loadDashboardData();
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
   }
 
   Future<void> _loadDashboardData() async {
@@ -70,6 +84,7 @@ class _CustomerHomeState extends State<CustomerHome> {
         _recentOrders = (ordersResult['data'] as List<Order>? ?? []).take(3).toList();
         _featuredProducts = products.take(8).toList();
         _isLoadingDashboard = false;
+        _pages[0] = _buildDashboardPage();
       });
     } catch (e) {
       if (!mounted) return;
@@ -330,8 +345,8 @@ class _CustomerHomeState extends State<CustomerHome> {
                 final product = _featuredProducts[index];
                 return _ProductCard(
                   product: product,
-                  onTap: () {
-                    Navigator.pushNamed(
+                  onTap: () async {
+                    await Navigator.pushNamed(
                       context,
                       AppRouter.productDetail,
                       arguments: {
@@ -339,6 +354,9 @@ class _CustomerHomeState extends State<CustomerHome> {
                         'product': product,
                       },
                     );
+                    if (mounted) {
+                      _loadDashboardData();
+                    }
                   },
                 );
               },
@@ -380,8 +398,8 @@ class _CustomerHomeState extends State<CustomerHome> {
             final order = _recentOrders[index];
             return _RecentOrderCard(
               order: order,
-              onTap: () {
-                Navigator.pushNamed(
+              onTap: () async {
+                await Navigator.pushNamed(
                   context,
                   AppRouter.orderDetail,
                   arguments: {
@@ -389,6 +407,9 @@ class _CustomerHomeState extends State<CustomerHome> {
                     'order': order,
                   },
                 );
+                if (mounted) {
+                  _loadDashboardData();
+                }
               },
             );
           },
@@ -397,8 +418,11 @@ class _CustomerHomeState extends State<CustomerHome> {
     );
   }
 
-  void _navigateTo(String route) {
-    Navigator.pushNamed(context, route, arguments: {'authService': widget.authService});
+  Future<void> _navigateTo(String route) async {
+    await Navigator.pushNamed(context, route, arguments: {'authService': widget.authService});
+    if (mounted) {
+      _loadDashboardData();
+    }
   }
 
   void _onNavigationTap(int index) {
@@ -412,7 +436,9 @@ class _CustomerHomeState extends State<CustomerHome> {
         context,
         AppRouter.myProducts,
         arguments: {'authService': widget.authService},
-      );
+      ).then((_) {
+        if (mounted) _loadDashboardData();
+      });
       return;
     }
 
@@ -421,7 +447,9 @@ class _CustomerHomeState extends State<CustomerHome> {
         context,
         AppRouter.customerProductList,
         arguments: {'authService': widget.authService},
-      );
+      ).then((_) {
+        if (mounted) _loadDashboardData();
+      });
       return;
     }
 
@@ -440,7 +468,10 @@ class _CustomerHomeState extends State<CustomerHome> {
       backgroundColor: Colors.transparent,
       isScrollControlled: true,
       builder: (context) {
-        return _MoreMenu(authService: widget.authService);
+        return _MoreMenu(
+          authService: widget.authService,
+          onRefresh: _loadDashboardData,
+        );
       },
     );
   }
@@ -914,8 +945,9 @@ class _RecentOrderCard extends StatelessWidget {
 
 class _MoreMenu extends StatelessWidget {
   final AuthService authService;
+  final VoidCallback? onRefresh;
 
-  const _MoreMenu({required this.authService});
+  const _MoreMenu({required this.authService, this.onRefresh});
 
   @override
   Widget build(BuildContext context) {
@@ -943,13 +975,14 @@ class _MoreMenu extends StatelessWidget {
                 icon: Icons.person_outline_rounded,
                 label: 'Profile',
                 color: Colors.deepPurple,
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(context);
-                  Navigator.pushNamed(
+                  await Navigator.pushNamed(
                     context,
                     AppRouter.profile,
                     arguments: {'authService': authService},
                   );
+                  onRefresh?.call();
                 },
               ),
               const SizedBox(height: 12),
@@ -957,13 +990,14 @@ class _MoreMenu extends StatelessWidget {
                 icon: Icons.favorite_outlined,
                 label: 'Favorites',
                 color: Colors.red,
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(context);
-                  Navigator.pushNamed(
+                  await Navigator.pushNamed(
                     context,
                     AppRouter.favorites,
                     arguments: {'authService': authService},
                   );
+                  onRefresh?.call();
                 },
               ),
               const SizedBox(height: 12),
@@ -971,13 +1005,14 @@ class _MoreMenu extends StatelessWidget {
                 icon: Icons.notifications_outlined,
                 label: 'Notifications',
                 color: Colors.orange,
-                onTap: () {
+                onTap: () async {
                   Navigator.pop(context);
-                  Navigator.pushNamed(
+                  await Navigator.pushNamed(
                     context,
                     AppRouter.notifications,
                     arguments: {'authService': authService},
                   );
+                  onRefresh?.call();
                 },
               ),
               const SizedBox(height: 12),
