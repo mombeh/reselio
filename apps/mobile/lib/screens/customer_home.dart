@@ -26,7 +26,7 @@ class _CustomerHomeState extends State<CustomerHome> with WidgetsBindingObserver
   List<Order> _recentOrders = [];
   List<Product> _featuredProducts = [];
 
-  late final List<Widget> _pages;
+  List<Widget> _pages = [];
 
   static const Color primary = Color(0xFF6C4AB6);
   static const Color background = Color(0xFFF7F7FA);
@@ -84,6 +84,7 @@ class _CustomerHomeState extends State<CustomerHome> with WidgetsBindingObserver
         _recentOrders = (ordersResult['data'] as List<Order>? ?? []).take(3).toList();
         _featuredProducts = products.take(8).toList();
         _isLoadingDashboard = false;
+        _pages[0] = _buildDashboardPage();
       });
     } catch (e) {
       if (!mounted) return;
