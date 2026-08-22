@@ -82,11 +82,13 @@ class AdminHome extends StatelessWidget {
             child: ListTile(
               leading: const Icon(Icons.people_alt_outlined, color: Colors.deepPurple),
               title: const Text('User Management'),
-              subtitle: const Text('Manage all users'),
+              subtitle: const Text('Manage sellers and users'),
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('User management coming soon')),
+                Navigator.pushNamed(
+                  context,
+                  AppRouter.sellerList,
+                  arguments: {'authService': authService},
                 );
               },
             ),

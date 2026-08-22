@@ -436,6 +436,44 @@ class ApiService {
     return data;
   }
 
+  Future<Map<String, dynamic>> getAdminDashboard() async {
+    final response = await dio.get('/admin/dashboard');
+    final data = response.data as Map<String, dynamic>;
+    return data;
+  }
+
+  Future<Map<String, dynamic>> getSellers({
+    String? search,
+    bool? isActive,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final params = <String, dynamic>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (isActive != null) params['isActive'] = isActive.toString();
+
+    final response = await dio.get('/admin/sellers', queryParameters: params);
+    final data = response.data as Map<String, dynamic>;
+    return data;
+  }
+
+  Future<Map<String, dynamic>> getSellerById(String id) async {
+    final response = await dio.get('/admin/sellers/$id');
+    final data = response.data as Map<String, dynamic>;
+    return data;
+  }
+
+  Future<Map<String, dynamic>> updateSellerStatus(String id, bool isActive) async {
+    final response = await dio.patch('/admin/sellers/$id/status', data: {
+      'isActive': isActive,
+    });
+    final data = response.data as Map<String, dynamic>;
+    return data;
+  }
+
   Future<Map<String, dynamic>> getSalesReport({String? period, String? startDate, String? endDate}) async {
     final params = <String, dynamic>{};
     if (period != null) params['period'] = period;

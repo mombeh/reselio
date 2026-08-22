@@ -13,6 +13,7 @@ import { DashboardModule } from './dashboard/dashboard.module';
 import { ReportsModule } from './reports/reports.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { FavoritesModule } from './favorites/favorites.module';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { FavoritesModule } from './favorites/favorites.module';
     ReportsModule,
     NotificationsModule,
     FavoritesModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -106,4 +106,53 @@ export class UsersService {
     user.password = await bcrypt.hash(newPassword, 10);
     return user.save();
   }
+
+  async findSellers(query: { search?: string; isActive?: boolean; page?: number; limit?: number }) {
+    const page = query.page || 1;
+    const limit = query.limit || 10;
+    const skip = (page - 1) * limit;
+
+    const filter: any = { role: Role.Client };
+    if (query.isActive !== undefined) {
+      filter.isActive = query.isActive;
+    }
+
+    const total = await this.userModel.countDocuments(filter);
+
+    const sellers = await this.userModel
+      .find(filter)
+      .select('-password')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return {
+      data: sellers,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
+  async findSellerById(id: string) {
+    const seller = await this.userModel.findById(id).select('-password');
+    if (!seller) {
+      throw new Error('Seller not found');
+    }
+    return seller;
+  }
+
+  async toggleSellerStatus(id: string, isActive: boolean) {
+    const seller = await this.userModel.findById(id);
+    if (!seller) {
+      throw new Error('Seller not found');
+    }
+    if (seller.role !== Role.Client) {
+      throw new Error('User is not a seller');
+    }
+
+    seller.isActive = isActive;
+    return seller.save();
+  }
 }
