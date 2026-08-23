@@ -506,6 +506,79 @@ export class OrdersService {
     ]);
   }
 
+  async getPlatformStatusBreakdown() {
+    return this.orderModel.aggregate([
+      {
+        $group: {
+          _id: '$status',
+          count: { $sum: 1 },
+          totalRevenue: { $sum: '$total' },
+          totalProfit: { $sum: '$profit' },
+        },
+      },
+    ]);
+  }
+
+  async getPlatformDailySales(days: number = 30) {
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    return this.orderModel.aggregate([
+      {
+        $match: {
+          status: { $ne: 'Cancelled' },
+          createdAt: { $gte: startDate },
+        },
+      },
+      {
+        $group: {
+          _id: {
+            $dateToString: { format: '%Y-%m-%d', date: '$createdAt' },
+          },
+          totalRevenue: { $sum: '$total' },
+          totalProfit: { $sum: '$profit' },
+          totalOrders: { $sum: 1 },
+        },
+      },
+      {
+        $sort: { _id: 1 },
+      },
+    ]);
+  }
+
+  async getPlatformTopProducts(limit: number = 10) {
+    return this.orderItemModel.aggregate([
+      {
+        $lookup: {
+          from: 'orders',
+          localField: 'orderId',
+          foreignField: '_id',
+          as: 'order',
+        },
+      },
+      { $unwind: '$order' },
+      { $match: { 'order.status': { $ne: 'Cancelled' } } },
+      {
+        $lookup: {
+          from: 'products',
+          localField: 'productId',
+          foreignField: '_id',
+          as: 'product',
+        },
+      },
+      { $unwind: '$product' },
+      {
+        $group: {
+          _id: '$product.name',
+          totalOrders: { $sum: '$quantity' },
+          totalRevenue: { $sum: '$totalPrice' },
+        },
+      },
+      { $sort: { totalRevenue: -1 } },
+      { $limit: limit },
+    ]);
+  }
+
   async getTopProducts(storeId: string, limit: number = 10) {
     return this.orderItemModel.aggregate([
       {

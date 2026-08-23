@@ -493,6 +493,63 @@ class ApiService {
     return data;
   }
 
+  Future<Map<String, dynamic>> getAdminReportsOverview() async {
+    final response = await dio.get('/admin/reports/overview');
+    final data = response.data as Map<String, dynamic>;
+    return data;
+  }
+
+  Future<List<Map<String, dynamic>>> getAdminOrderStatusBreakdown() async {
+    final response = await dio.get('/admin/reports/orders/status');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getAdminDailySales({int days = 30}) async {
+    final response = await dio.get('/admin/reports/analytics/daily?days=$days');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getAdminTopProducts({int limit = 10}) async {
+    final response = await dio.get('/admin/reports/analytics/products?limit=$limit');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<Map<String, dynamic>> getAdminSalesReport({String? period, String? startDate, String? endDate}) async {
+    final params = <String, dynamic>{};
+    if (period != null) params['period'] = period;
+    if (startDate != null) params['startDate'] = startDate;
+    if (endDate != null) params['endDate'] = endDate;
+
+    final response = await dio.get('/admin/reports/sales', queryParameters: params);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<List<Map<String, dynamic>>> getAdminRevenueTrend({String? period, String? startDate, String? endDate}) async {
+    final params = <String, dynamic>{};
+    if (period != null) params['period'] = period;
+    if (startDate != null) params['startDate'] = startDate;
+    if (endDate != null) params['endDate'] = endDate;
+
+    final response = await dio.get('/admin/reports/revenue', queryParameters: params);
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getAdminProductPerformance() async {
+    final response = await dio.get('/admin/reports/products');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
+  Future<List<Map<String, dynamic>>> getAdminCustomerReport() async {
+    final response = await dio.get('/admin/reports/customers');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => item as Map<String, dynamic>).toList();
+  }
+
   Future<Map<String, dynamic>> getSalesReport({String? period, String? startDate, String? endDate}) async {
     final params = <String, dynamic>{};
     if (period != null) params['period'] = period;

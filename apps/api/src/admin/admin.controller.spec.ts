@@ -3,6 +3,8 @@ import { AdminController } from './admin.controller';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { UsersService } from '../users/users.service';
 import { CustomersService } from '../customers/customers.service';
+import { OrdersService } from '../orders/orders.service';
+import { ReportsService } from '../reports/reports.service';
 import { Role } from '../auth/enums/role.enum';
 
 describe('AdminController', () => {
@@ -10,6 +12,8 @@ describe('AdminController', () => {
   let dashboardService: jest.Mocked<DashboardService>;
   let usersService: jest.Mocked<UsersService>;
   let customersService: jest.Mocked<CustomersService>;
+  let ordersService: jest.Mocked<OrdersService>;
+  let reportsService: jest.Mocked<ReportsService>;
 
   const mockDashboardService = {
     getAdminDashboard: jest.fn(),
@@ -26,6 +30,19 @@ describe('AdminController', () => {
     findOne: jest.fn(),
   };
 
+  const mockOrdersService = {
+    getPlatformStatusBreakdown: jest.fn(),
+    getPlatformDailySales: jest.fn(),
+    getPlatformTopProducts: jest.fn(),
+  };
+
+  const mockReportsService = {
+    getPlatformSalesReport: jest.fn(),
+    getPlatformRevenueTrend: jest.fn(),
+    getPlatformProductPerformance: jest.fn(),
+    getPlatformCustomerReport: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AdminController],
@@ -33,6 +50,8 @@ describe('AdminController', () => {
         { provide: DashboardService, useValue: mockDashboardService },
         { provide: UsersService, useValue: mockUsersService },
         { provide: CustomersService, useValue: mockCustomersService },
+        { provide: OrdersService, useValue: mockOrdersService },
+        { provide: ReportsService, useValue: mockReportsService },
       ],
     }).compile();
 
@@ -40,6 +59,8 @@ describe('AdminController', () => {
     dashboardService = module.get(DashboardService);
     usersService = module.get(UsersService);
     customersService = module.get(CustomersService);
+    ordersService = module.get(OrdersService);
+    reportsService = module.get(ReportsService);
   });
 
   afterEach(() => {
@@ -185,6 +206,119 @@ describe('AdminController', () => {
       const result = await controller.updateCustomerStatus('cust1', false);
 
       expect(result.message).toBe('Customer has no linked user account');
+    });
+  });
+
+  describe('getReportsOverview', () => {
+    it('should return platform reports overview', async () => {
+      mockUsersService.findSellers.mockResolvedValue({ total: 10, data: [] } as any);
+      mockOrdersService.getPlatformStatusBreakdown.mockResolvedValue([
+        { _id: 'Pending', count: 5, totalRevenue: 1000, totalProfit: 200 },
+        { _id: 'Delivered', count: 20, totalRevenue: 5000, totalProfit: 1000 },
+      ] as any);
+      mockOrdersService.getPlatformTopProducts.mockResolvedValue([]);
+
+      const result = await controller.getReportsOverview();
+
+      expect(result.totalSellers).toBe(10);
+      expect(result.totalCustomers).toBe(1240);
+      expect(result.statusBreakdown).toHaveLength(2);
+      expect(ordersService.getPlatformStatusBreakdown).toHaveBeenCalled();
+    });
+  });
+
+  describe('getOrderStatusBreakdown', () => {
+    it('should return platform order status breakdown', async () => {
+      mockOrdersService.getPlatformStatusBreakdown.mockResolvedValue([
+        { _id: 'Pending', count: 5 },
+      ] as any);
+
+      const result = await controller.getOrderStatusBreakdown();
+
+      expect(result).toHaveLength(1);
+      expect(ordersService.getPlatformStatusBreakdown).toHaveBeenCalled();
+    });
+  });
+
+  describe('getPlatformDailySales', () => {
+    it('should return platform daily sales', async () => {
+      mockOrdersService.getPlatformDailySales.mockResolvedValue([
+        { _id: '2024-01-01', totalRevenue: 1000, totalProfit: 200, totalOrders: 5 },
+      ] as any);
+
+      const result = await controller.getPlatformDailySales('7');
+
+      expect(result).toHaveLength(1);
+      expect(ordersService.getPlatformDailySales).toHaveBeenCalledWith(7);
+    });
+  });
+
+  describe('getPlatformTopProducts', () => {
+    it('should return platform top products', async () => {
+      mockOrdersService.getPlatformTopProducts.mockResolvedValue([
+        { _id: 'prod1', totalOrders: 10, totalRevenue: 5000 },
+      ] as any);
+
+      const result = await controller.getPlatformTopProducts('5');
+
+      expect(result).toHaveLength(1);
+      expect(ordersService.getPlatformTopProducts).toHaveBeenCalledWith(5);
+    });
+  });
+
+  describe('getPlatformSalesReport', () => {
+    it('should return platform sales report', async () => {
+      mockReportsService.getPlatformSalesReport.mockResolvedValue({
+        period: 'today',
+        totalOrders: 10,
+        totalRevenue: 5000,
+        totalProfit: 1000,
+        averageOrderValue: 500,
+      });
+
+      const result = await controller.getPlatformSalesReport({ period: 'today' });
+
+      expect(result.totalOrders).toBe(10);
+      expect(reportsService.getPlatformSalesReport).toHaveBeenCalled();
+    });
+  });
+
+  describe('getPlatformRevenueTrend', () => {
+    it('should return platform revenue trend', async () => {
+      mockReportsService.getPlatformRevenueTrend.mockResolvedValue([
+        { date: '2024-01-01', revenue: 1000 },
+      ]);
+
+      const result = await controller.getPlatformRevenueTrend({ period: 'month' });
+
+      expect(result).toHaveLength(1);
+      expect(reportsService.getPlatformRevenueTrend).toHaveBeenCalled();
+    });
+  });
+
+  describe('getPlatformProductPerformance', () => {
+    it('should return platform product performance', async () => {
+      mockReportsService.getPlatformProductPerformance.mockResolvedValue([
+        { productId: 'prod1', name: 'Product 1', unitsSold: 10, revenue: 5000 },
+      ]);
+
+      const result = await controller.getPlatformProductPerformance();
+
+      expect(result).toHaveLength(1);
+      expect(reportsService.getPlatformProductPerformance).toHaveBeenCalled();
+    });
+  });
+
+  describe('getPlatformCustomerReport', () => {
+    it('should return platform customer report', async () => {
+      mockReportsService.getPlatformCustomerReport.mockResolvedValue([
+        { customerId: 'cust1', customerName: 'John', totalOrders: 5, totalSpent: 1000 },
+      ]);
+
+      const result = await controller.getPlatformCustomerReport();
+
+      expect(result).toHaveLength(1);
+      expect(reportsService.getPlatformCustomerReport).toHaveBeenCalled();
     });
   });
 });
