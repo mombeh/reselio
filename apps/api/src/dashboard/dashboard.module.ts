@@ -9,9 +9,11 @@ import {
 } from '../orders/schemas/order-item.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
 import { Customer, CustomerSchema } from '../customers/schemas/customer.schema';
+import { User, UserSchema } from '../users/schemas/user.schema';
 import { OrdersModule } from '../orders/orders.module';
 import { ProductsModule } from '../products/products.module';
 import { CustomersModule } from '../customers/customers.module';
+import { UsersModule } from '../users/users.module';
 
 @Module({
   imports: [
@@ -20,10 +22,12 @@ import { CustomersModule } from '../customers/customers.module';
       { name: OrderItem.name, schema: OrderItemSchema },
       { name: Product.name, schema: ProductSchema },
       { name: Customer.name, schema: CustomerSchema },
+      { name: User.name, schema: UserSchema },
     ]),
     OrdersModule,
     ProductsModule,
     CustomersModule,
+    UsersModule,
   ],
   controllers: [DashboardController],
   providers: [DashboardService],

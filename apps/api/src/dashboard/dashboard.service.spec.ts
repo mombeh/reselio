@@ -8,6 +8,7 @@ describe('DashboardService', () => {
   let orderItemModel: any;
   let productModel: any;
   let customerModel: any;
+  let userModel: any;
 
   const mockOrderModel = {
     countDocuments: jest.fn(),
@@ -24,6 +25,10 @@ describe('DashboardService', () => {
   };
 
   const mockCustomerModel = {
+    countDocuments: jest.fn(),
+  };
+
+  const mockUserModel = {
     countDocuments: jest.fn(),
   };
 
@@ -47,6 +52,10 @@ describe('DashboardService', () => {
           provide: getModelToken('Customer'),
           useValue: mockCustomerModel,
         },
+        {
+          provide: getModelToken('User'),
+          useValue: mockUserModel,
+        },
       ],
     }).compile();
 
@@ -55,6 +64,7 @@ describe('DashboardService', () => {
     orderItemModel = module.get(getModelToken('OrderItem'));
     productModel = module.get(getModelToken('Product'));
     customerModel = module.get(getModelToken('Customer'));
+    userModel = module.get(getModelToken('User'));
   });
 
   afterEach(() => {
@@ -103,6 +113,30 @@ describe('DashboardService', () => {
       expect(result.topProducts).toEqual([
         { _id: 'prod1', totalRevenue: 50000 },
       ]);
+    });
+  });
+
+  describe('getAdminDashboard', () => {
+    it('should return platform-wide admin dashboard data', async () => {
+      userModel.countDocuments
+        .mockResolvedValueOnce(125)
+        .mockResolvedValueOnce(1240)
+        .mockResolvedValueOnce(89);
+      productModel.countDocuments.mockResolvedValue(850);
+      orderModel.countDocuments
+        .mockResolvedValueOnce(2430)
+        .mockResolvedValueOnce(320);
+      orderModel.aggregate.mockResolvedValue([{ revenue: 8500000 }]);
+
+      const result = await service.getAdminDashboard();
+
+      expect(result.totalSellers).toBe(125);
+      expect(result.totalCustomers).toBe(1240);
+      expect(result.totalProducts).toBe(850);
+      expect(result.totalOrders).toBe(2430);
+      expect(result.pendingOrders).toBe(320);
+      expect(result.totalRevenue).toBe(8500000);
+      expect(result.activeUsers).toBe(89);
     });
   });
 });

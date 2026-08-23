@@ -1,31 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
-import 'package:mobile/router/app_router.dart';
 
-class AdminHome extends StatefulWidget {
+class AdminDashboardScreen extends StatefulWidget {
   final AuthService authService;
 
-  const AdminHome({super.key, required this.authService});
+  const AdminDashboardScreen({super.key, required this.authService});
 
   @override
-  State<AdminHome> createState() => _AdminHomeState();
+  State<AdminDashboardScreen> createState() => _AdminDashboardScreenState();
 }
 
-class _AdminHomeState extends State<AdminHome> {
+class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   late Future<Map<String, dynamic>> _dashboardFuture;
+
   static const Color primary = Color(0xFF6C4AB6);
   static const Color background = Color(0xFFF7F7FA);
+  static const Color success = Color(0xFF2E9B68);
+  static const Color warning = Color(0xFFF59E0B);
+  static const Color info = Color(0xFF2589EF);
 
   @override
   void initState() {
     super.initState();
-    _loadDashboard();
-  }
-
-  void _loadDashboard() {
-    setState(() {
-      _dashboardFuture = widget.authService.apiService.getAdminDashboard();
-    });
+    _dashboardFuture = widget.authService.apiService.getAdminDashboard();
   }
 
   Future<void> _refresh() async {
@@ -68,6 +65,7 @@ class _AdminHomeState extends State<AdminHome> {
             }
 
             final data = snapshot.data ?? {};
+
             return ListView(
               physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.fromLTRB(20, 8, 20, 30),
@@ -77,10 +75,6 @@ class _AdminHomeState extends State<AdminHome> {
                 _buildSectionHeader('Platform Overview'),
                 const SizedBox(height: 12),
                 _buildOverviewCard(data),
-                const SizedBox(height: 24),
-                _buildSectionHeader('Quick Actions'),
-                const SizedBox(height: 12),
-                _buildQuickActions(),
               ],
             );
           },
@@ -108,19 +102,19 @@ class _AdminHomeState extends State<AdminHome> {
           title: 'Total Customers',
           value: '${data['totalCustomers'] ?? 0}',
           icon: Icons.people_outline_rounded,
-          color: const Color(0xFF2589EF),
+          color: info,
         ),
         _metricCard(
           title: 'Total Products',
           value: '${data['totalProducts'] ?? 0}',
           icon: Icons.inventory_2_outlined,
-          color: const Color(0xFF2E9B68),
+          color: success,
         ),
         _metricCard(
           title: 'Total Orders',
           value: '${data['totalOrders'] ?? 0}',
           icon: Icons.shopping_bag_outlined,
-          color: const Color(0xFFF59E0B),
+          color: warning,
         ),
         _metricCard(
           title: 'Pending Orders',
@@ -212,6 +206,11 @@ class _AdminHomeState extends State<AdminHome> {
 
   Widget _buildOverviewCard(Map<String, dynamic> data) {
     final totalRevenue = data['totalRevenue'] ?? 0;
+    final totalOrders = data['totalOrders'] ?? 0;
+    final totalProducts = data['totalProducts'] ?? 0;
+    final totalSellers = data['totalSellers'] ?? 0;
+    final totalCustomers = data['totalCustomers'] ?? 0;
+    final pendingOrders = data['pendingOrders'] ?? 0;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -227,176 +226,57 @@ class _AdminHomeState extends State<AdminHome> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: const Color(0xFF2E9B68).withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: const Icon(
-              Icons.payments_outlined,
-              color: Color(0xFF2E9B68),
-              size: 22,
-            ),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Total Revenue',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey.shade600,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  '${totalRevenue.toStringAsFixed(0)} FCFA',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF202027),
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _overviewRow('Total Revenue', '${totalRevenue.toStringAsFixed(0)} FCFA', Icons.payments_outlined, success),
+          const SizedBox(height: 16),
+          _overviewRow('Total Orders', totalOrders.toString(), Icons.receipt_long_outlined, info),
+          const SizedBox(height: 16),
+          _overviewRow('Total Products', totalProducts.toString(), Icons.inventory_2_outlined, primary),
+          const SizedBox(height: 16),
+          _overviewRow('Total Sellers', totalSellers.toString(), Icons.store_outlined, warning),
+          const SizedBox(height: 16),
+          _overviewRow('Total Customers', totalCustomers.toString(), Icons.people_outline_rounded, Colors.blue),
+          const SizedBox(height: 16),
+          _overviewRow('Pending Orders', pendingOrders.toString(), Icons.pending_actions_rounded, Colors.orange),
         ],
       ),
     );
   }
 
-  Widget _buildQuickActions() {
-    return GridView.count(
-      crossAxisCount: 2,
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 2.5,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
+  Widget _overviewRow(String label, String value, IconData icon, Color color) {
+    return Row(
       children: [
-        _quickActionCard(
-          title: 'Sellers',
-          subtitle: 'Manage sellers',
-          icon: Icons.store_outlined,
-          color: primary,
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              AppRouter.sellerList,
-              arguments: {'authService': widget.authService},
-            );
-          },
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.10),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: color, size: 18),
         ),
-        _quickActionCard(
-          title: 'Products',
-          subtitle: 'View products',
-          icon: Icons.inventory_2_outlined,
-          color: const Color(0xFF2E9B68),
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              AppRouter.productList,
-              arguments: {'authService': widget.authService},
-            );
-          },
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: Color(0xFF202027),
+            ),
+          ),
         ),
-        _quickActionCard(
-          title: 'Orders',
-          subtitle: 'View orders',
-          icon: Icons.receipt_long_outlined,
-          color: const Color(0xFFF59E0B),
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              AppRouter.orderList,
-              arguments: {'authService': widget.authService},
-            );
-          },
-        ),
-        _quickActionCard(
-          title: 'Customers',
-          subtitle: 'View customers',
-          icon: Icons.people_outline_rounded,
-          color: const Color(0xFF2589EF),
-          onTap: () {
-            Navigator.pushNamed(
-              context,
-              AppRouter.customerList,
-              arguments: {'authService': widget.authService},
-            );
-          },
+        Text(
+          value,
+          style: const TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Color(0xFF6C4AB6),
+          ),
         ),
       ],
-    );
-  }
-
-  Widget _quickActionCard({
-    required String title,
-    required String subtitle,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-          border: Border.all(color: const Color(0xFFECEAF0)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 10,
-              offset: const Offset(0, 3),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, color: color, size: 18),
-            ),
-            const SizedBox(width: 10),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF202027),
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontSize: 11,
-                      color: Color(0xFF777780),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 
@@ -421,7 +301,7 @@ class _AdminHomeState extends State<AdminHome> {
           ],
         ),
         const SizedBox(height: 24),
-        _skeletonCard(80),
+        _skeletonCard(200),
       ],
     );
   }
@@ -449,7 +329,7 @@ class _AdminHomeState extends State<AdminHome> {
         ),
         const SizedBox(height: 18),
         Text(
-          error.toString(),
+          widget.authService.apiService.getErrorMessage(error),
           textAlign: TextAlign.center,
           style: TextStyle(
             color: Colors.grey.shade600,
@@ -459,7 +339,7 @@ class _AdminHomeState extends State<AdminHome> {
         const SizedBox(height: 20),
         Center(
           child: FilledButton.icon(
-            onPressed: _loadDashboard,
+            onPressed: _refresh,
             icon: const Icon(Icons.refresh_rounded),
             label: const Text('Try again'),
             style: FilledButton.styleFrom(

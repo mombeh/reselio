@@ -11,6 +11,8 @@ import {
   Customer,
   CustomerDocument,
 } from '../customers/schemas/customer.schema';
+import { User, UserDocument } from '../users/schemas/user.schema';
+import { Role } from '../auth/enums/role.enum';
 
 @Injectable()
 export class DashboardService {
@@ -20,6 +22,7 @@ export class DashboardService {
     private orderItemModel: Model<OrderItemDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
   ) {}
 
   async getDashboard(storeId: string) {
@@ -153,5 +156,53 @@ export class DashboardService {
       { $sort: { totalRevenue: -1 } },
       { $limit: 5 },
     ]);
+  }
+
+  async getAdminDashboard() {
+    const [
+      totalSellers,
+      totalCustomers,
+      totalProducts,
+      totalOrders,
+      pendingOrders,
+      totalRevenue,
+      activeUsers,
+    ] = await Promise.all([
+      this.userModel.countDocuments({ role: Role.Client }),
+      this.userModel.countDocuments({ role: Role.Customer }),
+      this.productModel.countDocuments(),
+      this.orderModel.countDocuments(),
+      this.orderModel.countDocuments({ status: 'Pending' }),
+      this.getTotalRevenue(),
+      this.userModel.countDocuments({ isActive: true }),
+    ]);
+
+    return {
+      totalSellers,
+      totalCustomers,
+      totalProducts,
+      totalOrders,
+      pendingOrders,
+      totalRevenue,
+      activeUsers,
+    };
+  }
+
+  private async getTotalRevenue(): Promise<number> {
+    const result = await this.orderModel.aggregate([
+      {
+        $match: {
+          status: { $ne: 'Cancelled' },
+        },
+      },
+      {
+        $group: {
+          _id: null,
+          revenue: { $sum: '$total' },
+        },
+      },
+    ]);
+
+    return result[0]?.revenue || 0;
   }
 }
