@@ -327,7 +327,7 @@ class _AdminHomeState extends State<AdminHome> {
           onTap: () {
             Navigator.pushNamed(
               context,
-              AppRouter.customerList,
+              AppRouter.adminCustomerList,
               arguments: {'authService': widget.authService},
             );
           },

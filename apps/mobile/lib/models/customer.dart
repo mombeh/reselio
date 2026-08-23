@@ -9,6 +9,8 @@ class Customer {
   final String? notes;
   final DateTime? createdAt;
   final DateTime? updatedAt;
+  final bool isActive;
+  final String? userEmail;
 
   Customer({
     required this.id,
@@ -21,6 +23,8 @@ class Customer {
     this.notes,
     this.createdAt,
     this.updatedAt,
+    this.isActive = true,
+    this.userEmail,
   });
 
   factory Customer.fromJson(Map<String, dynamic> json) {
@@ -39,6 +43,8 @@ class Customer {
       updatedAt: json['updatedAt'] != null
           ? DateTime.tryParse(json['updatedAt'])
           : null,
+      isActive: json['isActive'] ?? true,
+      userEmail: json['userEmail'],
     );
   }
 
@@ -54,6 +60,8 @@ class Customer {
       'notes': notes,
       'createdAt': createdAt?.toIso8601String(),
       'updatedAt': updatedAt?.toIso8601String(),
+      'isActive': isActive,
+      'userEmail': userEmail,
     };
   }
 }

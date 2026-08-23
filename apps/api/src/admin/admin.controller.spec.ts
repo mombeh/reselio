@@ -2,12 +2,14 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AdminController } from './admin.controller';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { UsersService } from '../users/users.service';
+import { CustomersService } from '../customers/customers.service';
 import { Role } from '../auth/enums/role.enum';
 
 describe('AdminController', () => {
   let controller: AdminController;
   let dashboardService: jest.Mocked<DashboardService>;
   let usersService: jest.Mocked<UsersService>;
+  let customersService: jest.Mocked<CustomersService>;
 
   const mockDashboardService = {
     getAdminDashboard: jest.fn(),
@@ -19,18 +21,25 @@ describe('AdminController', () => {
     toggleSellerStatus: jest.fn(),
   };
 
+  const mockCustomersService = {
+    findAllByStore: jest.fn(),
+    findOne: jest.fn(),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       controllers: [AdminController],
       providers: [
         { provide: DashboardService, useValue: mockDashboardService },
         { provide: UsersService, useValue: mockUsersService },
+        { provide: CustomersService, useValue: mockCustomersService },
       ],
     }).compile();
 
     controller = module.get<AdminController>(AdminController);
     dashboardService = module.get(DashboardService);
     usersService = module.get(UsersService);
+    customersService = module.get(CustomersService);
   });
 
   afterEach(() => {
@@ -112,6 +121,70 @@ describe('AdminController', () => {
 
       expect(result.isActive).toBe(false);
       expect(usersService.toggleSellerStatus).toHaveBeenCalledWith('seller1', false);
+    });
+  });
+
+  describe('getCustomers', () => {
+    it('should return all customers with user info', async () => {
+      mockCustomersService.findAllByStore.mockResolvedValue([
+        { _id: 'cust1', fullName: 'John', phoneNumber: '123', userId: 'user1', toObject: () => ({ _id: 'cust1', fullName: 'John', phoneNumber: '123', userId: 'user1' }) },
+      ] as any);
+      mockUsersService.findSellerById.mockResolvedValue({ _id: 'user1', isActive: true, email: 'john@test.com' });
+
+      const result = await controller.getCustomers();
+
+      expect(result).toHaveLength(1);
+      expect(result[0].fullName).toBe('John');
+      expect(customersService.findAllByStore).toHaveBeenCalledWith(null);
+    });
+  });
+
+  describe('getCustomerById', () => {
+    it('should return customer details with user info', async () => {
+      mockCustomersService.findOne.mockResolvedValue({
+        _id: 'cust1',
+        fullName: 'John',
+        phoneNumber: '123',
+        userId: 'user1',
+        toObject: () => ({ _id: 'cust1', fullName: 'John', phoneNumber: '123', userId: 'user1' }),
+      } as any);
+      mockUsersService.findSellerById.mockResolvedValue({ _id: 'user1', isActive: true, email: 'john@test.com' });
+
+      const result = await controller.getCustomerById('cust1');
+
+      expect(result.fullName).toBe('John');
+      expect(result.isActive).toBe(true);
+      expect(customersService.findOne).toHaveBeenCalledWith('cust1', null);
+    });
+  });
+
+  describe('updateCustomerStatus', () => {
+    it('should update customer status via linked user', async () => {
+      mockCustomersService.findOne.mockResolvedValue({
+        _id: 'cust1',
+        fullName: 'John',
+        userId: 'user1',
+        toObject: () => ({ _id: 'cust1', fullName: 'John', userId: 'user1' }),
+      } as any);
+      mockUsersService.toggleSellerStatus.mockResolvedValue({ _id: 'user1', isActive: false } as any);
+
+      const result = await controller.updateCustomerStatus('cust1', false);
+
+      expect(result.isActive).toBe(false);
+      expect(usersService.toggleSellerStatus).toHaveBeenCalledWith('user1', false);
+    });
+
+    it('should handle customer without linked user', async () => {
+      mockCustomersService.findOne.mockResolvedValue({
+        _id: 'cust1',
+        fullName: 'John',
+        userId: null,
+        toObject: () => ({ _id: 'cust1', fullName: 'John', userId: null }),
+      } as any);
+
+      const result = await controller.updateCustomerStatus('cust1', false);
+
+      expect(result.message).toBe('Customer has no linked user account');
     });
   });
 });
