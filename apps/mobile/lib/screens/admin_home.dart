@@ -332,6 +332,19 @@ class _AdminHomeState extends State<AdminHome> {
             );
           },
         ),
+        _quickActionCard(
+          title: 'Reports',
+          subtitle: 'Platform analytics',
+          icon: Icons.bar_chart_rounded,
+          color: const Color(0xFF6C4AB6),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRouter.adminReports,
+              arguments: {'authService': widget.authService},
+            );
+          },
+        ),
       ],
     );
   }
