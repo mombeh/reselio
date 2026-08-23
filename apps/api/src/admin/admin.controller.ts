@@ -49,7 +49,7 @@ export class AdminController {
   }
 
   @Get('customers')
-  async getCustomers() {
+  async getCustomers(): Promise<Array<Record<string, any>>> {
     const customers = await this.customersService.findAllByStore(null);
     const result = await Promise.all(
       customers.map(async (customer) => {
@@ -69,7 +69,7 @@ export class AdminController {
   }
 
   @Get('customers/:id')
-  async getCustomerById(@Param('id') id: string) {
+  async getCustomerById(@Param('id') id: string): Promise<Record<string, any>> {
     const customer = await this.customersService.findOne(id, null);
     let user = null;
     if (customer.userId) {
