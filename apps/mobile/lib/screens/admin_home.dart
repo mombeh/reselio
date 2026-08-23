@@ -1,194 +1,480 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/router/app_router.dart';
-import 'package:mobile/widgets/notification_icon_badge.dart';
 
-class AdminHome extends StatelessWidget {
+class AdminHome extends StatefulWidget {
   final AuthService authService;
 
   const AdminHome({super.key, required this.authService});
 
   @override
+  State<AdminHome> createState() => _AdminHomeState();
+}
+
+class _AdminHomeState extends State<AdminHome> {
+  late Future<Map<String, dynamic>> _dashboardFuture;
+  static const Color primary = Color(0xFF6C4AB6);
+  static const Color background = Color(0xFFF7F7FA);
+
+  @override
+  void initState() {
+    super.initState();
+    _loadDashboard();
+  }
+
+  void _loadDashboard() {
+    setState(() {
+      _dashboardFuture = widget.authService.apiService.getAdminDashboard();
+    });
+  }
+
+  Future<void> _refresh() async {
+    setState(() {
+      _dashboardFuture = widget.authService.apiService.getAdminDashboard();
+    });
+    await _dashboardFuture;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: background,
       appBar: AppBar(
-        title: const Text('Admin Dashboard'),
-        actions: [
-          NotificationIconBadge(authService: authService),
-          IconButton(
-            icon: const Icon(Icons.person_outline),
-            onPressed: () {
-              Navigator.pushNamed(
-                context,
-                AppRouter.profile,
-                arguments: {'authService': authService},
-              );
-            },
+        elevation: 0,
+        backgroundColor: background,
+        surfaceTintColor: Colors.transparent,
+        titleSpacing: 20,
+        title: const Text(
+          'Admin Dashboard',
+          style: TextStyle(
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF17171C),
+          ),
+        ),
+      ),
+      body: RefreshIndicator(
+        color: primary,
+        onRefresh: _refresh,
+        child: FutureBuilder<Map<String, dynamic>>(
+          future: _dashboardFuture,
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.waiting &&
+                snapshot.data == null) {
+              return _buildLoadingSkeleton();
+            }
+
+            if (snapshot.hasError) {
+              return _buildErrorState(snapshot.error);
+            }
+
+            final data = snapshot.data ?? {};
+            return ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 30),
+              children: [
+                _buildMetricGrid(data),
+                const SizedBox(height: 24),
+                _buildSectionHeader('Platform Overview'),
+                const SizedBox(height: 12),
+                _buildOverviewCard(data),
+                const SizedBox(height: 24),
+                _buildSectionHeader('Quick Actions'),
+                const SizedBox(height: 12),
+                _buildQuickActions(),
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildMetricGrid(Map<String, dynamic> data) {
+    return GridView.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 1.4,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        _metricCard(
+          title: 'Total Sellers',
+          value: '${data['totalSellers'] ?? 0}',
+          icon: Icons.store_outlined,
+          color: primary,
+        ),
+        _metricCard(
+          title: 'Total Customers',
+          value: '${data['totalCustomers'] ?? 0}',
+          icon: Icons.people_outline_rounded,
+          color: const Color(0xFF2589EF),
+        ),
+        _metricCard(
+          title: 'Total Products',
+          value: '${data['totalProducts'] ?? 0}',
+          icon: Icons.inventory_2_outlined,
+          color: const Color(0xFF2E9B68),
+        ),
+        _metricCard(
+          title: 'Total Orders',
+          value: '${data['totalOrders'] ?? 0}',
+          icon: Icons.shopping_bag_outlined,
+          color: const Color(0xFFF59E0B),
+        ),
+        _metricCard(
+          title: 'Pending Orders',
+          value: '${data['pendingOrders'] ?? 0}',
+          icon: Icons.pending_actions_rounded,
+          color: Colors.orange,
+        ),
+        _metricCard(
+          title: 'Active Users',
+          value: '${data['activeUsers'] ?? 0}',
+          icon: Icons.person_outlined,
+          color: const Color(0xFF0D9D8C),
+        ),
+      ],
+    );
+  }
+
+  Widget _metricCard({
+    required String title,
+    required String value,
+    required IconData icon,
+    required Color color,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFECEAF0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
           ),
         ],
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(16),
+      child: Row(
         children: [
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.dashboard_outlined, color: Colors.deepPurple),
-              title: const Text('Dashboard'),
-              subtitle: const Text('Sales overview and metrics'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.dashboard,
-                  arguments: {'authService': authService},
-                );
-              },
+          Container(
+            width: 40,
+            height: 40,
+            decoration: BoxDecoration(
+              color: color.withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(12),
             ),
+            child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.notifications_outlined, color: Colors.deepOrange),
-              title: const Text('Notifications'),
-              subtitle: const Text('View your notifications'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.notifications,
-                  arguments: {'authService': authService},
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.bar_chart_outlined, color: Colors.red),
-              title: const Text('Reports'),
-              subtitle: const Text('Detailed analytics and charts'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.reports,
-                  arguments: {'authService': authService},
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.people_alt_outlined, color: Colors.deepPurple),
-              title: const Text('User Management'),
-              subtitle: const Text('Manage sellers and users'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.sellerList,
-                  arguments: {'authService': authService},
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.store_outlined, color: Colors.orange),
-              title: const Text('My Store'),
-              subtitle: const Text('View and manage your store'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.myStore,
-                  arguments: {'authService': authService},
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.inventory_2_outlined, color: Colors.teal),
-              title: const Text('Products'),
-              subtitle: const Text('Manage your products'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.productList,
-                  arguments: {'authService': authService},
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.people_outline, color: Colors.green),
-              title: const Text('Customers'),
-              subtitle: const Text('View and manage customers'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.customerList,
-                  arguments: {'authService': authService},
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.receipt_long, color: Colors.blue),
-              title: const Text('Orders'),
-              subtitle: const Text('Manage orders'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.orderList,
-                  arguments: {'authService': authService},
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.business_outlined, color: Colors.blue),
-              title: const Text('All Orders'),
-              subtitle: const Text('View all platform orders'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.orderList,
-                  arguments: {'authService': authService},
-                );
-              },
-            ),
-          ),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.settings_outlined, color: Colors.grey),
-              title: const Text('System Settings'),
-              subtitle: const Text('Configure platform settings'),
-              trailing: const Icon(Icons.arrow_forward_ios),
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Settings coming soon')),
-                );
-              },
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  value,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w800,
+                    color: Color(0xFF202027),
+                  ),
+                ),
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 11,
+                    color: Color(0xFF777780),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 18,
+        fontWeight: FontWeight.w800,
+        color: Color(0xFF202027),
+      ),
+    );
+  }
+
+  Widget _buildOverviewCard(Map<String, dynamic> data) {
+    final totalRevenue = data['totalRevenue'] ?? 0;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFECEAF0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Container(
+            width: 44,
+            height: 44,
+            decoration: BoxDecoration(
+              color: const Color(0xFF2E9B68).withValues(alpha: 0.10),
+              borderRadius: BorderRadius.circular(14),
+            ),
+            child: const Icon(
+              Icons.payments_outlined,
+              color: Color(0xFF2E9B68),
+              size: 22,
+            ),
+          ),
+          const SizedBox(width: 14),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Total Revenue',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey.shade600,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  '${totalRevenue.toStringAsFixed(0)} FCFA',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFF202027),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildQuickActions() {
+    return GridView.count(
+      crossAxisCount: 2,
+      crossAxisSpacing: 12,
+      mainAxisSpacing: 12,
+      childAspectRatio: 2.5,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      children: [
+        _quickActionCard(
+          title: 'Sellers',
+          subtitle: 'Manage sellers',
+          icon: Icons.store_outlined,
+          color: primary,
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRouter.sellerList,
+              arguments: {'authService': widget.authService},
+            );
+          },
+        ),
+        _quickActionCard(
+          title: 'Products',
+          subtitle: 'View products',
+          icon: Icons.inventory_2_outlined,
+          color: const Color(0xFF2E9B68),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRouter.productList,
+              arguments: {'authService': widget.authService},
+            );
+          },
+        ),
+        _quickActionCard(
+          title: 'Orders',
+          subtitle: 'View orders',
+          icon: Icons.receipt_long_outlined,
+          color: const Color(0xFFF59E0B),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRouter.orderList,
+              arguments: {'authService': widget.authService},
+            );
+          },
+        ),
+        _quickActionCard(
+          title: 'Customers',
+          subtitle: 'View customers',
+          icon: Icons.people_outline_rounded,
+          color: const Color(0xFF2589EF),
+          onTap: () {
+            Navigator.pushNamed(
+              context,
+              AppRouter.customerList,
+              arguments: {'authService': widget.authService},
+            );
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _quickActionCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: const Color(0xFFECEAF0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 10,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, color: color, size: 18),
+            ),
+            const SizedBox(width: 10),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w700,
+                      color: Color(0xFF202027),
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: Color(0xFF777780),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingSkeleton() {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(20),
+      children: [
+        Row(
+          children: [
+            Expanded(child: _skeletonCard(100)),
+            const SizedBox(width: 12),
+            Expanded(child: _skeletonCard(100)),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
+            Expanded(child: _skeletonCard(100)),
+            const SizedBox(width: 12),
+            Expanded(child: _skeletonCard(100)),
+          ],
+        ),
+        const SizedBox(height: 24),
+        _skeletonCard(80),
+      ],
+    );
+  }
+
+  Widget _skeletonCard(double height) {
+    return Container(
+      height: height,
+      decoration: BoxDecoration(
+        color: Colors.grey.shade200,
+        borderRadius: BorderRadius.circular(18),
+      ),
+    );
+  }
+
+  Widget _buildErrorState(Object? error) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 100),
+        Icon(
+          Icons.wifi_off_rounded,
+          size: 52,
+          color: Colors.grey.shade400,
+        ),
+        const SizedBox(height: 18),
+        Text(
+          error.toString(),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Center(
+          child: FilledButton.icon(
+            onPressed: _loadDashboard,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Try again'),
+            style: FilledButton.styleFrom(
+              backgroundColor: primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 22,
+                vertical: 13,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
