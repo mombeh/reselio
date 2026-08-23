@@ -474,6 +474,25 @@ class ApiService {
     return data;
   }
 
+  Future<List<Customer>> getAdminCustomers() async {
+    final response = await dio.get('/admin/customers');
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => Customer.fromJson(item)).toList();
+  }
+
+  Future<Customer> getAdminCustomerById(String id) async {
+    final response = await dio.get('/admin/customers/$id');
+    return Customer.fromJson(response.data);
+  }
+
+  Future<Map<String, dynamic>> updateCustomerStatus(String id, bool isActive) async {
+    final response = await dio.patch('/admin/customers/$id/status', data: {
+      'isActive': isActive,
+    });
+    final data = response.data as Map<String, dynamic>;
+    return data;
+  }
+
   Future<Map<String, dynamic>> getSalesReport({String? period, String? startDate, String? endDate}) async {
     final params = <String, dynamic>{};
     if (period != null) params['period'] = period;

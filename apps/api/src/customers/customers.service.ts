@@ -27,12 +27,19 @@ export class CustomersService {
     return customer.save();
   }
 
-  async findAllByStore(storeId: string) {
-    return this.customerModel.find({ storeId }).sort({ createdAt: -1 });
+  async findAllByStore(storeId: string | null) {
+    if (storeId) {
+      return this.customerModel.find({ storeId }).sort({ createdAt: -1 });
+    }
+    return this.customerModel.find().sort({ createdAt: -1 });
   }
 
-  async findOne(id: string, storeId: string) {
-    const customer = await this.customerModel.findOne({ _id: id, storeId });
+  async findOne(id: string, storeId: string | null) {
+    const query: any = { _id: id };
+    if (storeId) {
+      query.storeId = storeId;
+    }
+    const customer = await this.customerModel.findOne(query);
     if (!customer) {
       throw new NotFoundException('Customer not found');
     }

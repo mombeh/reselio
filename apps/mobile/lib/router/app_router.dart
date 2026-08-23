@@ -30,6 +30,8 @@ import 'package:mobile/screens/shared_product_screen.dart';
 import 'package:mobile/screens/admin_dashboard_screen.dart';
 import 'package:mobile/screens/seller_list_screen.dart';
 import 'package:mobile/screens/seller_detail_screen.dart';
+import 'package:mobile/screens/admin_customer_list_screen.dart';
+import 'package:mobile/screens/admin_customer_detail_screen.dart';
 import 'package:mobile/models/store.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/models/customer.dart';
@@ -68,6 +70,8 @@ class AppRouter {
   static const String adminDashboard = '/admin-dashboard';
   static const String sellerList = '/seller-list';
   static const String sellerDetail = '/seller-detail';
+  static const String adminCustomerList = '/admin-customer-list';
+  static const String adminCustomerDetail = '/admin-customer-detail';
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings,
@@ -262,6 +266,19 @@ class AppRouter {
           builder: (_) => SellerDetailScreen(
             authService: authService!,
             sellerId: args['sellerId'] as String,
+          ),
+          settings: settings,
+        );
+      case adminCustomerList:
+        return MaterialPageRoute(
+          builder: (_) => AdminCustomerListScreen(authService: authService!),
+          settings: settings,
+        );
+      case adminCustomerDetail:
+        return MaterialPageRoute(
+          builder: (_) => AdminCustomerDetailScreen(
+            authService: authService!,
+            customerId: args['customerId'] as String,
           ),
           settings: settings,
         );
