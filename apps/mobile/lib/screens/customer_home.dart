@@ -135,27 +135,6 @@ class _CustomerHomeState extends State<CustomerHome>
   // ============================================================
   // MAIN PAGE CONTENT
   // ============================================================
-
-  Widget _buildCurrentPage() {
-    switch (_currentIndex) {
-      case 0:
-        return _buildDashboardPage();
-
-      case 1:
-        return OrderListScreen(
-          authService: widget.authService,
-        );
-
-      case 2:
-        return CustomerProductListScreen(
-          authService: widget.authService,
-        );
-
-      default:
-        return _buildDashboardPage();
-    }
-  }
-
   Widget _buildDashboardPage() {
     return RefreshIndicator(
       color: primary,
