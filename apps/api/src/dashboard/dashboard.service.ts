@@ -169,7 +169,7 @@ export class DashboardService {
       activeUsers,
     ] = await Promise.all([
       this.userModel.countDocuments({ role: Role.Client }),
-      this.userModel.countDocuments({ role: Role.Customer }),
+      this.customerModel.countDocuments(),
       this.productModel.countDocuments(),
       this.orderModel.countDocuments(),
       this.orderModel.countDocuments({ status: 'Pending' }),

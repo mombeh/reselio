@@ -44,6 +44,20 @@ export class ProductsService {
     return this.productModel.find(filter).sort({ createdAt: -1 });
   }
 
+  async findAll(search?: string, category?: string) {
+    const filter: Record<string, unknown> = {};
+
+    if (category && category.length > 0) {
+      filter.category = category;
+    }
+
+    if (search && search.length > 0) {
+      filter.name = { $regex: search, $options: 'i' };
+    }
+
+    return this.productModel.find(filter).sort({ createdAt: -1 });
+  }
+
   async findOne(id: string, storeId: string) {
     const product = await this.productModel.findOne({ _id: id, storeId });
     if (!product) {
