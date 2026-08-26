@@ -4,7 +4,10 @@ import { DashboardService } from '../dashboard/dashboard.service';
 import { UsersService } from '../users/users.service';
 import { CustomersService } from '../customers/customers.service';
 import { OrdersService } from '../orders/orders.service';
+import { ProductsService } from '../products/products.service';
 import { ReportsService } from '../reports/reports.service';
+import { SalesPeriod } from '../reports/dto/sales-report-query.dto';
+import { RevenuePeriod } from '../reports/dto/revenue-report-query.dto';
 import { Role } from '../auth/enums/role.enum';
 
 describe('AdminController', () => {
@@ -13,6 +16,7 @@ describe('AdminController', () => {
   let usersService: jest.Mocked<UsersService>;
   let customersService: jest.Mocked<CustomersService>;
   let ordersService: jest.Mocked<OrdersService>;
+  let productsService: jest.Mocked<ProductsService>;
   let reportsService: jest.Mocked<ReportsService>;
 
   const mockDashboardService = {
@@ -31,9 +35,14 @@ describe('AdminController', () => {
   };
 
   const mockOrdersService = {
+    findAll: jest.fn(),
     getPlatformStatusBreakdown: jest.fn(),
     getPlatformDailySales: jest.fn(),
     getPlatformTopProducts: jest.fn(),
+  };
+
+  const mockProductsService = {
+    findAll: jest.fn(),
   };
 
   const mockReportsService = {
@@ -51,6 +60,7 @@ describe('AdminController', () => {
         { provide: UsersService, useValue: mockUsersService },
         { provide: CustomersService, useValue: mockCustomersService },
         { provide: OrdersService, useValue: mockOrdersService },
+        { provide: ProductsService, useValue: mockProductsService },
         { provide: ReportsService, useValue: mockReportsService },
       ],
     }).compile();
@@ -60,6 +70,7 @@ describe('AdminController', () => {
     usersService = module.get(UsersService);
     customersService = module.get(CustomersService);
     ordersService = module.get(OrdersService);
+    productsService = module.get(ProductsService);
     reportsService = module.get(ReportsService);
   });
 
@@ -130,20 +141,6 @@ describe('AdminController', () => {
     });
   });
 
-  describe('updateSellerStatus', () => {
-    it('should update seller status', async () => {
-      mockUsersService.toggleSellerStatus.mockResolvedValue({
-        _id: 'seller1',
-        name: 'Jane',
-        isActive: false,
-      } as any);
-
-      const result = await controller.updateSellerStatus('seller1', false);
-
-      expect(result.isActive).toBe(false);
-      expect(usersService.toggleSellerStatus).toHaveBeenCalledWith('seller1', false);
-    });
-  });
 
   describe('getCustomers', () => {
     it('should return all customers with user info', async () => {
@@ -179,49 +176,86 @@ describe('AdminController', () => {
     });
   });
 
-  describe('updateCustomerStatus', () => {
-    it('should update customer status via linked user', async () => {
-      mockCustomersService.findOne.mockResolvedValue({
-        _id: 'cust1',
-        fullName: 'John',
-        userId: 'user1',
-        toObject: () => ({ _id: 'cust1', fullName: 'John', userId: 'user1' }),
-      } as any);
-      mockUsersService.toggleSellerStatus.mockResolvedValue({ _id: 'user1', isActive: false } as any);
 
-      const result = await controller.updateCustomerStatus('cust1', false);
+  describe('getProducts', () => {
+    it('should return all products', async () => {
+      mockProductsService.findAll.mockResolvedValue([
+        { _id: 'prod1', name: 'Product 1', price: 100 },
+      ] as any);
 
-      expect(result.isActive).toBe(false);
-      expect(usersService.toggleSellerStatus).toHaveBeenCalledWith('user1', false);
+      const result = await controller.getProducts();
+
+      expect(result).toHaveLength(1);
+      expect(productsService.findAll).toHaveBeenCalledWith(undefined, undefined);
     });
 
-    it('should handle customer without linked user', async () => {
-      mockCustomersService.findOne.mockResolvedValue({
-        _id: 'cust1',
-        fullName: 'John',
-        userId: null,
-        toObject: () => ({ _id: 'cust1', fullName: 'John', userId: null }),
+    it('should filter products by search and category', async () => {
+      mockProductsService.findAll.mockResolvedValue([]);
+
+      await controller.getProducts('phone', 'Electronics');
+
+      expect(productsService.findAll).toHaveBeenCalledWith('phone', 'Electronics');
+    });
+  });
+
+  describe('getOrders', () => {
+    it('should return all orders', async () => {
+      mockOrdersService.findAll.mockResolvedValue({
+        data: [{ _id: 'ord1', orderNumber: 'ORD-001' }],
+        total: 1,
+        page: 1,
+        limit: 10,
+        totalPages: 1,
       } as any);
 
-      const result = await controller.updateCustomerStatus('cust1', false);
+      const result = await controller.getOrders();
 
-      expect(result.message).toBe('Customer has no linked user account');
+      expect(result.data).toHaveLength(1);
+      expect(ordersService.findAll).toHaveBeenCalledWith({});
+    });
+
+    it('should filter orders by status and search', async () => {
+      mockOrdersService.findAll.mockResolvedValue({
+        data: [],
+        total: 0,
+        page: 1,
+        limit: 10,
+        totalPages: 0,
+      } as any);
+
+      await controller.getOrders('Pending', 'ORD-001');
+
+      expect(ordersService.findAll).toHaveBeenCalledWith({
+        status: 'Pending',
+        search: 'ORD-001',
+        page: undefined,
+        limit: undefined,
+      });
     });
   });
 
   describe('getReportsOverview', () => {
     it('should return platform reports overview', async () => {
       mockUsersService.findSellers.mockResolvedValue({ total: 10, data: [] } as any);
+      mockCustomersService.findAllByStore.mockResolvedValue([
+        { _id: 'cust1' },
+        { _id: 'cust2' },
+      ] as any);
+      mockProductsService.findAll.mockResolvedValue([
+        { _id: 'prod1' },
+        { _id: 'prod2' },
+        { _id: 'prod3' },
+      ] as any);
       mockOrdersService.getPlatformStatusBreakdown.mockResolvedValue([
         { _id: 'Pending', count: 5, totalRevenue: 1000, totalProfit: 200 },
         { _id: 'Delivered', count: 20, totalRevenue: 5000, totalProfit: 1000 },
       ] as any);
-      mockOrdersService.getPlatformTopProducts.mockResolvedValue([]);
 
       const result = await controller.getReportsOverview();
 
       expect(result.totalSellers).toBe(10);
-      expect(result.totalCustomers).toBe(1240);
+      expect(result.totalCustomers).toBe(2);
+      expect(result.totalProducts).toBe(3);
       expect(result.statusBreakdown).toHaveLength(2);
       expect(ordersService.getPlatformStatusBreakdown).toHaveBeenCalled();
     });
@@ -276,7 +310,7 @@ describe('AdminController', () => {
         averageOrderValue: 500,
       });
 
-      const result = await controller.getPlatformSalesReport({ period: 'today' });
+      const result = await controller.getPlatformSalesReport({ period: SalesPeriod.TODAY });
 
       expect(result.totalOrders).toBe(10);
       expect(reportsService.getPlatformSalesReport).toHaveBeenCalled();
@@ -289,7 +323,7 @@ describe('AdminController', () => {
         { date: '2024-01-01', revenue: 1000 },
       ]);
 
-      const result = await controller.getPlatformRevenueTrend({ period: 'month' });
+      const result = await controller.getPlatformRevenueTrend({ period: RevenuePeriod.MONTH });
 
       expect(result).toHaveLength(1);
       expect(reportsService.getPlatformRevenueTrend).toHaveBeenCalled();

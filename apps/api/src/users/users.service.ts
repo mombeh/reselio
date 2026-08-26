@@ -117,6 +117,15 @@ export class UsersService {
       filter.isActive = query.isActive;
     }
 
+    if (query.search && query.search.trim().length > 0) {
+      const searchRegex = { $regex: query.search.trim(), $options: 'i' };
+      filter.$or = [
+        { name: searchRegex },
+        { email: searchRegex },
+        { phone: searchRegex },
+      ];
+    }
+
     const total = await this.userModel.countDocuments(filter);
 
     const sellers = await this.userModel

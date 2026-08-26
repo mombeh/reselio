@@ -38,20 +38,20 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
     _loadReports();
   }
 
-  String get _periodParam {
-    switch (_selectedPeriod) {
-      case AdminReportPeriod.today:
-        return 'today';
-      case AdminReportPeriod.week:
-        return 'week';
-      case AdminReportPeriod.month:
-        return 'month';
-      case AdminReportPeriod.year:
-        return 'year';
-      case AdminReportPeriod.custom:
-        return 'custom';
-    }
-  }
+  // String get _periodParam {
+  //   switch (_selectedPeriod) {
+  //     case AdminReportPeriod.today:
+  //       return 'today';
+  //     case AdminReportPeriod.week:
+  //       return 'week';
+  //     case AdminReportPeriod.month:
+  //       return 'month';
+  //     case AdminReportPeriod.year:
+  //       return 'year';
+  //     case AdminReportPeriod.custom:
+  //       return 'custom';
+  //   }
+  // }
 
   String get _periodLabel {
     switch (_selectedPeriod) {

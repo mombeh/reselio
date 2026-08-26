@@ -217,6 +217,41 @@ export class OrdersService {
     };
   }
 
+  async findAll(query: any) {
+    const page = parseInt(query.page) || 1;
+    const limit = parseInt(query.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    const filter: any = {};
+
+    if (query.status) {
+      filter.status = query.status;
+    }
+
+    if (query.search) {
+      filter.$or = [
+        { orderNumber: { $regex: query.search, $options: 'i' } },
+      ];
+    }
+
+    const total = await this.orderModel.countDocuments(filter);
+
+    const orders = await this.orderModel
+      .find(filter)
+      .populate('customerId', 'fullName phoneNumber email')
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit);
+
+    return {
+      data: orders,
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit),
+    };
+  }
+
   async findAllByCustomer(storeId: string, customerId: string, query: any) {
     const page = parseInt(query.page) || 1;
     const limit = parseInt(query.limit) || 10;
