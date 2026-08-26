@@ -814,13 +814,6 @@ class _AdminHomeState extends State<AdminHome> {
       physics: const NeverScrollableScrollPhysics(),
       children: [
         _managementCard(
-          title: 'Sellers',
-          subtitle: 'Manage sellers',
-          icon: Icons.storefront_rounded,
-          color: primary,
-          onTap: () => _openRoute(AppRouter.sellerList),
-        ),
-        _managementCard(
           title: 'Products',
           subtitle: 'View products',
           icon: Icons.inventory_2_rounded,
@@ -829,7 +822,7 @@ class _AdminHomeState extends State<AdminHome> {
         ),
         _managementCard(
           title: 'Orders',
-          subtitle: 'Manage orders',
+          subtitle: 'View orders',
           icon: Icons.receipt_long_rounded,
           color: warning,
           onTap: () => _openRoute(AppRouter.adminOrderList),

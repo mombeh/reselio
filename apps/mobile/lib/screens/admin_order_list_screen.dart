@@ -95,20 +95,6 @@ class _AdminOrderListScreenState extends State<AdminOrderListScreen> {
     });
   }
 
-  void _createOrder() {
-    Navigator.pushNamed(
-      context,
-      AppRouter.createOrder,
-      arguments: {
-        'authService': widget.authService,
-      },
-    ).then((result) {
-      if (result == true) {
-        _refresh();
-      }
-    });
-  }
-
   void _openOrder(Order order) {
     Navigator.pushNamed(
       context,
@@ -215,30 +201,7 @@ class _AdminOrderListScreenState extends State<AdminOrderListScreen> {
             ),
           ],
         ),
-        actions: [
-          Container(
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(14),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.04),
-                  blurRadius: 10,
-                  offset: const Offset(0, 3),
-                ),
-              ],
-            ),
-            child: IconButton(
-              onPressed: _createOrder,
-              icon: const Icon(
-                Icons.add_rounded,
-                color: primary,
-              ),
-              tooltip: 'Create order',
-            ),
-          ),
-        ],
+        actions: const [],
       ),
       body: Column(
         children: [
@@ -249,19 +212,6 @@ class _AdminOrderListScreenState extends State<AdminOrderListScreen> {
             child: _buildOrders(),
           ),
         ],
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _createOrder,
-        backgroundColor: primary,
-        foregroundColor: Colors.white,
-        elevation: 4,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text(
-          'New Order',
-          style: TextStyle(
-            fontWeight: FontWeight.w700,
-          ),
-        ),
       ),
     );
   }

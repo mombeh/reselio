@@ -63,77 +63,6 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
     });
   }
 
-  Future<void> _deleteProduct(Product product) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: const Text(
-            'Delete Product',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          content: Text(
-            'Are you sure you want to delete "${product.name}"?',
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context, false),
-              child: const Text('Cancel'),
-            ),
-            FilledButton(
-              onPressed: () => Navigator.pop(context, true),
-              style: FilledButton.styleFrom(
-                backgroundColor: Colors.red,
-              ),
-              child: const Text('Delete'),
-            ),
-          ],
-        );
-      },
-    );
-
-    if (confirmed != true) return;
-
-    try {
-      await widget.authService.apiService.deleteProduct(product.id);
-
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('${product.name} deleted'),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
-
-      _refresh();
-    } catch (e) {
-      if (!mounted) return;
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            widget.authService.apiService.getErrorMessage(e),
-          ),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
-        ),
-      );
-    }
-  }
-
   void _openProductDetails(Product product) {
     Navigator.pushNamed(
       context,
@@ -143,21 +72,6 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
         'product': product,
       },
     );
-  }
-
-  void _editProduct(Product product) {
-    Navigator.pushNamed(
-      context,
-      AppRouter.addProduct,
-      arguments: {
-        'authService': widget.authService,
-        'product': product,
-      },
-    ).then((result) {
-      if (result == true) {
-        _refresh();
-      }
-    });
   }
 
   @override
@@ -470,57 +384,13 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                 ],
               ),
             ),
-            const SizedBox(width: 6),
-            PopupMenuButton<String>(
-              padding: EdgeInsets.zero,
+            IconButton(
+              onPressed: () => _openProductDetails(product),
               icon: const Icon(
-                Icons.more_vert_rounded,
+                Icons.visibility_rounded,
                 color: Color(0xFF777780),
+                size: 20,
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-              onSelected: (value) {
-                if (value == 'edit') {
-                  _editProduct(product);
-                } else if (value == 'delete') {
-                  _deleteProduct(product);
-                }
-              },
-              itemBuilder: (context) => const [
-                PopupMenuItem(
-                  value: 'edit',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.edit_outlined,
-                        size: 19,
-                      ),
-                      SizedBox(width: 10),
-                      Text('Edit product'),
-                    ],
-                  ),
-                ),
-                PopupMenuItem(
-                  value: 'delete',
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.delete_outline_rounded,
-                        size: 19,
-                        color: Colors.red,
-                      ),
-                      SizedBox(width: 10),
-                      Text(
-                        'Delete product',
-                        style: TextStyle(
-                          color: Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
             ),
           ],
         ),

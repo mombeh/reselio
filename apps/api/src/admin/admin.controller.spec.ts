@@ -141,20 +141,6 @@ describe('AdminController', () => {
     });
   });
 
-  describe('updateSellerStatus', () => {
-    it('should update seller status', async () => {
-      mockUsersService.toggleSellerStatus.mockResolvedValue({
-        _id: 'seller1',
-        name: 'Jane',
-        isActive: false,
-      } as any);
-
-      const result = await controller.updateSellerStatus('seller1', false);
-
-      expect(result.isActive).toBe(false);
-      expect(usersService.toggleSellerStatus).toHaveBeenCalledWith('seller1', false);
-    });
-  });
 
   describe('getCustomers', () => {
     it('should return all customers with user info', async () => {
@@ -190,35 +176,6 @@ describe('AdminController', () => {
     });
   });
 
-  describe('updateCustomerStatus', () => {
-    it('should update customer status via linked user', async () => {
-      mockCustomersService.findOne.mockResolvedValue({
-        _id: 'cust1',
-        fullName: 'John',
-        userId: 'user1',
-        toObject: () => ({ _id: 'cust1', fullName: 'John', userId: 'user1' }),
-      } as any);
-      mockUsersService.toggleSellerStatus.mockResolvedValue({ _id: 'user1', isActive: false } as any);
-
-      const result = await controller.updateCustomerStatus('cust1', false);
-
-      expect(result.isActive).toBe(false);
-      expect(usersService.toggleSellerStatus).toHaveBeenCalledWith('user1', false);
-    });
-
-    it('should handle customer without linked user', async () => {
-      mockCustomersService.findOne.mockResolvedValue({
-        _id: 'cust1',
-        fullName: 'John',
-        userId: null,
-        toObject: () => ({ _id: 'cust1', fullName: 'John', userId: null }),
-      } as any);
-
-      const result = await controller.updateCustomerStatus('cust1', false);
-
-      expect(result.message).toBe('Customer has no linked user account');
-    });
-  });
 
   describe('getProducts', () => {
     it('should return all products', async () => {

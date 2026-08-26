@@ -1,4 +1,4 @@
-import { Controller, Get, Patch, Body, Param, Query, UseGuards } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards, Param } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { DashboardService } from '../dashboard/dashboard.service';
 import { UsersService } from '../users/users.service';
@@ -51,11 +51,6 @@ export class AdminController {
     return this.usersService.findSellerById(id);
   }
 
-  @Patch('sellers/:id/status')
-  updateSellerStatus(@Param('id') id: string, @Body('isActive') isActive: boolean) {
-    return this.usersService.toggleSellerStatus(id, isActive);
-  }
-
   @Get('customers')
   async getCustomers(): Promise<Array<Record<string, any>>> {
     const customers = await this.customersService.findAllByStore(null);
@@ -89,16 +84,6 @@ export class AdminController {
       isActive: user?.isActive ?? true,
       userEmail: user?.email ?? null,
     };
-  }
-
-  @Patch('customers/:id/status')
-  async updateCustomerStatus(@Param('id') id: string, @Body('isActive') isActive: boolean) {
-    const customer = await this.customersService.findOne(id, null);
-    if (!customer.userId) {
-      return { message: 'Customer has no linked user account', isActive };
-    }
-    await this.usersService.toggleSellerStatus(customer.userId, isActive);
-    return { message: 'Status updated', isActive };
   }
 
   @Get('products')
