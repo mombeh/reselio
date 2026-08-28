@@ -14,7 +14,7 @@ import '../models/top_product.dart';
 import '../models/user.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:4000';
+  static const String baseUrl = 'https://reselio.onrender.com';
   static const String tokenKey = 'auth_token';
 
   late final Dio dio;
