@@ -15,9 +15,13 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       configService.get<string>('GOOGLE_REDIRECT_URI_LOCAL') ||
       '';
 
-    const clientID = configService.get<string>('GOOGLE_CLIENT_ID') || '';
+    const clientID = configService.get<string>('GOOGLE_CLIENT_ID') || 'dummy-client-id';
     const clientSecret =
-      configService.get<string>('GOOGLE_CLIENT_SECRET') || '';
+      configService.get<string>('GOOGLE_CLIENT_SECRET') || 'dummy-client-secret';
+
+    if (!configService.get<string>('GOOGLE_CLIENT_ID') || !configService.get<string>('GOOGLE_CLIENT_SECRET')) {
+      Logger.warn('Google OAuth is not configured. Set GOOGLE_CLIENT_ID and GOOGLE_CLIENT_SECRET in environment variables.', 'GoogleStrategy');
+    }
 
     super({
       clientID,
