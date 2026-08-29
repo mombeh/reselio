@@ -121,7 +121,18 @@ class _AddProductScreenState extends State<AddProductScreen> {
     try {
       final price = double.parse(_priceController.text.trim());
       final quantity = int.parse(_quantityController.text.trim());
-      final imageUrl = _getImageUrl();
+
+      String? imageUrl;
+
+      if (_pickedImageBytes != null) {
+        imageUrl = await widget.authService.apiService.uploadProductImage(
+          _pickedImageBytes!,
+          _nameController.text.trim(),
+        );
+      } else {
+        final url = _imageUrlController.text.trim();
+        imageUrl = url.isEmpty ? null : url;
+      }
 
       if (_isEditing) {
         await widget.authService.apiService.updateProduct(
