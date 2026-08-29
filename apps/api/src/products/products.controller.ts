@@ -111,7 +111,27 @@ export class ProductsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file', { storage }))
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage,
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+      fileFilter: (req, file, callback) => {
+        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        if (allowedTypes.includes(file.mimetype)) {
+          callback(null, true);
+        } else {
+          callback(
+            new BadRequestException(
+              'Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed.',
+            ),
+            false,
+          );
+        }
+      },
+    }),
+  )
   uploadFile(@UploadedFile() file: Express.Multer.File) {
     if (!file) {
       throw new BadRequestException('No file uploaded');

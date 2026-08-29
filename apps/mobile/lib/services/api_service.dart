@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
@@ -14,7 +15,7 @@ import '../models/top_product.dart';
 import '../models/user.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:4000';
+  static const String baseUrl = 'https://reselio.onrender.com';
   static const String tokenKey = 'auth_token';
 
   late final Dio dio;
@@ -225,6 +226,26 @@ class ApiService {
   Future<Map<String, dynamic>> getPublicStore(String userId) async {
     final response = await dio.get('/stores/public/$userId');
     return response.data as Map<String, dynamic>;
+  }
+
+  Future<String> uploadProductImage(Uint8List bytes, String filename) async {
+    final fileName = '$filename-${DateTime.now().millisecondsSinceEpoch}.jpg';
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(
+        bytes,
+        filename: fileName,
+      ),
+    });
+
+    final response = await dio.post(
+      '/products/upload',
+      data: formData,
+      options: Options(
+        headers: {'Content-Type': 'multipart/form-data'},
+      ),
+    );
+
+    return response.data['imageUrl'] as String;
   }
 
   Future<Product> createProduct({
