@@ -234,7 +234,6 @@ class ApiService {
       'file': MultipartFile.fromBytes(
         bytes,
         filename: fileName,
-        contentType: MediaType.parse('image/jpeg'),
       ),
     });
 
