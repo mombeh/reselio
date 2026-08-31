@@ -43,10 +43,10 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _error = null);
 
     try {
-      // final response = await widget.authService.login(
-      //   email: _emailController.text.trim(),
-      //   password: _passwordController.text,
-      // );
+      final response = await widget.authService.login(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
 
       if (!mounted) return;
 

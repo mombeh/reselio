@@ -78,6 +78,9 @@ class FakeAuthService extends ChangeNotifier implements AuthService {
 
   @override
   Future<void> updateRole(String role) async {}
+
+  @override
+  Future<void> ensureClientRole() async {}
 }
 
 void main() {
