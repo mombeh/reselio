@@ -56,13 +56,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
       if (!mounted) return;
 
-      await widget.authService.logout();
+      await widget.authService.ensureClientRole();
 
       if (!mounted) return;
 
       Navigator.pushReplacementNamed(
         context,
-        AppRouter.login,
+        AppRouter.clientHome,
         arguments: {
           'authService': widget.authService,
         },

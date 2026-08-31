@@ -50,47 +50,17 @@ class _LoginScreenState extends State<LoginScreen> {
 
       if (!mounted) return;
 
-      final user = response.user;
-      final hasRole = user.role.isNotEmpty;
+      await widget.authService.ensureClientRole();
 
-      if (!hasRole) {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.roleSelection,
-          arguments: {
-            'authService': widget.authService,
-          },
-        );
-        return;
-      }
+      if (!mounted) return;
 
-      final role = user.role;
-
-      if (role == 'customer') {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.customerHome,
-          arguments: {
-            'authService': widget.authService,
-          },
-        );
-      } else if (role == 'client') {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.clientHome,
-          arguments: {
-            'authService': widget.authService,
-          },
-        );
-      } else {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.adminHome,
-          arguments: {
-            'authService': widget.authService,
-          },
-        );
-      }
+      Navigator.pushReplacementNamed(
+        context,
+        AppRouter.clientHome,
+        arguments: {
+          'authService': widget.authService,
+        },
+      );
     } catch (e) {
       if (!mounted) return;
 
