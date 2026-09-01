@@ -8,6 +8,7 @@ import {
   Req,
   Res,
   Logger,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import type { Response } from 'express';
@@ -16,6 +17,8 @@ import { UsersService } from '../users/users.service';
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { CreateUserDto } from '../users/dto/create-user.dto';
 import { LoginUserDto } from '../users/dto/login-user.dto';
+import { ForgotPasswordDto } from './dto/forgot-password.dto';
+import { ResetPasswordDto } from './dto/reset-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -96,5 +99,53 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   logout() {
     return { message: 'Logged out successfully' };
+  }
+
+  @Post('forgot-password')
+  async forgotPassword(@Body() forgotPasswordDto: ForgotPasswordDto) {
+    const email = forgotPasswordDto.email.trim().toLowerCase();
+    const token = await this.authService.createPasswordResetToken(email);
+
+    if (!token) {
+      return {
+        message:
+          'If an account with that email exists, password reset instructions have been generated.',
+        resetToken: null,
+      };
+    }
+
+    const frontendUrl =
+      process.env.FRONTEND_URL || 'https://reselio-web.vercel.app';
+    const resetLink = `${frontendUrl}/reset-password?token=${encodeURIComponent(token)}`;
+
+    this.logger.log(`Password reset requested for ${email}. Reset link: ${resetLink}`);
+
+    return {
+      message:
+        'If an account with that email exists, password reset instructions have been generated.',
+      resetToken: token,
+      resetLink,
+    };
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: ResetPasswordDto) {
+    if (!resetPasswordDto.token) {
+      throw new BadRequestException('Reset token is required');
+    }
+    if (resetPasswordDto.newPassword !== resetPasswordDto.confirmPassword) {
+      throw new BadRequestException('Passwords do not match');
+    }
+
+    const { userId } = await this.authService.verifyPasswordResetToken(
+      resetPasswordDto.token,
+    );
+
+    await this.usersService.updatePasswordByUserId(
+      userId,
+      resetPasswordDto.newPassword,
+    );
+
+    return { message: 'Password has been reset successfully' };
   }
 }

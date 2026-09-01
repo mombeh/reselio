@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile/screens/welcome_screen.dart';
 import 'package:mobile/screens/login_screen.dart';
 import 'package:mobile/screens/register_screen.dart';
+import 'package:mobile/screens/forgot_password_screen.dart';
+import 'package:mobile/screens/reset_password_screen.dart';
 import 'package:mobile/screens/role_selection_screen.dart';
 import 'package:mobile/screens/customer_home.dart';
 import 'package:mobile/screens/client_home.dart';
@@ -46,6 +48,8 @@ class AppRouter {
   static const String welcome = '/welcome';
   static const String login = '/login';
   static const String register = '/register';
+  static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
   static const String roleSelection = '/role-selection';
   static const String customerHome = '/customer-home';
   static const String clientHome = '/client-home';
@@ -108,6 +112,20 @@ class AppRouter {
       case register:
         return MaterialPageRoute(
           builder: (_) => RegisterScreen(authService: authService!),
+          settings: settings,
+        );
+      case forgotPassword:
+        return MaterialPageRoute(
+          builder: (_) => ForgotPasswordScreen(authService: authService!),
+          settings: settings,
+        );
+      case resetPassword:
+        return MaterialPageRoute(
+          builder: (_) => ResetPasswordScreen(
+            authService: authService!,
+            token: args['token'] as String?,
+            email: args['email'] as String?,
+          ),
           settings: settings,
         );
       case roleSelection:

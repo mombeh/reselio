@@ -154,6 +154,30 @@ class ApiService {
     );
   }
 
+  Future<Map<String, dynamic>> requestPasswordReset({required String email}) async {
+    final response = await dio.post(
+      '/auth/forgot-password',
+      data: {'email': email},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    final response = await dio.post(
+      '/auth/reset-password',
+      data: {
+        'token': token,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<Store> createStore({
     required String name,
     required String description,

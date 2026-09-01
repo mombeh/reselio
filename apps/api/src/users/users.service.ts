@@ -152,6 +152,15 @@ export class UsersService {
     return seller;
   }
 
+  async updatePasswordByUserId(userId: string, newPassword: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.password = await bcrypt.hash(newPassword, 10);
+    return user.save();
+  }
+
   async toggleSellerStatus(id: string, isActive: boolean) {
     const seller = await this.userModel.findById(id);
     if (!seller) {

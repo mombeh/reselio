@@ -118,4 +118,36 @@ export class AuthService {
       throw error;
     }
   }
+
+  async createPasswordResetToken(email: string): Promise<string | null> {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      this.logger.warn(`Password reset requested for unknown email: ${email}`);
+      return null;
+    }
+
+    const payload = {
+      sub: user._id.toString(),
+      email: user.email,
+      type: 'password-reset',
+    };
+
+    return this.jwtService.sign(payload, { expiresIn: '15m' });
+  }
+
+  async verifyPasswordResetToken(token: string): Promise<{ userId: string; email: string }> {
+    try {
+      const payload = this.jwtService.verify(token) as {
+        sub: string;
+        email: string;
+        type?: string;
+      };
+      if (payload.type !== 'password-reset') {
+        throw new Error('Invalid token type');
+      }
+      return { userId: payload.sub, email: payload.email };
+    } catch (error) {
+      throw new Error('Invalid or expired reset token');
+    }
+  }
 }
