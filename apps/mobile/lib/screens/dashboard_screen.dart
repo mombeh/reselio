@@ -85,11 +85,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final user = widget.authService.currentUser;
-    final isSeller = user?.role == 'client';
     final userName =
-        (isSeller && user?.businessName != null && user!.businessName!.trim().isNotEmpty)
-            ? user.businessName!.trim()
-            : (user?.name.trim().isNotEmpty == true ? user!.name.trim() : 'User');
+        user?.name.trim().isNotEmpty == true ? user!.name.trim() : 'User';
+    final storeName = user?.businessName?.trim();
 
     return Scaffold(
       backgroundColor: background,
@@ -103,7 +101,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Good morning, ${userName.split(' ').first} 👋',
+              'Welcome, ${userName.split(' ').first}',
               style: const TextStyle(
                 color: textPrimary,
                 fontSize: 23,
@@ -111,6 +109,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 letterSpacing: -0.5,
               ),
             ),
+            if (storeName != null && storeName.isNotEmpty) ...[
+              const SizedBox(height: 3),
+              Text(
+                storeName,
+                style: const TextStyle(
+                  color: textSecondary,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
             const SizedBox(height: 3),
             const Text(
               "Here's how your business is doing",
