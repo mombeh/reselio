@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:mobile/services/auth_service.dart';
@@ -14,12 +16,15 @@ class NotificationIconBadge extends StatefulWidget {
 class _NotificationIconBadgeState extends State<NotificationIconBadge> {
   int _unreadCount = 0;
   bool _isLoading = false;
+  Timer? _refreshTimer;
 
   Future<void> _fetchCount() async {
-    if (widget.authService == null) return;
+    if (widget.authService == null || _isLoading) return;
+
     setState(() => _isLoading = true);
     try {
-      final count = await widget.authService!.apiService.getUnreadNotificationCount();
+      final count = await widget.authService!.apiService
+          .getUnreadNotificationCount();
       if (mounted) {
         setState(() {
           _unreadCount = count;
@@ -46,6 +51,16 @@ class _NotificationIconBadgeState extends State<NotificationIconBadge> {
   void initState() {
     super.initState();
     _fetchCount();
+    _refreshTimer = Timer.periodic(
+      const Duration(seconds: 30),
+      (_) => _fetchCount(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
   }
 
   @override

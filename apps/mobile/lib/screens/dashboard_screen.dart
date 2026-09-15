@@ -5,14 +5,12 @@ import 'package:mobile/models/order.dart';
 import 'package:mobile/models/top_product.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/router/app_router.dart';
+import 'package:mobile/widgets/notification_icon_badge.dart';
 
 class DashboardScreen extends StatefulWidget {
   final AuthService authService;
 
-  const DashboardScreen({
-    super.key,
-    required this.authService,
-  });
+  const DashboardScreen({super.key, required this.authService});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -36,23 +34,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Future<Map<String, dynamic>> _loadDashboard() async {
-    final metrics =
-        await widget.authService.apiService.getDashboardMetrics();
+    final metrics = await widget.authService.apiService.getDashboardMetrics();
 
-    final dailySales =
-        await widget.authService.apiService.getDailySales(days: 7);
+    final dailySales = await widget.authService.apiService.getDailySales(
+      days: 7,
+    );
 
-    final topProducts =
-        await widget.authService.apiService.getTopProducts();
+    final topProducts = await widget.authService.apiService.getTopProducts();
 
-    final ordersResult =
-        await widget.authService.apiService.getOrders(limit: 5);
+    final ordersResult = await widget.authService.apiService.getOrders(
+      limit: 5,
+    );
 
-    final customers =
-        await widget.authService.apiService.getCustomers();
+    final customers = await widget.authService.apiService.getCustomers();
 
-    final products =
-        await widget.authService.apiService.getProducts();
+    final products = await widget.authService.apiService.getProducts();
 
     return {
       'metrics': metrics,
@@ -85,8 +81,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
     final user = widget.authService.currentUser;
-    final userName =
-        user?.name.trim().isNotEmpty == true ? user!.name.trim() : 'User';
+    final userName = user?.name.trim().isNotEmpty == true
+        ? user!.name.trim()
+        : 'User';
     final storeName = user?.businessName?.trim();
 
     return Scaffold(
@@ -96,40 +93,44 @@ class _DashboardScreenState extends State<DashboardScreen> {
         backgroundColor: background,
         surfaceTintColor: Colors.transparent,
         automaticallyImplyLeading: false,
+        toolbarHeight: 88,
         titleSpacing: 20,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Welcome, ${userName.split(' ').first}',
-              style: const TextStyle(
-                color: textPrimary,
-                fontSize: 23,
-                fontWeight: FontWeight.w700,
-                letterSpacing: -0.5,
-              ),
-            ),
-            if (storeName != null && storeName.isNotEmpty) ...[
-              const SizedBox(height: 3),
+        title: Padding(
+          padding: const EdgeInsets.only(top: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
               Text(
-                storeName,
+                'Welcome, ${userName.split(' ').first}',
                 style: const TextStyle(
+                  color: textPrimary,
+                  fontSize: 23,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                ),
+              ),
+              if (storeName != null && storeName.isNotEmpty) ...[
+                const SizedBox(height: 3),
+                Text(
+                  storeName,
+                  style: const TextStyle(
+                    color: textSecondary,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+              const SizedBox(height: 3),
+              const Text(
+                "Here's how your business is doing",
+                style: TextStyle(
                   color: textSecondary,
                   fontSize: 13,
-                  fontWeight: FontWeight.w500,
+                  fontWeight: FontWeight.w400,
                 ),
               ),
             ],
-            const SizedBox(height: 3),
-            const Text(
-              "Here's how your business is doing",
-              style: TextStyle(
-                color: textSecondary,
-                fontSize: 13,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-          ],
+          ),
         ),
         actions: [
           Container(
@@ -137,25 +138,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
             decoration: BoxDecoration(
               color: surface,
               borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: Colors.black.withValues(alpha: 0.05),
-              ),
+              border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
             ),
-            child: IconButton(
-              icon: const Icon(
-                Icons.notifications_none_rounded,
-                color: textPrimary,
-              ),
-              onPressed: () {
-                Navigator.pushNamed(
-                  context,
-                  AppRouter.notifications,
-                  arguments: {
-                    'authService': widget.authService,
-                  },
-                );
-              },
-            ),
+            child: NotificationIconBadge(authService: widget.authService),
           ),
         ],
       ),
@@ -179,63 +164,40 @@ class _DashboardScreenState extends State<DashboardScreen> {
             final metrics = data['metrics'] as dynamic;
 
             final dailySales =
-                (data['dailySales'] as List<dynamic>?)
-                        ?.cast<DailySale>() ??
-                    <DailySale>[];
+                (data['dailySales'] as List<dynamic>?)?.cast<DailySale>() ??
+                <DailySale>[];
 
             final topProducts =
-                (data['topProducts'] as List<dynamic>?)
-                        ?.cast<TopProduct>() ??
-                    <TopProduct>[];
+                (data['topProducts'] as List<dynamic>?)?.cast<TopProduct>() ??
+                <TopProduct>[];
 
             final recentOrders =
-                (data['recentOrders'] as List<dynamic>?)
-                        ?.cast<Order>() ??
-                    <Order>[];
+                (data['recentOrders'] as List<dynamic>?)?.cast<Order>() ??
+                <Order>[];
 
-            final totalProducts =
-                data['totalProducts'] as int? ?? 0;
+            final totalProducts = data['totalProducts'] as int? ?? 0;
 
-            final totalCustomers =
-                data['totalCustomers'] as int? ?? 0;
+            final totalCustomers = data['totalCustomers'] as int? ?? 0;
 
             return SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(
-                20,
-                8,
-                20,
-                30,
-              ),
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 30),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildRevenueCard(metrics),
                   const SizedBox(height: 16),
-                  _buildMetricGrid(
-                    metrics,
-                    totalProducts,
-                    totalCustomers,
-                  ),
+                  _buildMetricGrid(metrics, totalProducts, totalCustomers),
                   const SizedBox(height: 24),
-                  _buildSectionHeader(
-                    'Quick Actions',
-                    null,
-                  ),
+                  _buildSectionHeader('Quick Actions', null),
                   const SizedBox(height: 12),
                   _buildQuickActions(),
                   const SizedBox(height: 26),
-                  _buildSectionHeader(
-                    'Revenue Overview',
-                    'Last 7 days',
-                  ),
+                  _buildSectionHeader('Revenue Overview', 'Last 7 days'),
                   const SizedBox(height: 12),
                   _buildChartSection(dailySales),
                   const SizedBox(height: 26),
-                  _buildSectionHeader(
-                    'Top Products',
-                    'See all',
-                  ),
+                  _buildSectionHeader('Top Products', 'See all'),
                   const SizedBox(height: 12),
                   _buildTopProductsSection(topProducts),
                   const SizedBox(height: 26),
@@ -246,9 +208,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Navigator.pushNamed(
                         context,
                         AppRouter.orderList,
-                        arguments: {
-                          'authService': widget.authService,
-                        },
+                        arguments: {'authService': widget.authService},
                       );
                     },
                   ),
@@ -273,10 +233,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            Color(0xFF7747D5),
-            Color(0xFF5C32AF),
-          ],
+          colors: [Color(0xFF7747D5), Color(0xFF5C32AF)],
         ),
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
@@ -329,10 +286,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           Row(
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 4,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(20),
@@ -416,9 +370,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: Colors.black.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
       ),
       child: Row(
         children: [
@@ -428,11 +380,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               color: color.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(
-              icon,
-              color: color,
-              size: 21,
-            ),
+            child: Icon(icon, color: color, size: 21),
           ),
           const SizedBox(width: 11),
           Expanded(
@@ -442,10 +390,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               children: [
                 Text(
                   title,
-                  style: const TextStyle(
-                    color: textSecondary,
-                    fontSize: 12,
-                  ),
+                  style: const TextStyle(color: textSecondary, fontSize: 12),
                 ),
                 const SizedBox(height: 3),
                 Text(
@@ -476,9 +421,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.pushNamed(
                 context,
                 AppRouter.productList,
-                arguments: {
-                  'authService': widget.authService,
-                },
+                arguments: {'authService': widget.authService},
               );
             },
           ),
@@ -493,9 +436,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               Navigator.pushNamed(
                 context,
                 AppRouter.createOrder,
-                arguments: {
-                  'authService': widget.authService,
-                },
+                arguments: {'authService': widget.authService},
               );
             },
           ),
@@ -517,23 +458,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         onTap: onTap,
         borderRadius: BorderRadius.circular(16),
         child: Container(
-          padding: const EdgeInsets.symmetric(
-            horizontal: 14,
-            vertical: 15,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 15),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(
-              color: Colors.black.withValues(alpha: 0.05),
-            ),
+            border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
           ),
           child: Row(
             children: [
-              Icon(
-                icon,
-                color: color,
-                size: 21,
-              ),
+              Icon(icon, color: color, size: 21),
               const SizedBox(width: 9),
               Expanded(
                 child: Text(
@@ -593,7 +525,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       );
     }
 
-    final maxRevenue = dailySales
+    final maxRevenue =
+        dailySales
             .map((sale) => sale.totalRevenue)
             .reduce((a, b) => a > b ? a : b) *
         1.1;
@@ -606,15 +539,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.black.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.end,
         children: dailySales.map((sale) {
-          final barHeight =
-              (sale.totalRevenue / maxValue) * 115;
+          final barHeight = (sale.totalRevenue / maxValue) * 115;
 
           final displayDate = sale.date.length >= 10
               ? sale.date.substring(sale.date.length - 5)
@@ -631,10 +561,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     gradient: const LinearGradient(
                       begin: Alignment.topCenter,
                       end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0xFF8C5DE5),
-                        Color(0xFF6439B9),
-                      ],
+                      colors: [Color(0xFF8C5DE5), Color(0xFF6439B9)],
                     ),
                     borderRadius: BorderRadius.circular(8),
                   ),
@@ -642,10 +569,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(height: 7),
                 Text(
                   displayDate,
-                  style: const TextStyle(
-                    color: textSecondary,
-                    fontSize: 9,
-                  ),
+                  style: const TextStyle(color: textSecondary, fontSize: 9),
                 ),
               ],
             ),
@@ -655,9 +579,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildTopProductsSection(
-    List<TopProduct> topProducts,
-  ) {
+  Widget _buildTopProductsSection(List<TopProduct> topProducts) {
     if (topProducts.isEmpty) {
       return _emptyCard(
         icon: Icons.inventory_2_outlined,
@@ -669,9 +591,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.black.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
       ),
       child: Column(
         children: topProducts.take(3).map((product) {
@@ -683,8 +603,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0D9D8C)
-                        .withValues(alpha: 0.10),
+                    color: const Color(0xFF0D9D8C).withValues(alpha: 0.10),
                     borderRadius: BorderRadius.circular(13),
                   ),
                   child: const Icon(
@@ -696,8 +615,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         product.name,
@@ -721,9 +639,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 Text(
-                  _formatShortCurrency(
-                    product.totalRevenue,
-                  ),
+                  _formatShortCurrency(product.totalRevenue),
                   style: const TextStyle(
                     color: primary,
                     fontSize: 12,
@@ -738,9 +654,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildRecentOrdersSection(
-    List<Order> recentOrders,
-  ) {
+  Widget _buildRecentOrdersSection(List<Order> recentOrders) {
     if (recentOrders.isEmpty) {
       return _emptyCard(
         icon: Icons.receipt_long_outlined,
@@ -752,14 +666,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
       decoration: BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.black.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
       ),
       child: Column(
         children: recentOrders.map((order) {
-          final statusColor =
-              _statusColor(order.status);
+          final statusColor = _statusColor(order.status);
 
           return Padding(
             padding: const EdgeInsets.all(15),
@@ -781,8 +692,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
-                    crossAxisAlignment:
-                        CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         order.orderNumber,
@@ -804,8 +714,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                 ),
                 Column(
-                  crossAxisAlignment:
-                      CrossAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
                     Text(
                       _formatShortCurrency(order.total),
@@ -822,10 +731,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         vertical: 4,
                       ),
                       decoration: BoxDecoration(
-                        color:
-                            statusColor.withValues(alpha: 0.10),
-                        borderRadius:
-                            BorderRadius.circular(20),
+                        color: statusColor.withValues(alpha: 0.10),
+                        borderRadius: BorderRadius.circular(20),
                       ),
                       child: Text(
                         order.status,
@@ -846,34 +753,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _emptyCard({
-    required IconData icon,
-    required String message,
-  }) {
+  Widget _emptyCard({required IconData icon, required String message}) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 32),
       decoration: BoxDecoration(
         color: surface,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.black.withValues(alpha: 0.05),
-        ),
+        border: Border.all(color: Colors.black.withValues(alpha: 0.05)),
       ),
       child: Column(
         children: [
-          Icon(
-            icon,
-            size: 32,
-            color: textSecondary.withValues(alpha: 0.55),
-          ),
+          Icon(icon, size: 32, color: textSecondary.withValues(alpha: 0.55)),
           const SizedBox(height: 10),
           Text(
             message,
-            style: const TextStyle(
-              color: textSecondary,
-              fontSize: 12,
-            ),
+            style: const TextStyle(color: textSecondary, fontSize: 12),
           ),
         ],
       ),
@@ -886,20 +781,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       padding: const EdgeInsets.all(24),
       children: [
         const SizedBox(height: 100),
-        const Icon(
-          Icons.wifi_off_rounded,
-          size: 52,
-          color: textSecondary,
-        ),
+        const Icon(Icons.wifi_off_rounded, size: 52, color: textSecondary),
         const SizedBox(height: 18),
         Text(
-          widget.authService.apiService
-              .getErrorMessage(error),
+          widget.authService.apiService.getErrorMessage(error),
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            color: textSecondary,
-            fontSize: 14,
-          ),
+          style: const TextStyle(color: textSecondary, fontSize: 14),
         ),
         const SizedBox(height: 20),
         Center(
@@ -912,10 +799,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(14),
               ),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 22,
-                vertical: 13,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
             ),
           ),
         ),
