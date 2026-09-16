@@ -509,12 +509,25 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
 
             if (!hasSearch) ...[
               const SizedBox(height: 20),
-              OutlinedButton.icon(
+              FilledButton.icon(
                 onPressed: _addCustomer,
-                icon: const Icon(
-                  Icons.person_add_outlined,
+                style: FilledButton.styleFrom(
+                  backgroundColor: Colors.blue.shade700,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 13,
+                  ),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
+                  ),
                 ),
-                label: const Text('Add Customer'),
+                icon: const Icon(Icons.person_add_outlined),
+                label: const Text(
+                  'Add Customer',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w700,
+                  ),
+                ),
               ),
             ],
           ],
