@@ -602,10 +602,10 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 30),
+      padding: const EdgeInsets.fromLTRB(30, 0, 30, 120),
       children: [
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.22,
+          height: MediaQuery.of(context).size.height * 0.18,
         ),
         Container(
           width: 90,
@@ -644,7 +644,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
             height: 1.5,
           ),
         ),
-        ]
+      ],
     );
   }
 

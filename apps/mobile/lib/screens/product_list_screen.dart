@@ -652,73 +652,69 @@ class _ProductListScreenState extends State<ProductListScreen> {
     final hasFilter =
         _searchQuery.isNotEmpty || _selectedCategory != null;
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 20,
-        vertical: 80,
-      ),
-      child: Column(
-        children: [
-          Container(
-            width: 92,
-            height: 92,
-            decoration: BoxDecoration(
-              color: const Color(0xFFEDE8F7),
-              borderRadius: BorderRadius.circular(28),
-            ),
-            child: const Icon(
-              Icons.inventory_2_outlined,
-              size: 44,
-              color: Color(0xFF6C4AB6),
-            ),
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(20, 80, 20, 120),
+      children: [
+        Container(
+          width: 92,
+          height: 92,
+          decoration: BoxDecoration(
+            color: const Color(0xFFEDE8F7),
+            borderRadius: BorderRadius.circular(28),
           ),
-          const SizedBox(height: 20),
-          Text(
-            hasFilter ? 'No products found' : 'Your inventory is empty',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 19,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF27252D),
-            ),
+          child: const Icon(
+            Icons.inventory_2_outlined,
+            size: 44,
+            color: Color(0xFF6C4AB6),
           ),
-          const SizedBox(height: 8),
-          Text(
-            hasFilter
-                ? 'Try adjusting your search or category filter.'
-                : 'Add your first product and start managing your inventory.',
-            textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 13,
-              height: 1.5,
-              color: Color(0xFF85838C),
-            ),
+        ),
+        const SizedBox(height: 20),
+        Text(
+          hasFilter ? 'No products found' : 'Your inventory is empty',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 19,
+            fontWeight: FontWeight.w800,
+            color: Color(0xFF27252D),
           ),
-          if (!hasFilter) ...[
-            const SizedBox(height: 22),
-            FilledButton.icon(
-              onPressed: _openAddProduct,
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF6C4AB6),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 13,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          hasFilter
+              ? 'Try adjusting your search or category filter.'
+              : 'Add your first product and start managing your inventory.',
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontSize: 13,
+            height: 1.5,
+            color: Color(0xFF85838C),
+          ),
+        ),
+        if (!hasFilter) ...[
+          const SizedBox(height: 22),
+          FilledButton.icon(
+            onPressed: _openAddProduct,
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF6C4AB6),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 13,
               ),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Add Product',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
               ),
             ),
-          ],
+            icon: const Icon(Icons.add_rounded),
+            label: const Text(
+              'Add Product',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
         ],
-      ),
+      ],
     );
   }
 
