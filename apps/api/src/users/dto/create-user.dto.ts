@@ -17,9 +17,9 @@ export class CreateUserDto {
 
   @IsEmail({}, { message: 'Please provide a valid email address' })
   @Matches(
-    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,63})+$/,
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.com)+$/,
     {
-      message: 'Please provide a valid email address',
+      message: 'Please provide a valid email address with .com domain',
     },
   )
   email: string;

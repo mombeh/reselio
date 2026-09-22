@@ -102,7 +102,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     // - Domain: each label starts/ends with alphanumeric, max 63 chars
     // - TLD: 2-63 letters only (no numbers)
     final emailRegex = RegExp(
-      r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z]{2,63})+$",
+      r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.com)+$",
     );
 
     if (!emailRegex.hasMatch(email)) {
