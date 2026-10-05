@@ -20,7 +20,7 @@ import { UpdateProductDto } from './dto/update-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { UPLOADS_DIR } from '../app.module';
+import { UPLOADS_DIR } from '../uploads.config';
 
 const storage = diskStorage({
   destination: UPLOADS_DIR,

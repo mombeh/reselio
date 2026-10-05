@@ -1,10 +1,9 @@
 import { Module } from '@nestjs/common';
-import { mkdirSync } from 'fs';
-import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule } from '@nestjs/config';
+import { ensureUploadsDir } from './uploads.config';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { OrdersModule } from './orders/orders.module';
@@ -17,9 +16,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { AdminModule } from './admin/admin.module';
 
-export const UPLOADS_DIR = join(process.cwd(), 'uploads');
-
-mkdirSync(UPLOADS_DIR, { recursive: true });
+ensureUploadsDir();
 
 @Module({
   imports: [
