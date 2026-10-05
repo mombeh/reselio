@@ -19,10 +19,11 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { extname } from 'path';
+import { UPLOADS_DIR } from '../app.module';
 
 const storage = diskStorage({
-  destination: join(process.cwd(), 'uploads'),
+  destination: UPLOADS_DIR,
   filename: (req, file, callback) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     callback(
@@ -132,13 +133,12 @@ export class ProductsController {
       },
     }),
   )
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  uploadFile(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-    const host =
-      process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || 'localhost:4000';
+    const host = req.headers.host;
+    const protocol = req.protocol;
     const imageUrl = `${protocol}://${host}/uploads/${file.filename}`;
     return { imageUrl };
   }
