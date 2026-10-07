@@ -93,8 +93,6 @@ export class AdminController {
   getProducts(
     @Query('search') search?: string,
     @Query('category') category?: string,
-    @Query('page') _page?: string,
-    @Query('limit') _limit?: string,
   ) {
     return this.productsService.findAll(search, category);
   }
@@ -109,8 +107,8 @@ export class AdminController {
     return this.ordersService.findAll({
       status,
       search,
-      page,
-      limit,
+      page: _page,
+      limit: _limit,
     });
   }
 
