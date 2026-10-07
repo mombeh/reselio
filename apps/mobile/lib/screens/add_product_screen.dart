@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/utils/currency.dart';
 
 class AddProductScreen extends StatefulWidget {
   final AuthService authService;
@@ -126,7 +127,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
     });
 
     try {
-      final price = double.parse(_priceController.text.trim());
+      final price = Currency.parse(_priceController.text.trim()) ?? 0;
       final quantity = int.parse(_quantityController.text.trim());
 
       String? imageUrl;
@@ -190,11 +191,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
     required String label,
     required IconData icon,
     String? hint,
+    String? suffixText,
   }) {
     return InputDecoration(
       labelText: label,
       hintText: hint,
       prefixIcon: Icon(icon),
+      suffixText: suffixText,
+      suffixStyle: suffixText == null
+          ? null
+          : const TextStyle(
+              color: Color(0xFF6C4AB6),
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -595,15 +605,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       ),
                       decoration: _inputDecoration(
                         label: 'Price',
-                        icon: Icons.attach_money_outlined,
-                        hint: '0.00',
+                        icon: Icons.payments_outlined,
+                        hint: '0',
+                        suffixText: Currency.code,
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Enter price';
                         }
 
-                        final price = double.tryParse(value.trim());
+                        final price = Currency.parse(value.trim());
 
                         if (price == null || price < 0) {
                           return 'Invalid price';

@@ -9,7 +9,7 @@ describe('ReportsService', () => {
   let orderModel: any;
   let orderItemModel: any;
   let productModel: any;
-  let customerModel: any;
+  // customerModel is declared but not used in current tests
 
   const mockOrderModel = {
     find: jest.fn(),
@@ -70,8 +70,18 @@ describe('ReportsService', () => {
   describe('getSalesReport', () => {
     it('should return sales summary for today by default', async () => {
       const mockOrders = [
-        { _id: '1', total: 10000, profit: 3000, customerId: { fullName: 'Alice' } },
-        { _id: '2', total: 15000, profit: 5000, customerId: { fullName: 'Bob' } },
+        {
+          _id: '1',
+          total: 10000,
+          profit: 3000,
+          customerId: { fullName: 'Alice' },
+        },
+        {
+          _id: '2',
+          total: 15000,
+          profit: 5000,
+          customerId: { fullName: 'Bob' },
+        },
       ];
 
       orderModel.find.mockReturnValue({
@@ -88,7 +98,12 @@ describe('ReportsService', () => {
 
     it('should return sales summary for custom date range', async () => {
       const mockOrders = [
-        { _id: '1', total: 10000, profit: 3000, customerId: { fullName: 'Alice' } },
+        {
+          _id: '1',
+          total: 10000,
+          profit: 3000,
+          customerId: { fullName: 'Alice' },
+        },
       ];
 
       orderModel.find.mockReturnValue({
@@ -113,11 +128,6 @@ describe('ReportsService', () => {
       const mockProducts = [
         { _id: 'prod1', name: 'Red Dress' },
         { _id: 'prod2', name: 'Blue Shirt' },
-      ];
-
-      const mockOrderItems = [
-        { _id: 'item1', productId: 'prod1', quantity: 5, totalPrice: 25000 },
-        { _id: 'item2', productId: 'prod2', quantity: 3, totalPrice: 15000 },
       ];
 
       productModel.find.mockResolvedValue(mockProducts);
@@ -151,8 +161,18 @@ describe('ReportsService', () => {
   describe('getCustomerReport', () => {
     it('should return customer report sorted by total spent', async () => {
       const mockResult = [
-        { _id: 'cust1', customerName: 'Alice', totalOrders: 5, totalSpent: 50000 },
-        { _id: 'cust2', customerName: 'Bob', totalOrders: 3, totalSpent: 30000 },
+        {
+          _id: 'cust1',
+          customerName: 'Alice',
+          totalOrders: 5,
+          totalSpent: 50000,
+        },
+        {
+          _id: 'cust2',
+          customerName: 'Bob',
+          totalOrders: 3,
+          totalSpent: 30000,
+        },
       ];
 
       orderModel.aggregate.mockResolvedValue(mockResult);
@@ -183,13 +203,13 @@ describe('ReportsService', () => {
     });
 
     it('should return monthly revenue trend', async () => {
-      const mockResult = [
-        { _id: '2026-08', revenue: 1800000 },
-      ];
+      const mockResult = [{ _id: '2026-08', revenue: 1800000 }];
 
       orderModel.aggregate.mockResolvedValue(mockResult);
 
-      const result = await service.getRevenueTrend('store1', { period: 'month' as RevenuePeriod });
+      const result = await service.getRevenueTrend('store1', {
+        period: 'month' as RevenuePeriod,
+      });
 
       expect(result).toHaveLength(1);
       expect(result[0].date).toBe('2026-08');

@@ -1,18 +1,26 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { randomBytes } from 'crypto';
 import { Product, ProductDocument } from './schemas/product.schema';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { OrderItem, OrderItemDocument } from '../orders/schemas/order-item.schema';
+import {
+  OrderItem,
+  OrderItemDocument,
+} from '../orders/schemas/order-item.schema';
 import { Store, StoreDocument } from '../stores/schemas/store.schema';
 
 @Injectable()
 export class ProductsService {
   constructor(
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
-    @InjectModel(OrderItem.name) private orderItemModel: Model<OrderItemDocument>,
+    @InjectModel(OrderItem.name)
+    private orderItemModel: Model<OrderItemDocument>,
     @InjectModel(Store.name) private storeModel: Model<StoreDocument>,
   ) {}
 
@@ -110,7 +118,10 @@ export class ProductsService {
   }
 
   async getShareUrl(productId: string, storeId: string) {
-    const product = await this.productModel.findOne({ _id: productId, storeId });
+    const product = await this.productModel.findOne({
+      _id: productId,
+      storeId,
+    });
     if (!product) {
       throw new NotFoundException('Product not found');
     }
@@ -143,7 +154,9 @@ export class ProductsService {
       filter.name = { $regex: search, $options: 'i' };
     }
 
-    const products = await this.productModel.find(filter).sort({ createdAt: -1 });
+    const products = await this.productModel
+      .find(filter)
+      .sort({ createdAt: -1 });
 
     const storeIds = [...new Set(products.map((p) => p.storeId))];
     const stores = await this.storeModel

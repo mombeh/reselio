@@ -141,13 +141,27 @@ describe('AdminController', () => {
     });
   });
 
-
   describe('getCustomers', () => {
     it('should return all customers with user info', async () => {
       mockCustomersService.findAllByStore.mockResolvedValue([
-        { _id: 'cust1', fullName: 'John', phoneNumber: '123', userId: 'user1', toObject: () => ({ _id: 'cust1', fullName: 'John', phoneNumber: '123', userId: 'user1' }) },
+        {
+          _id: 'cust1',
+          fullName: 'John',
+          phoneNumber: '123',
+          userId: 'user1',
+          toObject: () => ({
+            _id: 'cust1',
+            fullName: 'John',
+            phoneNumber: '123',
+            userId: 'user1',
+          }),
+        },
       ] as any);
-      mockUsersService.findSellerById.mockResolvedValue({ _id: 'user1', isActive: true, email: 'john@test.com' });
+      mockUsersService.findSellerById.mockResolvedValue({
+        _id: 'user1',
+        isActive: true,
+        email: 'john@test.com',
+      });
 
       const result = await controller.getCustomers();
 
@@ -164,9 +178,18 @@ describe('AdminController', () => {
         fullName: 'John',
         phoneNumber: '123',
         userId: 'user1',
-        toObject: () => ({ _id: 'cust1', fullName: 'John', phoneNumber: '123', userId: 'user1' }),
+        toObject: () => ({
+          _id: 'cust1',
+          fullName: 'John',
+          phoneNumber: '123',
+          userId: 'user1',
+        }),
       } as any);
-      mockUsersService.findSellerById.mockResolvedValue({ _id: 'user1', isActive: true, email: 'john@test.com' });
+      mockUsersService.findSellerById.mockResolvedValue({
+        _id: 'user1',
+        isActive: true,
+        email: 'john@test.com',
+      });
 
       const result = await controller.getCustomerById('cust1');
 
@@ -175,7 +198,6 @@ describe('AdminController', () => {
       expect(customersService.findOne).toHaveBeenCalledWith('cust1', null);
     });
   });
-
 
   describe('getProducts', () => {
     it('should return all products', async () => {
@@ -186,7 +208,10 @@ describe('AdminController', () => {
       const result = await controller.getProducts();
 
       expect(result).toHaveLength(1);
-      expect(productsService.findAll).toHaveBeenCalledWith(undefined, undefined);
+      expect(productsService.findAll).toHaveBeenCalledWith(
+        undefined,
+        undefined,
+      );
     });
 
     it('should filter products by search and category', async () => {
@@ -194,7 +219,10 @@ describe('AdminController', () => {
 
       await controller.getProducts('phone', 'Electronics');
 
-      expect(productsService.findAll).toHaveBeenCalledWith('phone', 'Electronics');
+      expect(productsService.findAll).toHaveBeenCalledWith(
+        'phone',
+        'Electronics',
+      );
     });
   });
 
@@ -236,7 +264,10 @@ describe('AdminController', () => {
 
   describe('getReportsOverview', () => {
     it('should return platform reports overview', async () => {
-      mockUsersService.findSellers.mockResolvedValue({ total: 10, data: [] } as any);
+      mockUsersService.findSellers.mockResolvedValue({
+        total: 10,
+        data: [],
+      } as any);
       mockCustomersService.findAllByStore.mockResolvedValue([
         { _id: 'cust1' },
         { _id: 'cust2' },
@@ -277,7 +308,12 @@ describe('AdminController', () => {
   describe('getPlatformDailySales', () => {
     it('should return platform daily sales', async () => {
       mockOrdersService.getPlatformDailySales.mockResolvedValue([
-        { _id: '2024-01-01', totalRevenue: 1000, totalProfit: 200, totalOrders: 5 },
+        {
+          _id: '2024-01-01',
+          totalRevenue: 1000,
+          totalProfit: 200,
+          totalOrders: 5,
+        },
       ] as any);
 
       const result = await controller.getPlatformDailySales('7');
@@ -310,7 +346,9 @@ describe('AdminController', () => {
         averageOrderValue: 500,
       });
 
-      const result = await controller.getPlatformSalesReport({ period: SalesPeriod.TODAY });
+      const result = await controller.getPlatformSalesReport({
+        period: SalesPeriod.TODAY,
+      });
 
       expect(result.totalOrders).toBe(10);
       expect(reportsService.getPlatformSalesReport).toHaveBeenCalled();
@@ -323,7 +361,9 @@ describe('AdminController', () => {
         { date: '2024-01-01', revenue: 1000 },
       ]);
 
-      const result = await controller.getPlatformRevenueTrend({ period: RevenuePeriod.MONTH });
+      const result = await controller.getPlatformRevenueTrend({
+        period: RevenuePeriod.MONTH,
+      });
 
       expect(result).toHaveLength(1);
       expect(reportsService.getPlatformRevenueTrend).toHaveBeenCalled();
@@ -346,7 +386,12 @@ describe('AdminController', () => {
   describe('getPlatformCustomerReport', () => {
     it('should return platform customer report', async () => {
       mockReportsService.getPlatformCustomerReport.mockResolvedValue([
-        { customerId: 'cust1', customerName: 'John', totalOrders: 5, totalSpent: 1000 },
+        {
+          customerId: 'cust1',
+          customerName: 'John',
+          totalOrders: 5,
+          totalSpent: 1000,
+        },
       ]);
 
       const result = await controller.getPlatformCustomerReport();

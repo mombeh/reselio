@@ -47,7 +47,9 @@ describe('ReportsController', () => {
       { period: 'today' as SalesPeriod },
     );
 
-    expect(mockReportsService.getSalesReport).toHaveBeenCalledWith('store1', { period: 'today' });
+    expect(mockReportsService.getSalesReport).toHaveBeenCalledWith('store1', {
+      period: 'today',
+    });
     expect(result).toEqual(mockReport);
   });
 
@@ -58,20 +60,31 @@ describe('ReportsController', () => {
 
     mockReportsService.getProductPerformance.mockResolvedValue(mockProducts);
 
-    const result = await controller.getProductPerformance({ user: { userId: 'store1' } });
+    const result = await controller.getProductPerformance({
+      user: { userId: 'store1' },
+    });
 
-    expect(mockReportsService.getProductPerformance).toHaveBeenCalledWith('store1');
+    expect(mockReportsService.getProductPerformance).toHaveBeenCalledWith(
+      'store1',
+    );
     expect(result).toEqual(mockProducts);
   });
 
   it('should call service.getCustomerReport with userId', async () => {
     const mockCustomers = [
-      { customerId: 'cust1', customerName: 'Alice', totalOrders: 5, totalSpent: 50000 },
+      {
+        customerId: 'cust1',
+        customerName: 'Alice',
+        totalOrders: 5,
+        totalSpent: 50000,
+      },
     ];
 
     mockReportsService.getCustomerReport.mockResolvedValue(mockCustomers);
 
-    const result = await controller.getCustomerReport({ user: { userId: 'store1' } });
+    const result = await controller.getCustomerReport({
+      user: { userId: 'store1' },
+    });
 
     expect(mockReportsService.getCustomerReport).toHaveBeenCalledWith('store1');
     expect(result).toEqual(mockCustomers);
@@ -90,7 +103,9 @@ describe('ReportsController', () => {
       { period: 'week' as RevenuePeriod },
     );
 
-    expect(mockReportsService.getRevenueTrend).toHaveBeenCalledWith('store1', { period: 'week' });
+    expect(mockReportsService.getRevenueTrend).toHaveBeenCalledWith('store1', {
+      period: 'week',
+    });
     expect(result).toEqual(mockTrend);
   });
 });

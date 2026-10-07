@@ -78,7 +78,11 @@ describe('NotificationsService', () => {
 
   describe('findOne', () => {
     it('should return a notification by id and userId', async () => {
-      const mockNotification = { _id: 'notif1', title: 'New Order', userId: 'user1' };
+      const mockNotification = {
+        _id: 'notif1',
+        title: 'New Order',
+        userId: 'user1',
+      };
       model.findOne.mockResolvedValue(mockNotification);
 
       const result = await service.findOne('notif1', 'user1');
@@ -133,7 +137,12 @@ describe('NotificationsService', () => {
         save: saveMock,
       }));
 
-      const result = await service.createLowStockNotification('user1', 'prod1', 'Red Dress', 2);
+      const result = await service.createLowStockNotification(
+        'user1',
+        'prod1',
+        'Red Dress',
+        2,
+      );
 
       expect(result).toBeDefined();
       expect(result!.type).toBe(NotificationType.LOW_STOCK);
@@ -142,7 +151,12 @@ describe('NotificationsService', () => {
     it('should not create duplicate low stock notification if unread one exists', async () => {
       model.findOne.mockResolvedValue({ _id: 'existing' });
 
-      const result = await service.createLowStockNotification('user1', 'prod1', 'Red Dress', 2);
+      const result = await service.createLowStockNotification(
+        'user1',
+        'prod1',
+        'Red Dress',
+        2,
+      );
 
       expect(result).toBeNull();
     });

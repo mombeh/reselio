@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/utils/currency.dart';
 
 class FavoritesScreen extends StatefulWidget {
   final AuthService authService;
@@ -196,7 +197,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                   ),
                   const SizedBox(height: 9),
                   Text(
-                    _formatCurrency(product.price),
+                    Currency.format(product.price),
                     style: const TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w800,
@@ -262,18 +263,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
         color: Color(0xFF9A8CAF),
       ),
     );
-  }
-
-  String _formatCurrency(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}M FCFA';
-    }
-
-    if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1)}K FCFA';
-    }
-
-    return '${amount.toStringAsFixed(0)} FCFA';
   }
 
   Widget _buildEmptyState() {

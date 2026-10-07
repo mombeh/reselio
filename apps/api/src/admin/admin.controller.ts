@@ -37,7 +37,8 @@ export class AdminController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
-    const isActiveBool = isActive !== undefined ? isActive === 'true' : undefined;
+    const isActiveBool =
+      isActive !== undefined ? isActive === 'true' : undefined;
     return this.usersService.findSellers({
       search,
       isActive: isActiveBool,
@@ -60,7 +61,9 @@ export class AdminController {
         if (customer.userId) {
           user = await this.usersService.findSellerById(customer.userId);
         }
-        const plainCustomer = customer.toObject ? customer.toObject() : customer;
+        const plainCustomer = customer.toObject
+          ? customer.toObject()
+          : customer;
         return {
           ...plainCustomer,
           isActive: user?.isActive ?? true,
@@ -90,40 +93,46 @@ export class AdminController {
   getProducts(
     @Query('search') search?: string,
     @Query('category') category?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
   ) {
-    return this.productsService.findAll(
-      search,
-      category,
-    );
+    return this.productsService.findAll(search, category);
   }
 
   @Get('orders')
   getOrders(
     @Query('status') status?: string,
     @Query('search') search?: string,
-    @Query('page') page?: string,
-    @Query('limit') limit?: string,
+    @Query('page') _page?: string,
+    @Query('limit') _limit?: string,
   ) {
     return this.ordersService.findAll({
       status,
       search,
-      page,
-      limit,
+      page: _page,
+      limit: _limit,
     });
   }
 
   @Get('reports/overview')
   async getReportsOverview() {
-    const sellersResult = await this.usersService.findSellers({ page: 1, limit: 1 });
+    const sellersResult = await this.usersService.findSellers({
+      page: 1,
+      limit: 1,
+    });
     const totalSellers = sellersResult.total;
     const totalCustomers = await this.customersService.findAllByStore(null);
     const totalProducts = await this.productsService.findAll();
-    const totalOrdersResult = await this.ordersService.getPlatformStatusBreakdown();
-    const totalOrders = totalOrdersResult.reduce((sum, item) => sum + (item.count || 0), 0);
-    const pendingOrders = totalOrdersResult.find(item => item._id === 'Pending')?.count || 0;
-    const totalRevenue = totalOrdersResult.reduce((sum, item) => sum + (item.totalRevenue || 0), 0);
+    const totalOrdersResult =
+      await this.ordersService.getPlatformStatusBreakdown();
+    const totalOrders = totalOrdersResult.reduce(
+      (sum, item) => sum + (item.count || 0),
+      0,
+    );
+    const pendingOrders =
+      totalOrdersResult.find((item) => item._id === 'Pending')?.count || 0;
+    const totalRevenue = totalOrdersResult.reduce(
+      (sum, item) => sum + (item.totalRevenue || 0),
+      0,
+    );
     const activeUsers = totalSellers + totalCustomers.length;
 
     return {

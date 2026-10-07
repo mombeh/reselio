@@ -3,6 +3,7 @@ import 'package:mobile/models/customer.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/utils/currency.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   final AuthService authService;
@@ -111,13 +112,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
   double get _total => _subtotal;
 
   double get _advance =>
-      double.tryParse(_advanceController.text.trim()) ?? 0;
+      Currency.parse(_advanceController.text.trim()) ?? 0;
 
   double get _balance => _total - _advance;
-
-  String _formatCurrency(double amount) {
-    return '${amount.toStringAsFixed(0)} FCFA';
-  }
 
   void _addItem(Product product) {
     final existing = _items.firstWhereOrNull(
@@ -1015,7 +1012,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  _formatCurrency(product.price),
+                  Currency.format(product.price),
                   style: TextStyle(
                     color: Colors.deepPurple.shade700,
                     fontWeight: FontWeight.bold,
@@ -1148,7 +1145,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  _formatCurrency(item.unitPrice),
+                  Currency.format(item.unitPrice),
                   style: TextStyle(
                     color: Colors.grey.shade600,
                     fontSize: 12,
@@ -1204,7 +1201,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                 ),
               ),
               Text(
-                _formatCurrency(item.total),
+                Currency.format(item.total),
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
@@ -1261,12 +1258,12 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
           const SizedBox(height: 18),
           _summaryRow(
             'Subtotal',
-            _formatCurrency(_subtotal),
+            Currency.format(_subtotal),
           ),
           const SizedBox(height: 10),
           _summaryRow(
             'Total',
-            _formatCurrency(_total),
+            Currency.format(_total),
           ),
           const SizedBox(height: 18),
           TextField(
@@ -1323,7 +1320,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> {
                   ),
                 ),
                 Text(
-                  _formatCurrency(_balance < 0 ? 0 : _balance),
+                  Currency.format(_balance < 0 ? 0 : _balance),
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 20,

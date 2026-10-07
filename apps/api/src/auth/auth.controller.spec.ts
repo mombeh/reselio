@@ -47,19 +47,27 @@ describe('AuthController', () => {
 
   describe('forgotPassword', () => {
     it('should return a reset token when the email exists', async () => {
-      mockAuthService.createPasswordResetToken.mockResolvedValue('reset-token-123');
+      mockAuthService.createPasswordResetToken.mockResolvedValue(
+        'reset-token-123',
+      );
 
-      const result = await controller.forgotPassword({ email: 'jane@example.com' });
+      const result = await controller.forgotPassword({
+        email: 'jane@example.com',
+      });
 
       expect(result.message).toContain('password reset instructions');
       expect(result.resetToken).toBe('reset-token-123');
-      expect(authService.createPasswordResetToken).toHaveBeenCalledWith('jane@example.com');
+      expect(authService.createPasswordResetToken).toHaveBeenCalledWith(
+        'jane@example.com',
+      );
     });
 
     it('should not reveal whether the email exists when not found', async () => {
       mockAuthService.createPasswordResetToken.mockResolvedValue(null);
 
-      const result = await controller.forgotPassword({ email: 'unknown@example.com' });
+      const result = await controller.forgotPassword({
+        email: 'unknown@example.com',
+      });
 
       expect(result.message).toContain('password reset instructions');
       expect(result.resetToken).toBeNull();
@@ -81,8 +89,13 @@ describe('AuthController', () => {
       });
 
       expect(result.message).toBe('Password has been reset successfully');
-      expect(authService.verifyPasswordResetToken).toHaveBeenCalledWith('valid-token');
-      expect(usersService.updatePasswordByUserId).toHaveBeenCalledWith('user1', 'NewPass123!');
+      expect(authService.verifyPasswordResetToken).toHaveBeenCalledWith(
+        'valid-token',
+      );
+      expect(usersService.updatePasswordByUserId).toHaveBeenCalledWith(
+        'user1',
+        'NewPass123!',
+      );
     });
 
     it('should throw BadRequestException if passwords do not match', async () => {

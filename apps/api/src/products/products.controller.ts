@@ -78,8 +78,16 @@ export class ProductsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll(@Req() req: any, @Query('search') search?: string, @Query('category') category?: string) {
-    return this.productsService.findAllByStore(req.user.userId, search, category);
+  findAll(
+    @Req() req: any,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ) {
+    return this.productsService.findAllByStore(
+      req.user.userId,
+      search,
+      category,
+    );
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -119,7 +127,12 @@ export class ProductsController {
         fileSize: 5 * 1024 * 1024,
       },
       fileFilter: (req, file, callback) => {
-        const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+        const allowedTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/webp',
+          'image/gif',
+        ];
         if (allowedTypes.includes(file.mimetype)) {
           callback(null, true);
         } else {

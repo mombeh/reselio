@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/models/order.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/utils/currency.dart';
 
 class OrderListScreen extends StatefulWidget {
   final AuthService authService;
@@ -172,10 +173,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
       default:
         return Icons.receipt_long_outlined;
     }
-  }
-
-  String _formatAmount(double amount) {
-    return '${amount.toStringAsFixed(0)} FCFA';
   }
 
   @override
@@ -493,7 +490,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                       child: _orderInfo(
                         icon: Icons.payments_outlined,
                         label: 'Total',
-                        value: _formatAmount(order.total),
+                        value: Currency.format(order.total),
                       ),
                     ),
                     Expanded(

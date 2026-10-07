@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/models/order.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/utils/currency.dart';
 
 class OrderDetailScreen extends StatefulWidget {
   final AuthService authService;
@@ -83,10 +84,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       default:
         return Icons.info_outline_rounded;
     }
-  }
-
-  String _formatCurrency(double amount) {
-    return '${amount.toStringAsFixed(0)} FCFA';
   }
 
   String _formatDate(DateTime? date) {
@@ -534,7 +531,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                         const SizedBox(height: 5),
                         Text(
                           '${item.quantity} × '
-                          '${_formatCurrency(item.unitPrice)}',
+                          '${Currency.format(item.unitPrice)}',
                           style: TextStyle(
                             color: Colors.grey.shade600,
                             fontSize: 12,
@@ -545,7 +542,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    _formatCurrency(item.totalPrice),
+                    Currency.format(item.totalPrice),
                     style: const TextStyle(
                       fontWeight: FontWeight.w700,
                       fontSize: 14,
@@ -569,7 +566,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                 ),
               ),
               Text(
-                _formatCurrency(order.subtotal),
+                Currency.format(order.subtotal),
                 style: const TextStyle(
                   fontWeight: FontWeight.w700,
                 ),
@@ -630,12 +627,12 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
         children: [
           _summaryRow(
             'Subtotal',
-            _formatCurrency(order.subtotal),
+            Currency.format(order.subtotal),
           ),
           const SizedBox(height: 12),
           _summaryRow(
             'Advance Paid',
-            _formatCurrency(order.advancePaid),
+            Currency.format(order.advancePaid),
           ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 14),
@@ -643,14 +640,14 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
           ),
           _summaryRow(
             'Total',
-            _formatCurrency(order.total),
+            Currency.format(order.total),
             isBold: true,
             fontSize: 18,
           ),
           const SizedBox(height: 12),
           _summaryRow(
             'Balance',
-            _formatCurrency(order.balance),
+            Currency.format(order.balance),
             isBold: true,
             valueColor:
                 order.balance > 0 ? Colors.orange : Colors.green,
@@ -686,7 +683,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
                     ],
                   ),
                   Text(
-                    _formatCurrency(order.profit),
+                    Currency.format(order.profit),
                     style: TextStyle(
                       color: Colors.green.shade700,
                       fontWeight: FontWeight.w800,

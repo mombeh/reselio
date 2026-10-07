@@ -106,7 +106,11 @@ export class OrdersController {
     @Req() req: any,
     @Query() query: GetOrdersQueryDto,
   ) {
-    return this.ordersService.findAllByCustomer(req.user.userId, customerId, query);
+    return this.ordersService.findAllByCustomer(
+      req.user.userId,
+      customerId,
+      query,
+    );
   }
 
   @UseGuards(AuthGuard('jwt'))

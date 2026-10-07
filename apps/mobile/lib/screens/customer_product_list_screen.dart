@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/utils/currency.dart';
 
 class CustomerProductListScreen extends StatefulWidget {
   final AuthService authService;
@@ -423,7 +424,7 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
                     ),
                   const SizedBox(height: 8),
                   Text(
-                    _formatCurrency(product.price),
+                    Currency.format(product.price),
                     style: const TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w800,
@@ -551,18 +552,6 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
       'label': 'In Stock',
       'color': Colors.green,
     };
-  }
-
-  String _formatCurrency(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}M FCFA';
-    }
-
-    if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1)}K FCFA';
-    }
-
-    return '${amount.toStringAsFixed(0)} FCFA';
   }
 
   Widget _buildEmptyState() {
