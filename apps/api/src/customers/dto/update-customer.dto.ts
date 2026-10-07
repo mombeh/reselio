@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsEmail } from 'class-validator';
+import { IsString, IsOptional, IsEmail, Matches } from 'class-validator';
 
 export class UpdateCustomerDto {
   @IsString()
@@ -12,6 +12,10 @@ export class UpdateCustomerDto {
   @IsString()
   @IsOptional()
   @IsEmail({}, { message: 'Please provide a valid email address' })
+  @Matches(
+    /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.com)+$/,
+    { message: 'Please provide a valid email address with .com domain' },
+  )
   email?: string;
 
   @IsString()

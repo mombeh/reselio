@@ -252,12 +252,19 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
-  Future<String> uploadProductImage(Uint8List bytes, String filename) async {
-    final fileName = '$filename-${DateTime.now().millisecondsSinceEpoch}.jpg';
+  Future<String> uploadProductImage(
+    Uint8List bytes,
+    String filename, {
+    String? mimeType,
+  }) async {
+    final mime = _uploadMimeType(mimeType);
+    final fileName =
+        '$filename-${DateTime.now().millisecondsSinceEpoch}.${_uploadExtension(mime)}';
     final formData = FormData.fromMap({
       'file': MultipartFile.fromBytes(
         bytes,
         filename: fileName,
+        contentType: DioMediaType.parse(mime),
       ),
     });
 
@@ -270,6 +277,33 @@ class ApiService {
     );
 
     return response.data['imageUrl'] as String;
+  }
+
+  String _uploadMimeType(String? mimeType) {
+    switch (mimeType) {
+      case 'image/png':
+        return 'image/png';
+      case 'image/webp':
+        return 'image/webp';
+      case 'image/gif':
+        return 'image/gif';
+      case 'image/jpeg':
+      default:
+        return 'image/jpeg';
+    }
+  }
+
+  String _uploadExtension(String mime) {
+    switch (mime) {
+      case 'image/png':
+        return 'png';
+      case 'image/webp':
+        return 'webp';
+      case 'image/gif':
+        return 'gif';
+      default:
+        return 'jpg';
+    }
   }
 
   Future<Product> createProduct({

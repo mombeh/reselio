@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -27,13 +26,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController();
   final _categoryController = TextEditingController();
-  final _imageUrlController = TextEditingController();
 
   String? _error;
   bool _isEditing = false;
   bool _isSubmitting = false;
   Uint8List? _pickedImageBytes;
-  String? _pickedImageExtension;
+  String? _pickedImageMimeType;
+  String? _existingImageUrl;
+  bool _isPickingImage = false;
 
   @override
   void initState() {
@@ -49,10 +49,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
       _priceController.text = product.price.toString();
       _quantityController.text = product.quantity.toString();
       _categoryController.text = product.category;
-      _imageUrlController.text = product.imageUrl ?? '';
+      _existingImageUrl = product.imageUrl;
     }
-
-    _imageUrlController.addListener(_onImageUrlChanged);
   }
 
   @override
@@ -62,17 +60,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
     _priceController.dispose();
     _quantityController.dispose();
     _categoryController.dispose();
-    _imageUrlController.dispose();
     super.dispose();
   }
 
-  void _onImageUrlChanged() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
   Future<void> _pickImage() async {
+    if (_isPickingImage) return;
+
+    setState(() {
+      _isPickingImage = true;
+    });
+
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(
@@ -85,28 +82,38 @@ class _AddProductScreenState extends State<AddProductScreen> {
       if (pickedFile == null) return;
 
       final bytes = await pickedFile.readAsBytes();
-      final extension = pickedFile.mimeType?.split('/').last ?? 'png';
+
+      if (!mounted) return;
 
       setState(() {
         _pickedImageBytes = bytes;
-        _pickedImageExtension = extension;
+        _pickedImageMimeType = pickedFile.mimeType;
       });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to pick image: $e')),
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPickingImage = false;
+        });
+      }
     }
   }
 
-  String? _getImageUrl() {
-    if (_pickedImageBytes != null) {
-      final base64 = base64Encode(_pickedImageBytes!);
-      return 'data:image/$_pickedImageExtension;base64,$base64';
-    }
-    final url = _imageUrlController.text.trim();
-    return url.isEmpty ? null : url;
+  void _removeImage() {
+    setState(() {
+      _pickedImageBytes = null;
+      _pickedImageMimeType = null;
+      _existingImageUrl = null;
+    });
   }
+
+  bool get _hasImage =>
+      _pickedImageBytes != null ||
+      (_existingImageUrl != null && _existingImageUrl!.isNotEmpty);
 
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) {
@@ -128,10 +135,10 @@ class _AddProductScreenState extends State<AddProductScreen> {
         imageUrl = await widget.authService.apiService.uploadProductImage(
           _pickedImageBytes!,
           _nameController.text.trim(),
+          mimeType: _pickedImageMimeType,
         );
       } else {
-        final url = _imageUrlController.text.trim();
-        imageUrl = url.isEmpty ? null : url;
+        imageUrl = _existingImageUrl;
       }
 
       if (_isEditing) {
@@ -254,9 +261,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   Widget _buildImagePreview() {
-    final imageUrl = _getImageUrl();
-
     Widget preview;
+
     if (_pickedImageBytes != null) {
       preview = Image.memory(
         _pickedImageBytes!,
@@ -264,11 +270,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
         height: 180,
         fit: BoxFit.cover,
       );
-    } else if (imageUrl != null && imageUrl.isNotEmpty) {
+    } else if (_existingImageUrl != null && _existingImageUrl!.isNotEmpty) {
       preview = ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: Image.network(
-          imageUrl,
+          _existingImageUrl!,
           width: double.infinity,
           height: 180,
           fit: BoxFit.cover,
@@ -340,10 +346,47 @@ class _AddProductScreenState extends State<AddProductScreen> {
               borderRadius: BorderRadius.circular(14),
               child: preview,
             ),
-            if (_pickedImageBytes != null || (imageUrl != null && imageUrl.isNotEmpty))
+            if (_hasImage) ...[
               Positioned(
                 top: 8,
                 right: 8,
+                child: Material(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    onTap: _removeImage,
+                    borderRadius: BorderRadius.circular(20),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.delete_outline,
+                            color: Colors.white,
+                            size: 13,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Remove',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 8,
+                left: 8,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
@@ -356,6 +399,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       color: Colors.white,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (_isPickingImage)
+              const ColoredBox(
+                color: Color(0x66000000),
+                child: Center(
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -596,7 +654,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               // Image
               _buildSectionTitle(
                 title: 'Product Image',
-                subtitle: 'Add an image URL to display your product.',
+                subtitle: 'Upload a clear photo so customers can recognise it.',
                 icon: Icons.image_outlined,
               ),
 
@@ -607,9 +665,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
               const SizedBox(height: 12),
 
               OutlinedButton.icon(
-                onPressed: _pickImage,
+                onPressed: _isPickingImage ? null : _pickImage,
                 icon: const Icon(Icons.upload_outlined),
-                label: const Text('Upload Image'),
+                label: Text(
+                  _isPickingImage
+                      ? 'Loading...'
+                      : _hasImage
+                          ? 'Change Image'
+                          : 'Upload Image',
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -618,15 +682,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
-              TextFormField(
-                controller: _imageUrlController,
-                keyboardType: TextInputType.url,
-                decoration: _inputDecoration(
-                  label: 'Image URL',
-                  icon: Icons.link_outlined,
-                  hint: 'https://...',
+              Text(
+                'JPEG, PNG, WEBP or GIF. Up to 5 MB.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey.shade500,
                 ),
               ),
 
