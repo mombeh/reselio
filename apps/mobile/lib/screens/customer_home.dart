@@ -6,6 +6,7 @@ import 'package:mobile/screens/customer_product_list_screen.dart';
 import 'package:mobile/screens/my_products_screen.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/widgets/notification_icon_badge.dart';
+import 'package:mobile/utils/currency.dart';
 
 class CustomerHome extends StatefulWidget {
   final AuthService authService;
@@ -786,7 +787,7 @@ class _ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    _formatCurrency(product.price),
+                    Currency.format(product.price),
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
@@ -802,16 +803,6 @@ class _ProductCard extends StatelessWidget {
     );
   }
 
-  String _formatCurrency(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}M FCFA';
-    }
-    if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1)}K FCFA';
-    }
-    return '${amount.toStringAsFixed(0)} FCFA';
-  }
-}
 
 class _ImagePlaceholder extends StatelessWidget {
   const _ImagePlaceholder();

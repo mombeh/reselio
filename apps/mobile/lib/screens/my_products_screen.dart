@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/models/order.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/utils/currency.dart';
 
 class MyProductsScreen extends StatefulWidget {
   final AuthService authService;
@@ -295,7 +296,7 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _formatCurrency(order.total),
+                        Currency.format(order.total),
                         style: const TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
@@ -318,158 +319,3 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     );
   }
 
-  String _formatCurrency(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}M FCFA';
-    }
-
-    if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1)}K FCFA';
-    }
-
-    return '${amount.toStringAsFixed(0)} FCFA';
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 80,
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: 92,
-              height: 92,
-              decoration: BoxDecoration(
-                color: const Color(0xFFEDE8F7),
-                borderRadius: BorderRadius.circular(28),
-              ),
-              child: const Icon(
-                Icons.shopping_bag_outlined,
-                size: 44,
-                color: Color(0xFF6C4AB6),
-              ),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'No orders yet',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 19,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF27252D),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Orders you place will appear here.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 13,
-                height: 1.5,
-                color: Colors.grey.shade600,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorState(Object? error) {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(
-        horizontal: 24,
-        vertical: 100,
-      ),
-      children: [
-        Container(
-          width: 80,
-          height: 80,
-          decoration: BoxDecoration(
-            color: Colors.red.shade50,
-            shape: BoxShape.circle,
-          ),
-          child: const Icon(
-            Icons.wifi_off_rounded,
-            size: 38,
-            color: Colors.red,
-          ),
-        ),
-        const SizedBox(height: 20),
-        const Text(
-          'Unable to load orders',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontSize: 18,
-            fontWeight: FontWeight.w800,
-            color: Color(0xFF27252D),
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          widget.authService.apiService.getErrorMessage(error),
-          textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 13,
-            height: 1.5,
-            color: Color(0xFF85838C),
-          ),
-        ),
-        const SizedBox(height: 22),
-        Center(
-          child: FilledButton.icon(
-            onPressed: _loadOrders,
-            style: FilledButton.styleFrom(
-              backgroundColor: const Color(0xFF6C4AB6),
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 13,
-              ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(14),
-              ),
-            ),
-            icon: const Icon(Icons.refresh_rounded),
-            label: const Text(
-              'Try Again',
-              style: TextStyle(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildLoadingState() {
-    return ListView(
-      physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 100),
-      children: [
-        _buildSkeleton(height: 140, radius: 20),
-        const SizedBox(height: 12),
-        _buildSkeleton(height: 140, radius: 20),
-        const SizedBox(height: 12),
-        _buildSkeleton(height: 140, radius: 20),
-      ],
-    );
-  }
-
-  Widget _buildSkeleton({
-    required double height,
-    double radius = 12,
-  }) {
-    return Container(
-      height: height,
-      decoration: BoxDecoration(
-        color: const Color(0xFFE9E7EC),
-        borderRadius: BorderRadius.circular(radius),
-      ),
-    );
-  }
-}
