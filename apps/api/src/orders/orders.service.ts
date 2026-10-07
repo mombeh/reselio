@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Parser } from 'json2csv';
@@ -7,7 +11,6 @@ import { OrderItem, OrderItemDocument } from './schemas/order-item.schema';
 import { Customer, CustomerDocument } from './schemas/customer.schema';
 import { Product, ProductDocument } from '../products/schemas/product.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/enums/notification-type.enum';
 import { LOW_STOCK_THRESHOLD } from '../notifications/notifications.service';
@@ -16,7 +19,8 @@ import { LOW_STOCK_THRESHOLD } from '../notifications/notifications.service';
 export class OrdersService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
-    @InjectModel(OrderItem.name) private orderItemModel: Model<OrderItemDocument>,
+    @InjectModel(OrderItem.name)
+    private orderItemModel: Model<OrderItemDocument>,
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     private notificationsService: NotificationsService,
@@ -56,7 +60,9 @@ export class OrdersService {
         throw new ConflictException('Product ID is required for each item');
       }
       if (typeof item.quantity !== 'number' || item.quantity < 1) {
-        throw new ConflictException('Quantity must be at least 1 for each item');
+        throw new ConflictException(
+          'Quantity must be at least 1 for each item',
+        );
       }
     }
 
@@ -157,7 +163,9 @@ export class OrdersService {
         await this.productModel.findByIdAndUpdate(item.productId, {
           $inc: { quantity: item.quantity },
         });
-        await this.orderItemModel.deleteMany({ orderId: savedOrder._id.toString() });
+        await this.orderItemModel.deleteMany({
+          orderId: savedOrder._id.toString(),
+        });
         await this.orderModel.findByIdAndDelete(savedOrder._id);
         throw new ConflictException(
           `Insufficient stock for product ${item.productId}. Stock cannot be negative.`,
@@ -174,7 +182,10 @@ export class OrdersService {
       }
     }
 
-    const populatedOrder = await savedOrder.populate('customerId', 'fullName phoneNumber email');
+    const populatedOrder = await savedOrder.populate(
+      'customerId',
+      'fullName phoneNumber email',
+    );
     const orderItemsResult = await this.orderItemModel
       .find({ orderId: savedOrder._id.toString() })
       .populate('productId', 'name price imageUrl');
@@ -194,9 +205,7 @@ export class OrdersService {
     }
 
     if (query.search) {
-      filter.$or = [
-        { orderNumber: { $regex: query.search, $options: 'i' } },
-      ];
+      filter.$or = [{ orderNumber: { $regex: query.search, $options: 'i' } }];
     }
 
     const total = await this.orderModel.countDocuments(filter);
@@ -229,9 +238,7 @@ export class OrdersService {
     }
 
     if (query.search) {
-      filter.$or = [
-        { orderNumber: { $regex: query.search, $options: 'i' } },
-      ];
+      filter.$or = [{ orderNumber: { $regex: query.search, $options: 'i' } }];
     }
 
     const total = await this.orderModel.countDocuments(filter);
@@ -283,10 +290,9 @@ export class OrdersService {
   }
 
   async findOne(id: string, storeId: string) {
-    const order = await this.orderModel.findOne({ _id: id, storeId }).populate(
-      'customerId',
-      'fullName phoneNumber email address',
-    );
+    const order = await this.orderModel
+      .findOne({ _id: id, storeId })
+      .populate('customerId', 'fullName phoneNumber email address');
 
     if (!order) {
       throw new NotFoundException('Order not found');
@@ -310,21 +316,21 @@ export class OrdersService {
 
     if (previousStatus === 'Delivered' || previousStatus === 'Cancelled') {
       throw new ConflictException(
-        `Cannot update status of an order that is already ${previousStatus.toLowerCase()}`
+        `Cannot update status of an order that is already ${previousStatus.toLowerCase()}`,
       );
     }
 
     const allowedTransitions: Record<string, string[]> = {
-      'Pending': ['Confirmed', 'Preparing', 'Cancelled'],
-      'Confirmed': ['Preparing', 'Ready for Pickup', 'Delivered', 'Cancelled'],
-      'Preparing': ['Ready for Pickup', 'Delivered', 'Cancelled'],
+      Pending: ['Confirmed', 'Preparing', 'Cancelled'],
+      Confirmed: ['Preparing', 'Ready for Pickup', 'Delivered', 'Cancelled'],
+      Preparing: ['Ready for Pickup', 'Delivered', 'Cancelled'],
       'Ready for Pickup': ['Delivered', 'Cancelled'],
     };
 
     const allowedNextStatuses = allowedTransitions[previousStatus] || [];
     if (!allowedNextStatuses.includes(status)) {
       throw new ConflictException(
-        `Invalid status transition from ${previousStatus} to ${status}`
+        `Invalid status transition from ${previousStatus} to ${status}`,
       );
     }
 
@@ -450,12 +456,18 @@ export class OrdersService {
   }
 
   async getDashboardMetrics(storeId: string) {
-    const orders = await this.orderModel.find({ storeId, status: { $ne: 'Cancelled' } });
+    const orders = await this.orderModel.find({
+      storeId,
+      status: { $ne: 'Cancelled' },
+    });
 
     const totalOrders = orders.length;
     const deliveredOrders = orders.filter((o) => o.status === 'Delivered');
     const totalRevenue = deliveredOrders.reduce((sum, o) => sum + o.total, 0);
-    const totalProfit = deliveredOrders.reduce((sum, o) => sum + (o.profit || 0), 0);
+    const totalProfit = deliveredOrders.reduce(
+      (sum, o) => sum + (o.profit || 0),
+      0,
+    );
     const pendingDeliveries = orders.filter(
       (o) => !['Delivered', 'Cancelled'].includes(o.status),
     ).length;
@@ -625,7 +637,12 @@ export class OrdersService {
         },
       },
       { $unwind: '$order' },
-      { $match: { 'order.storeId': storeId, 'order.status': { $ne: 'Cancelled' } } },
+      {
+        $match: {
+          'order.storeId': storeId,
+          'order.status': { $ne: 'Cancelled' },
+        },
+      },
       {
         $lookup: {
           from: 'products',
@@ -642,7 +659,10 @@ export class OrdersService {
           totalRevenue: { $sum: '$totalPrice' },
           totalProfit: {
             $sum: {
-              $multiply: ['$quantity', { $subtract: ['$unitPrice', '$product.costPrice'] }],
+              $multiply: [
+                '$quantity',
+                { $subtract: ['$unitPrice', '$product.costPrice'] },
+              ],
             },
           },
         },

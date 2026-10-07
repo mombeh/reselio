@@ -802,6 +802,7 @@ class _ProductCard extends StatelessWidget {
       ),
     );
   }
+}
 
 
 class _ImagePlaceholder extends StatelessWidget {

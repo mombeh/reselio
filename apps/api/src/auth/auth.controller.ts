@@ -49,7 +49,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
-  async googleAuth(@Req() req: any) {}
+  async googleAuth(@Req() _req: any) {}
 
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
@@ -118,7 +118,9 @@ export class AuthController {
       process.env.FRONTEND_URL || 'https://reselio-web.vercel.app';
     const resetLink = `${frontendUrl}/reset-password?token=${encodeURIComponent(token)}`;
 
-    this.logger.log(`Password reset requested for ${email}. Reset link: ${resetLink}`);
+    this.logger.log(
+      `Password reset requested for ${email}. Reset link: ${resetLink}`,
+    );
 
     return {
       message:

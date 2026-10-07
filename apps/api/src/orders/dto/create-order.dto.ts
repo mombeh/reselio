@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsNumber, IsArray, MinLength } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsArray } from 'class-validator';
 
 export class CreateOrderDto {
   @IsString()

@@ -319,3 +319,145 @@ class _MyProductsScreenState extends State<MyProductsScreen> {
     );
   }
 
+  Future<void> _refresh() async {
+    _loadOrders();
+  }
+
+  Widget _buildLoadingState() {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(20),
+      children: List.generate(5, (index) => _buildOrderSkeleton()),
+    );
+  }
+
+  Widget _buildOrderSkeleton() {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: const Color(0xFFECEAF0)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 120,
+                height: 16,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              Container(
+                width: 60,
+                height: 14,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: 100,
+            height: 14,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Container(
+            width: 80,
+            height: 18,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade300,
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(Object? error) {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 100),
+        Icon(
+          Icons.wifi_off_rounded,
+          size: 52,
+          color: Colors.grey.shade400,
+        ),
+        const SizedBox(height: 18),
+        Text(
+          widget.authService.apiService.getErrorMessage(error),
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            fontSize: 14,
+          ),
+        ),
+        const SizedBox(height: 20),
+        Center(
+          child: FilledButton.icon(
+            onPressed: _refresh,
+            icon: const Icon(Icons.refresh_rounded),
+            label: const Text('Try again'),
+            style: FilledButton.styleFrom(
+              backgroundColor: const Color(0xFF6C4AB6),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 22, vertical: 13),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(24),
+      children: [
+        const SizedBox(height: 100),
+        Icon(
+          Icons.local_offer_rounded,
+          size: 52,
+          color: Colors.grey.shade400,
+        ),
+        const SizedBox(height: 18),
+        const Text(
+          'No orders yet',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Color(0xFF777780),
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Your order history will appear here once you place an order',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.grey.shade500,
+            fontSize: 13,
+          ),
+        ),
+      ],
+    );
+  }
+}

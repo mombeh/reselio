@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Favorite, FavoriteDocument } from './schemas/favorite.schema';
@@ -27,7 +31,10 @@ export class FavoritesService {
   }
 
   async remove(userId: string, productId: string) {
-    const favorite = await this.favoriteModel.findOneAndDelete({ userId, productId });
+    const favorite = await this.favoriteModel.findOneAndDelete({
+      userId,
+      productId,
+    });
     if (!favorite) {
       throw new NotFoundException('Favorite not found');
     }

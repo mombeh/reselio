@@ -135,18 +135,16 @@ export class AuthService {
     return this.jwtService.sign(payload, { expiresIn: '15m' });
   }
 
-  async verifyPasswordResetToken(token: string): Promise<{ userId: string; email: string }> {
+  async verifyPasswordResetToken(
+    token: string,
+  ): Promise<{ userId: string; email: string }> {
     try {
-      const payload = this.jwtService.verify(token) as {
-        sub: string;
-        email: string;
-        type?: string;
-      };
+      const payload = this.jwtService.verify(token);
       if (payload.type !== 'password-reset') {
         throw new Error('Invalid token type');
       }
       return { userId: payload.sub, email: payload.email };
-    } catch (error) {
+    } catch (_error) {
       throw new Error('Invalid or expired reset token');
     }
   }
