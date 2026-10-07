@@ -265,18 +265,6 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
     );
   }
 
-  String Currency.format(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}M FCFA';
-    }
-
-    if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1)}K FCFA';
-    }
-
-    return '${amount.toStringAsFixed(0)} FCFA';
-  }
-
   Widget _buildEmptyState() {
     return Center(
       child: Padding(

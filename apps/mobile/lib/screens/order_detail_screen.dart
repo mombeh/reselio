@@ -86,10 +86,6 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     }
   }
 
-  String Currency.format(double amount) {
-    return '${amount.toStringAsFixed(0)} FCFA';
-  }
-
   String _formatDate(DateTime? date) {
     if (date == null) return 'N/A';
 

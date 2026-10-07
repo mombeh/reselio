@@ -175,10 +175,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
     }
   }
 
-  String Currency.format(double amount) {
-    return '${amount.toStringAsFixed(0)} FCFA';
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

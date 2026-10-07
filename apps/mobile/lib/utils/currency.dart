@@ -5,12 +5,12 @@ class Currency {
 
   /// Full amount with thousands separators: 5000 -> "5,000 FCFA"
   static String format(num amount) {
-    return '${_group(amount.toDoubleAsFixed(0))} $code';
+    return '${_group(amount.toStringAsFixed(0))} $code';
   }
 
   /// Full amount with two decimals, for places that need cents-like precision.
   static String formatWithDecimals(num amount, {int decimals = 2}) {
-    return '${_group(amount.toDoubleAsFixed(decimals))} $code';
+    return '${_group(amount.toStringAsFixed(decimals))} $code';
   }
 
   /// Compact form for dense dashboard tiles: 5000000 -> "5.0M FCFA"
