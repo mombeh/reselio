@@ -35,6 +35,9 @@ class _AddProductScreenState extends State<AddProductScreen> {
   String? _pickedImageMimeType;
   String? _existingImageUrl;
   bool _isPickingImage = false;
+  List<String> _categories = [];
+  String? _selectedCategory;
+  bool _isLoadingCategories = true;
 
   @override
   void initState() {
@@ -50,7 +53,41 @@ class _AddProductScreenState extends State<AddProductScreen> {
       _priceController.text = product.price.toString();
       _quantityController.text = product.quantity.toString();
       _categoryController.text = product.category;
+      _selectedCategory = product.category;
       _existingImageUrl = product.imageUrl;
+    }
+
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final products =
+              await widget.authService.apiService.getProducts();
+      final categories = products
+          .map((product) => product.category)
+          .where((category) => category.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort();
+
+      if (!mounted) return;
+
+      setState(() {
+        _categories = categories;
+        _isLoadingCategories = false;
+
+        if (_selectedCategory != null &&
+            !_categories.contains(_selectedCategory)) {
+          _categories.insert(0, _selectedCategory!);
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingCategories = false;
+      });
     }
   }
 
@@ -149,7 +186,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           description: _descriptionController.text.trim(),
           price: price,
           quantity: quantity,
-          category: _categoryController.text.trim(),
+          category: _selectedCategory ?? _categoryController.text.trim(),
           imageUrl: imageUrl,
         );
       } else {
@@ -158,7 +195,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           description: _descriptionController.text.trim(),
           price: price,
           quantity: quantity,
-          category: _categoryController.text.trim(),
+          category: _selectedCategory ?? _categoryController.text.trim(),
           imageUrl: imageUrl,
         );
       }
@@ -567,20 +604,49 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
               const SizedBox(height: 16),
 
-              TextFormField(
-                controller: _categoryController,
-                textCapitalization: TextCapitalization.words,
-                decoration: _inputDecoration(
-                  label: 'Category',
-                  icon: Icons.category_outlined,
-                  hint: 'e.g. Electronics',
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a category';
-                  }
-                  return null;
-                },
+              SizedBox(
+                height: 60,
+                child: _isLoadingCategories
+                    ? TextField(
+                        enabled: false,
+                        decoration: _inputDecoration(
+                          label: 'Category',
+                          icon: Icons.category_outlined,
+                          hint: 'Loading categories...',
+                        ),
+                      )
+                    : DropdownButtonFormField<String>(
+                        initialValue: _selectedCategory,
+                        isExpanded: true,
+                        decoration: _inputDecoration(
+                          label: 'Category',
+                          icon: Icons.category_outlined,
+                          hint: 'Select a category',
+                        ),
+                        hint: const Text('Select a category'),
+                        items: _categories
+                            .map(
+                              (category) => DropdownMenuItem(
+                                value: category,
+                                child: Text(
+                                  category,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategory = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please select a category';
+                          }
+                          return null;
+                        },
+                      ),
               ),
 
               const SizedBox(height: 28),
