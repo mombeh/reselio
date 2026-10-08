@@ -22,7 +22,14 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   String _searchQuery = '';
   String? _selectedCategory;
   late Future<List> _productsFuture;
-  List<Product> _allProducts = [];
+
+  final List<Map<String, String?>> _categories = [
+    {'label': 'All', 'value': null},
+    {'label': 'Electronics', 'value': 'Electronics'},
+    {'label': 'Clothing', 'value': 'Clothing'},
+    {'label': 'Shoes', 'value': 'Shoes'},
+    {'label': 'Accessories', 'value': 'Accessories'},
+  ];
 
   @override
   void initState() {
@@ -31,11 +38,9 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   }
 
   void _loadProducts() {
-    _productsFuture = widget.authService.apiService.getAdminProducts().then(
-      (products) {
-        _allProducts = products.cast<Product>();
-        return _allProducts;
-      },
+    _productsFuture = widget.authService.apiService.getAdminProducts(
+      search: _searchQuery.isNotEmpty ? _searchQuery : null,
+      category: _selectedCategory,
     );
   }
 
@@ -48,40 +53,15 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
   void _applyFilter(String? category) {
     setState(() {
       _selectedCategory = category;
+      _loadProducts();
     });
   }
 
   void _onSearchChanged(String value) {
     setState(() {
       _searchQuery = value;
+      _loadProducts();
     });
-  }
-
-  List<Product> get _filteredProducts {
-    return _allProducts.where((product) {
-      final matchesCategory =
-          _selectedCategory == null || product.category == _selectedCategory;
-      final matchesSearch =
-          _searchQuery.isEmpty ||
-          product.name.toLowerCase().contains(_searchQuery.toLowerCase());
-      return matchesCategory && matchesSearch;
-    }).toList();
-  }
-
-  List<Map<String, String?>> get _categories {
-    final uniqueCategories = _allProducts
-        .map((product) => product.category)
-        .where((category) => category.isNotEmpty)
-        .toSet()
-        .toList()
-      ..sort();
-
-    return [
-      {'label': 'All', 'value': null},
-      ...uniqueCategories.map(
-        (category) => {'label': category, 'value': category},
-      ),
-    ];
   }
 
   void _openProductDetails(Product product) {
@@ -154,7 +134,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
               return _buildErrorState(snapshot.error);
             }
 
-            final products = _filteredProducts;
+            final products = snapshot.data ?? [];
 
             return ListView(
               physics: const AlwaysScrollableScrollPhysics(),
@@ -172,7 +152,7 @@ class _AdminProductListScreenState extends State<AdminProductListScreen> {
                   ...products.map(
                     (product) => Padding(
                       padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildProductCard(product),
+                      child: _buildProductCard(product as Product),
                     ),
                   ),
               ],
