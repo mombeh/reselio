@@ -5,6 +5,7 @@ import 'package:mobile/models/order.dart';
 import 'package:mobile/models/top_product.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/router/app_router.dart';
+import 'package:mobile/utils/currency.dart';
 import 'package:mobile/widgets/notification_icon_badge.dart';
 
 class DashboardScreen extends StatefulWidget {
@@ -67,15 +68,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   String _formatShortCurrency(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}M FCFA';
-    }
-
-    if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1)}K FCFA';
-    }
-
-    return '${amount.toStringAsFixed(0)} FCFA';
+    return Currency.format(amount);
   }
 
   @override
@@ -352,7 +345,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _metricCard(
           icon: Icons.shopping_bag_outlined,
           title: 'Sales',
-          value: '${metrics?.totalOrders ?? 0}',
+          value: '${metrics?.completedOrders ?? 0}',
           color: primary,
         ),
       ],
