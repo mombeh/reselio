@@ -21,14 +21,7 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
   String? _selectedCategory;
   late Future<List<Product>> _productsFuture;
   final Set<String> _favoriteProductIds = {};
-
-  final List<Map<String, String?>> _categories = [
-    {'label': 'All', 'value': null},
-    {'label': 'Electronics', 'value': 'Electronics'},
-    {'label': 'Clothing', 'value': 'Clothing'},
-    {'label': 'Shoes', 'value': 'Shoes'},
-    {'label': 'Accessories', 'value': 'Accessories'},
-  ];
+  List<Product> _allProducts = [];
 
   @override
   void initState() {
@@ -38,10 +31,12 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
   }
 
   void _loadProducts() {
-    _productsFuture = widget.authService.apiService.getPublicProducts(
-      search: _searchQuery.isNotEmpty ? _searchQuery : null,
-      category: _selectedCategory,
-    );
+    _productsFuture = widget.authService.apiService
+        .getPublicProducts()
+        .then((products) {
+      _allProducts = products;
+      return products;
+    });
   }
 
   Future<void> _loadFavorites() async {
@@ -97,15 +92,40 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
   void _applyFilter(String? category) {
     setState(() {
       _selectedCategory = category;
-      _loadProducts();
     });
   }
 
   void _onSearchChanged(String value) {
     setState(() {
       _searchQuery = value;
-      _loadProducts();
     });
+  }
+
+  List<Product> get _filteredProducts {
+    return _allProducts.where((product) {
+      final matchesCategory =
+          _selectedCategory == null || product.category == _selectedCategory;
+      final matchesSearch =
+          _searchQuery.isEmpty ||
+          product.name.toLowerCase().contains(_searchQuery.toLowerCase());
+      return matchesCategory && matchesSearch;
+    }).toList();
+  }
+
+  List<Map<String, String?>> get _categories {
+    final uniqueCategories = _allProducts
+        .map((product) => product.category)
+        .where((category) => category.isNotEmpty)
+        .toSet()
+        .toList()
+      ..sort();
+
+    return [
+      {'label': 'All', 'value': null},
+      ...uniqueCategories.map(
+        (category) => {'label': category, 'value': category},
+      ),
+    ];
   }
 
   void _openProductDetails(Product product) {
@@ -178,7 +198,7 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
               return _buildErrorState(snapshot.error);
             }
 
-            final products = snapshot.data ?? [];
+            final products = _filteredProducts;
 
             return ListView(
               physics: const AlwaysScrollableScrollPhysics(),
