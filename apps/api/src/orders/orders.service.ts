@@ -149,7 +149,7 @@ export class OrdersService {
     for (const item of orderItems) {
       const orderItem = new this.orderItemModel({
         ...item,
-        orderId: savedOrder._id.toString(),
+        orderId: savedOrder._id,
       });
       await orderItem.save();
 
@@ -164,7 +164,7 @@ export class OrdersService {
           $inc: { quantity: item.quantity },
         });
         await this.orderItemModel.deleteMany({
-          orderId: savedOrder._id.toString(),
+          orderId: savedOrder._id,
         });
         await this.orderModel.findByIdAndDelete(savedOrder._id);
         throw new ConflictException(
@@ -187,7 +187,7 @@ export class OrdersService {
       'fullName phoneNumber email',
     );
     const orderItemsResult = await this.orderItemModel
-      .find({ orderId: savedOrder._id.toString() })
+      .find({ orderId: savedOrder._id })
       .populate('productId', 'name price imageUrl');
 
     return { ...populatedOrder.toObject(), orderItems: orderItemsResult };
@@ -478,6 +478,7 @@ export class OrdersService {
 
     return {
       totalOrders,
+      completedOrders: deliveredOrders.length,
       totalRevenue,
       totalProfit,
       pendingDeliveries,
@@ -640,7 +641,7 @@ export class OrdersService {
       {
         $match: {
           'order.storeId': storeId,
-          'order.status': { $ne: 'Cancelled' },
+          'order.status': 'Delivered',
         },
       },
       {
@@ -680,7 +681,7 @@ export class OrdersService {
       {
         $match: {
           storeId,
-          status: { $ne: 'Cancelled' },
+          status: 'Delivered',
           createdAt: { $gte: startDate },
         },
       },
