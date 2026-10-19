@@ -76,7 +76,8 @@ export class UsersService {
 
     if (data.name) user.name = data.name;
     if (data.email) user.email = data.email;
-    if (data.businessName !== undefined) (user as any).businessName = data.businessName;
+    if (data.businessName !== undefined)
+      (user as any).businessName = data.businessName;
     if (data.phone !== undefined) (user as any).phone = data.phone;
     if (data.address !== undefined) (user as any).address = data.address;
     if (data.currency !== undefined) (user as any).currency = data.currency;
@@ -107,7 +108,12 @@ export class UsersService {
     return user.save();
   }
 
-  async findSellers(query: { search?: string; isActive?: boolean; page?: number; limit?: number }) {
+  async findSellers(query: {
+    search?: string;
+    isActive?: boolean;
+    page?: number;
+    limit?: number;
+  }) {
     const page = query.page || 1;
     const limit = query.limit || 10;
     const skip = (page - 1) * limit;
@@ -115,6 +121,15 @@ export class UsersService {
     const filter: any = { role: Role.Client };
     if (query.isActive !== undefined) {
       filter.isActive = query.isActive;
+    }
+
+    if (query.search && query.search.trim().length > 0) {
+      const searchRegex = { $regex: query.search.trim(), $options: 'i' };
+      filter.$or = [
+        { name: searchRegex },
+        { email: searchRegex },
+        { phone: searchRegex },
+      ];
     }
 
     const total = await this.userModel.countDocuments(filter);
@@ -141,6 +156,15 @@ export class UsersService {
       throw new Error('Seller not found');
     }
     return seller;
+  }
+
+  async updatePasswordByUserId(userId: string, newPassword: string) {
+    const user = await this.userModel.findById(userId);
+    if (!user) {
+      throw new Error('User not found');
+    }
+    user.password = await bcrypt.hash(newPassword, 10);
+    return user.save();
   }
 
   async toggleSellerStatus(id: string, isActive: boolean) {

@@ -8,6 +8,17 @@ import { ReportsModule } from '../reports/reports.module';
 
 @Module({
   imports: [DashboardModule, UsersModule, CustomersModule, OrdersModule, ReportsModule],
+import { ProductsModule } from '../products/products.module';
+
+@Module({
+  imports: [
+    DashboardModule,
+    UsersModule,
+    CustomersModule,
+    OrdersModule,
+    ReportsModule,
+    ProductsModule,
+  ],
   controllers: [AdminController],
 })
 export class AdminModule {}

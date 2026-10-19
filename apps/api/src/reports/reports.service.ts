@@ -2,17 +2,27 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order, OrderDocument } from '../orders/schemas/order.schema';
-import { OrderItem, OrderItemDocument } from '../orders/schemas/order-item.schema';
+import {
+  OrderItem,
+  OrderItemDocument,
+} from '../orders/schemas/order-item.schema';
 import { Product, ProductDocument } from '../products/schemas/product.schema';
-import { Customer, CustomerDocument } from '../customers/schemas/customer.schema';
+import {
+  Customer,
+  CustomerDocument,
+} from '../customers/schemas/customer.schema';
 import { SalesReportQueryDto, SalesPeriod } from './dto/sales-report-query.dto';
-import { RevenueReportQueryDto, RevenuePeriod } from './dto/revenue-report-query.dto';
+import {
+  RevenueReportQueryDto,
+  RevenuePeriod,
+} from './dto/revenue-report-query.dto';
 
 @Injectable()
 export class ReportsService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<OrderDocument>,
-    @InjectModel(OrderItem.name) private orderItemModel: Model<OrderItemDocument>,
+    @InjectModel(OrderItem.name)
+    private orderItemModel: Model<OrderItemDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
   ) {}
@@ -24,21 +34,24 @@ export class ReportsService {
 
     const now = new Date();
     switch (period) {
-      case SalesPeriod.TODAY:
+      case SalesPeriod.TODAY: {
         const startOfDay = new Date(now);
         startOfDay.setHours(0, 0, 0, 0);
         dateFilter = { createdAt: { $gte: startOfDay } };
         break;
-      case SalesPeriod.WEEK:
+      }
+      case SalesPeriod.WEEK: {
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - now.getDay());
         startOfWeek.setHours(0, 0, 0, 0);
         dateFilter = { createdAt: { $gte: startOfWeek } };
         break;
-      case SalesPeriod.MONTH:
+      }
+      case SalesPeriod.MONTH: {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         dateFilter = { createdAt: { $gte: startOfMonth } };
         break;
+      }
       case SalesPeriod.CUSTOM:
         if (!startDate || !endDate) {
           throw new NotFoundException(
@@ -52,10 +65,11 @@ export class ReportsService {
           },
         };
         break;
-      default:
+      default: {
         const startOfDayDefault = new Date(now);
         startOfDayDefault.setHours(0, 0, 0, 0);
         dateFilter = { createdAt: { $gte: startOfDayDefault } };
+      }
     }
 
     const orders = await this.orderModel
@@ -160,29 +174,33 @@ export class ReportsService {
 
     const now = new Date();
     switch (period) {
-      case RevenuePeriod.WEEK:
+      case RevenuePeriod.WEEK: {
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - now.getDay());
         startOfWeek.setHours(0, 0, 0, 0);
         dateFilter = { createdAt: { $gte: startOfWeek } };
         dateFormat = '%Y-%m-%d';
         break;
-      case RevenuePeriod.MONTH:
+      }
+      case RevenuePeriod.MONTH: {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         dateFilter = { createdAt: { $gte: startOfMonth } };
         dateFormat = '%Y-%m-%d';
         break;
-      case RevenuePeriod.YEAR:
+      }
+      case RevenuePeriod.YEAR: {
         const startOfYear = new Date(now.getFullYear(), 0, 1);
         dateFilter = { createdAt: { $gte: startOfYear } };
         dateFormat = '%Y-%m';
         break;
-      default:
+      }
+      default: {
         const startOfWeekDefault = new Date(now);
         startOfWeekDefault.setDate(now.getDate() - now.getDay());
         startOfWeekDefault.setHours(0, 0, 0, 0);
         dateFilter = { createdAt: { $gte: startOfWeekDefault } };
         dateFormat = '%Y-%m-%d';
+      }
     }
 
     if (startDate && endDate) {
@@ -204,7 +222,7 @@ export class ReportsService {
           revenue: { $sum: '$total' },
         },
       },
-      { $sort: { '_id': 1 } },
+      { $sort: { _id: 1 } },
     ]);
 
     return result.map((item) => ({
@@ -220,21 +238,24 @@ export class ReportsService {
 
     const now = new Date();
     switch (period) {
-      case SalesPeriod.TODAY:
+      case SalesPeriod.TODAY: {
         const startOfDay = new Date(now);
         startOfDay.setHours(0, 0, 0, 0);
         dateFilter = { createdAt: { $gte: startOfDay } };
         break;
-      case SalesPeriod.WEEK:
+      }
+      case SalesPeriod.WEEK: {
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - now.getDay());
         startOfWeek.setHours(0, 0, 0, 0);
         dateFilter = { createdAt: { $gte: startOfWeek } };
         break;
-      case SalesPeriod.MONTH:
+      }
+      case SalesPeriod.MONTH: {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         dateFilter = { createdAt: { $gte: startOfMonth } };
         break;
+      }
       case SalesPeriod.CUSTOM:
         if (!startDate || !endDate) {
           throw new NotFoundException(
@@ -248,10 +269,11 @@ export class ReportsService {
           },
         };
         break;
-      default:
+      default: {
         const startOfDayDefault = new Date(now);
         startOfDayDefault.setHours(0, 0, 0, 0);
         dateFilter = { createdAt: { $gte: startOfDayDefault } };
+      }
     }
 
     const orders = await this.orderModel
@@ -282,29 +304,33 @@ export class ReportsService {
 
     const now = new Date();
     switch (period) {
-      case RevenuePeriod.WEEK:
+      case RevenuePeriod.WEEK: {
         const startOfWeek = new Date(now);
         startOfWeek.setDate(now.getDate() - now.getDay());
         startOfWeek.setHours(0, 0, 0, 0);
         dateFilter = { createdAt: { $gte: startOfWeek } };
         dateFormat = '%Y-%m-%d';
         break;
-      case RevenuePeriod.MONTH:
+      }
+      case RevenuePeriod.MONTH: {
         const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
         dateFilter = { createdAt: { $gte: startOfMonth } };
         dateFormat = '%Y-%m-%d';
         break;
-      case RevenuePeriod.YEAR:
+      }
+      case RevenuePeriod.YEAR: {
         const startOfYear = new Date(now.getFullYear(), 0, 1);
         dateFilter = { createdAt: { $gte: startOfYear } };
         dateFormat = '%Y-%m';
         break;
-      default:
+      }
+      default: {
         const startOfWeekDefault = new Date(now);
         startOfWeekDefault.setDate(now.getDate() - now.getDay());
         startOfWeekDefault.setHours(0, 0, 0, 0);
         dateFilter = { createdAt: { $gte: startOfWeekDefault } };
         dateFormat = '%Y-%m-%d';
+      }
     }
 
     if (startDate && endDate) {
@@ -326,7 +352,7 @@ export class ReportsService {
           revenue: { $sum: '$total' },
         },
       },
-      { $sort: { '_id': 1 } },
+      { $sort: { _id: 1 } },
     ]);
 
     return result.map((item) => ({

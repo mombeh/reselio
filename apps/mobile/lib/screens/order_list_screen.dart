@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mobile/models/order.dart';
 import 'package:mobile/router/app_router.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/utils/currency.dart';
 
 class OrderListScreen extends StatefulWidget {
   final AuthService authService;
@@ -172,10 +173,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
       default:
         return Icons.receipt_long_outlined;
     }
-  }
-
-  String _formatAmount(double amount) {
-    return '${amount.toStringAsFixed(0)} FCFA';
   }
 
   @override
@@ -493,7 +490,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                       child: _orderInfo(
                         icon: Icons.payments_outlined,
                         label: 'Total',
-                        value: _formatAmount(order.total),
+                        value: Currency.format(order.total),
                       ),
                     ),
                     Expanded(
@@ -602,10 +599,10 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.symmetric(horizontal: 30),
+      padding: const EdgeInsets.fromLTRB(30, 0, 30, 120),
       children: [
         SizedBox(
-          height: MediaQuery.of(context).size.height * 0.22,
+          height: MediaQuery.of(context).size.height * 0.18,
         ),
         Container(
           width: 90,
@@ -644,33 +641,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
             height: 1.5,
           ),
         ),
-        if (!hasFilters) ...[
-          const SizedBox(height: 24),
-          Center(
-            child: ElevatedButton.icon(
-              onPressed: _createOrder,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primary,
-                foregroundColor: Colors.white,
-                elevation: 0,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 13,
-                ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              icon: const Icon(Icons.add_rounded),
-              label: const Text(
-                'Create Order',
-                style: TextStyle(
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-        ],
       ],
     );
   }

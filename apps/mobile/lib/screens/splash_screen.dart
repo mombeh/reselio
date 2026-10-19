@@ -28,41 +28,16 @@ class _SplashScreenState extends State<SplashScreen> {
     if (!mounted) return;
 
     if (isLoggedIn) {
-      final user = authService.currentUser!;
-      final hasRole = user.role.isNotEmpty;
+      final authService = widget.authService!;
+      await authService.ensureClientRole();
+
       if (!mounted) return;
 
-      if (!hasRole) {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.roleSelection,
-          arguments: {'authService': authService},
-        );
-        return;
-      }
-
-      final role = user.role;
-      if (!mounted) return;
-
-      if (role == 'customer') {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.customerHome,
-          arguments: {'authService': authService},
-        );
-      } else if (role == 'client') {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.clientHome,
-          arguments: {'authService': authService},
-        );
-      } else {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.adminHome,
-          arguments: {'authService': authService},
-        );
-      }
+      Navigator.pushReplacementNamed(
+        context,
+        AppRouter.clientHome,
+        arguments: {'authService': authService},
+      );
     } else {
       Navigator.pushReplacementNamed(
         context,

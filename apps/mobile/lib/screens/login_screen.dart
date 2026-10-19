@@ -43,54 +43,24 @@ class _LoginScreenState extends State<LoginScreen> {
     setState(() => _error = null);
 
     try {
-      final response = await widget.authService.login(
+      await widget.authService.login(
         email: _emailController.text.trim(),
         password: _passwordController.text,
       );
 
       if (!mounted) return;
 
-      final user = response.user;
-      final hasRole = user.role.isNotEmpty;
+      await widget.authService.ensureClientRole();
 
-      if (!hasRole) {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.roleSelection,
-          arguments: {
-            'authService': widget.authService,
-          },
-        );
-        return;
-      }
+      if (!mounted) return;
 
-      final role = user.role;
-
-      if (role == 'customer') {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.customerHome,
-          arguments: {
-            'authService': widget.authService,
-          },
-        );
-      } else if (role == 'client') {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.clientHome,
-          arguments: {
-            'authService': widget.authService,
-          },
-        );
-      } else {
-        Navigator.pushReplacementNamed(
-          context,
-          AppRouter.adminHome,
-          arguments: {
-            'authService': widget.authService,
-          },
-        );
-      }
+      Navigator.pushReplacementNamed(
+        context,
+        AppRouter.clientHome,
+        arguments: {
+          'authService': widget.authService,
+        },
+      );
     } catch (e) {
       if (!mounted) return;
 
@@ -108,7 +78,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
 
     final emailRegex = RegExp(
-      r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+      r"^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.com)+$",
     );
 
     if (!emailRegex.hasMatch(email)) {
@@ -337,7 +307,39 @@ class _LoginScreenState extends State<LoginScreen> {
                         ),
                       ),
 
-                      const SizedBox(height: 28),
+                      const SizedBox(height: 10),
+
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: TextButton(
+                          onPressed: isLoading
+                              ? null
+                              : () {
+                                  Navigator.pushNamed(
+                                    context,
+                                    AppRouter.forgotPassword,
+                                    arguments: {
+                                      'authService': widget.authService,
+                                    },
+                                  );
+                                },
+                          style: TextButton.styleFrom(
+                            foregroundColor: primary,
+                            padding: EdgeInsets.zero,
+                            minimumSize: const Size(0, 32),
+                            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                          ),
+                          child: const Text(
+                            'Forgot password?',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ),
+                      ),
+
+                      const SizedBox(height: 18),
 
                       // --------------------------------------------------
                       // Login button

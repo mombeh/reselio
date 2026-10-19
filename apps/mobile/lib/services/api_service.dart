@@ -1,3 +1,4 @@
+import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../models/auth_response.dart';
@@ -14,7 +15,7 @@ import '../models/top_product.dart';
 import '../models/user.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:4000';
+  static const String baseUrl = 'https://reselio.onrender.com';
   static const String tokenKey = 'auth_token';
 
   late final Dio dio;
@@ -153,6 +154,30 @@ class ApiService {
     );
   }
 
+  Future<Map<String, dynamic>> requestPasswordReset({required String email}) async {
+    final response = await dio.post(
+      '/auth/forgot-password',
+      data: {'email': email},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> resetPassword({
+    required String token,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    final response = await dio.post(
+      '/auth/reset-password',
+      data: {
+        'token': token,
+        'newPassword': newPassword,
+        'confirmPassword': confirmPassword,
+      },
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
   Future<Store> createStore({
     required String name,
     required String description,
@@ -204,6 +229,15 @@ class ApiService {
     return data.map((item) => Product.fromJson(item)).toList();
   }
 
+  Future<List<Product>> getAdminProducts({String? search, String? category}) async {
+    final params = <String, dynamic>{};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (category != null && category.isNotEmpty) params['category'] = category;
+    final response = await dio.get('/admin/products', queryParameters: params);
+    final List<dynamic> data = response.data as List;
+    return data.map((item) => Product.fromJson(item)).toList();
+  }
+
   Future<List<Product>> getPublicProducts({String? search, String? category}) async {
     final params = <String, dynamic>{};
     if (search != null && search.isNotEmpty) params['search'] = search;
@@ -216,6 +250,60 @@ class ApiService {
   Future<Map<String, dynamic>> getPublicStore(String userId) async {
     final response = await dio.get('/stores/public/$userId');
     return response.data as Map<String, dynamic>;
+  }
+
+  Future<String> uploadProductImage(
+    Uint8List bytes,
+    String filename, {
+    String? mimeType,
+  }) async {
+    final mime = _uploadMimeType(mimeType);
+    final fileName =
+        '$filename-${DateTime.now().millisecondsSinceEpoch}.${_uploadExtension(mime)}';
+    final formData = FormData.fromMap({
+      'file': MultipartFile.fromBytes(
+        bytes,
+        filename: fileName,
+        contentType: DioMediaType.parse(mime),
+      ),
+    });
+
+    final response = await dio.post(
+      '/products/upload',
+      data: formData,
+      options: Options(
+        headers: {'Content-Type': 'multipart/form-data'},
+      ),
+    );
+
+    return response.data['imageUrl'] as String;
+  }
+
+  String _uploadMimeType(String? mimeType) {
+    switch (mimeType) {
+      case 'image/png':
+        return 'image/png';
+      case 'image/webp':
+        return 'image/webp';
+      case 'image/gif':
+        return 'image/gif';
+      case 'image/jpeg':
+      default:
+        return 'image/jpeg';
+    }
+  }
+
+  String _uploadExtension(String mime) {
+    switch (mime) {
+      case 'image/png':
+        return 'png';
+      case 'image/webp':
+        return 'webp';
+      case 'image/gif':
+        return 'gif';
+      default:
+        return 'jpg';
+    }
   }
 
   Future<Product> createProduct({
@@ -369,6 +457,31 @@ class ApiService {
     if (search != null && search.isNotEmpty) params['search'] = search;
 
     final response = await dio.get('/orders', queryParameters: params);
+    final data = response.data as Map<String, dynamic>;
+    final List<dynamic> ordersList = data['data'] as List;
+    return {
+      'orders': ordersList.map((item) => Order.fromJson(item)).toList(),
+      'total': data['total'] as int,
+      'page': data['page'] as int,
+      'limit': data['limit'] as int,
+      'totalPages': data['totalPages'] as int,
+    };
+  }
+
+  Future<Map<String, dynamic>> getAdminOrders({
+    String? status,
+    String? search,
+    int page = 1,
+    int limit = 10,
+  }) async {
+    final params = <String, dynamic>{
+      'page': page.toString(),
+      'limit': limit.toString(),
+    };
+    if (status != null && status.isNotEmpty) params['status'] = status;
+    if (search != null && search.isNotEmpty) params['search'] = search;
+
+    final response = await dio.get('/admin/orders', queryParameters: params);
     final data = response.data as Map<String, dynamic>;
     final List<dynamic> ordersList = data['data'] as List;
     return {

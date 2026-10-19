@@ -81,7 +81,9 @@ describe('OrdersService', () => {
 
   describe('findAllByStore', () => {
     it('should return paginated orders', async () => {
-      const mockOrders = [{ orderNumber: 'ORD-1', customerId: { fullName: 'Alice' } }];
+      const mockOrders = [
+        { orderNumber: 'ORD-1', customerId: { fullName: 'Alice' } },
+      ];
 
       orderModel.countDocuments.mockResolvedValue(1);
       orderModel.find.mockReturnValue({
@@ -127,7 +129,10 @@ describe('OrdersService', () => {
 
   describe('create', () => {
     it('should create an order and decrement stock', async () => {
-      customerModel.findOne.mockResolvedValue({ _id: 'cust1', storeId: 'store1' });
+      customerModel.findOne.mockResolvedValue({
+        _id: 'cust1',
+        storeId: 'store1',
+      });
       orderModel.findOne.mockResolvedValue(null);
       orderModel.countDocuments.mockResolvedValue(0);
       orderItemModel.find.mockReturnValue({
@@ -148,7 +153,11 @@ describe('OrdersService', () => {
         populate: jest.fn().mockResolvedValue({
           _id: 'order1',
           storeId: 'store1',
-          customerId: { fullName: 'John', phoneNumber: '123', email: 'john@test.com' },
+          customerId: {
+            fullName: 'John',
+            phoneNumber: '123',
+            email: 'john@test.com',
+          },
           orderNumber: 'ORD-123',
           status: 'Pending',
           subtotal: 10000,
@@ -159,7 +168,11 @@ describe('OrdersService', () => {
           toObject: jest.fn().mockReturnValue({
             _id: 'order1',
             storeId: 'store1',
-            customerId: { fullName: 'John', phoneNumber: '123', email: 'john@test.com' },
+            customerId: {
+              fullName: 'John',
+              phoneNumber: '123',
+              email: 'john@test.com',
+            },
             orderNumber: 'ORD-123',
             status: 'Pending',
             subtotal: 10000,
@@ -205,13 +218,20 @@ describe('OrdersService', () => {
       });
 
       expect(result.orderNumber).toBe('ORD-123');
-      expect(productModel.findByIdAndUpdate).toHaveBeenCalledWith('prod1', {
-        $inc: { quantity: -2 },
-      }, { new: true });
+      expect(productModel.findByIdAndUpdate).toHaveBeenCalledWith(
+        'prod1',
+        {
+          $inc: { quantity: -2 },
+        },
+        { new: true },
+      );
     });
 
     it('should throw ConflictException when quantity exceeds stock', async () => {
-      customerModel.findOne.mockResolvedValue({ _id: 'cust1', storeId: 'store1' });
+      customerModel.findOne.mockResolvedValue({
+        _id: 'cust1',
+        storeId: 'store1',
+      });
       orderModel.findOne.mockResolvedValue(null);
       productModel.findOne.mockResolvedValue({
         _id: 'prod1',
@@ -231,7 +251,10 @@ describe('OrdersService', () => {
     });
 
     it('should throw ConflictException when stock would go negative', async () => {
-      customerModel.findOne.mockResolvedValue({ _id: 'cust1', storeId: 'store1' });
+      customerModel.findOne.mockResolvedValue({
+        _id: 'cust1',
+        storeId: 'store1',
+      });
       orderModel.findOne.mockResolvedValue(null);
       orderModel.countDocuments.mockResolvedValue(0);
       orderItemModel.find.mockReturnValue({
@@ -252,7 +275,11 @@ describe('OrdersService', () => {
         populate: jest.fn().mockResolvedValue({
           _id: 'order1',
           storeId: 'store1',
-          customerId: { fullName: 'John', phoneNumber: '123', email: 'john@test.com' },
+          customerId: {
+            fullName: 'John',
+            phoneNumber: '123',
+            email: 'john@test.com',
+          },
           orderNumber: 'ORD-123',
           status: 'Pending',
           subtotal: 5000,
@@ -263,7 +290,11 @@ describe('OrdersService', () => {
           toObject: jest.fn().mockReturnValue({
             _id: 'order1',
             storeId: 'store1',
-            customerId: { fullName: 'John', phoneNumber: '123', email: 'john@test.com' },
+            customerId: {
+              fullName: 'John',
+              phoneNumber: '123',
+              email: 'john@test.com',
+            },
             orderNumber: 'ORD-123',
             status: 'Pending',
             subtotal: 5000,
@@ -308,11 +339,16 @@ describe('OrdersService', () => {
           customerId: 'cust1',
           items: [{ productId: 'prod1', quantity: 6 }],
         }),
-      ).rejects.toThrow('Insufficient stock for product prod1. Stock cannot be negative.');
+      ).rejects.toThrow(
+        'Insufficient stock for product prod1. Stock cannot be negative.',
+      );
     });
 
     it('should throw ConflictException for empty items', async () => {
-      customerModel.findOne.mockResolvedValue({ _id: 'cust1', storeId: 'store1' });
+      customerModel.findOne.mockResolvedValue({
+        _id: 'cust1',
+        storeId: 'store1',
+      });
 
       await expect(
         service.create('store1', {
@@ -344,7 +380,9 @@ describe('OrdersService', () => {
 
       await expect(
         service.updateStatus('order1', 'store1', 'Cancelled'),
-      ).rejects.toThrow('Cannot update status of an order that is already delivered');
+      ).rejects.toThrow(
+        'Cannot update status of an order that is already delivered',
+      );
     });
 
     it('should throw ConflictException when updating cancelled order', async () => {
@@ -356,7 +394,9 @@ describe('OrdersService', () => {
 
       await expect(
         service.updateStatus('order1', 'store1', 'Pending'),
-      ).rejects.toThrow('Cannot update status of an order that is already cancelled');
+      ).rejects.toThrow(
+        'Cannot update status of an order that is already cancelled',
+      );
     });
 
     it('should throw ConflictException for invalid status transition', async () => {

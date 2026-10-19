@@ -4,6 +4,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/router/app_router.dart';
+import 'package:mobile/utils/currency.dart';
 
 class ProductDetailScreen extends StatefulWidget {
   final AuthService? authService;
@@ -395,9 +396,9 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
                        fontWeight: FontWeight.w500,
                      ),
                    ),
-                   Text(
-                     '${product.price.toStringAsFixed(0)} FCFA',
-                     style: const TextStyle(
+                      Text(
+                      Currency.format(product.price),
+                      style: const TextStyle(
                        fontSize: 26,
                        fontWeight: FontWeight.bold,
                        color: Colors.deepPurple,

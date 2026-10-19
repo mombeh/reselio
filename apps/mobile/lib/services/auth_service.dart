@@ -134,4 +134,21 @@ class AuthService extends ChangeNotifier {
     _currentUser = null;
     notifyListeners();
   }
+
+  Future<void> ensureClientRole() async {
+    if (_currentUser == null) return;
+    if (_currentUser!.role == 'client') return;
+
+    _isLoading = true;
+    notifyListeners();
+    try {
+      final updatedUser = await apiService.updateProfile(role: 'client');
+      _currentUser = updatedUser;
+    } catch (e) {
+      // If profile update fails, keep current user data
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
 }

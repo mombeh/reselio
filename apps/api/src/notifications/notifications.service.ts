@@ -1,7 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { Notification, NotificationDocument } from './schemas/notification.schema';
+import {
+  Notification,
+  NotificationDocument,
+} from './schemas/notification.schema';
 import { NotificationType } from './enums/notification-type.enum';
 
 export const LOW_STOCK_THRESHOLD = 5;
@@ -9,16 +12,20 @@ export const LOW_STOCK_THRESHOLD = 5;
 @Injectable()
 export class NotificationsService {
   constructor(
-    @InjectModel(Notification.name) private notificationModel: Model<NotificationDocument>,
+    @InjectModel(Notification.name)
+    private notificationModel: Model<NotificationDocument>,
   ) {}
 
-  async create(userId: string, data: {
-    type: NotificationType;
-    title: string;
-    message: string;
-    referenceId?: string;
-    referenceType?: string;
-  }) {
+  async create(
+    userId: string,
+    data: {
+      type: NotificationType;
+      title: string;
+      message: string;
+      referenceId?: string;
+      referenceType?: string;
+    },
+  ) {
     const notification = new this.notificationModel({
       userId,
       type: data.type,
@@ -35,7 +42,10 @@ export class NotificationsService {
   }
 
   async findOne(id: string, userId: string) {
-    const notification = await this.notificationModel.findOne({ _id: id, userId });
+    const notification = await this.notificationModel.findOne({
+      _id: id,
+      userId,
+    });
     if (!notification) {
       throw new NotFoundException('Notification not found');
     }
@@ -55,10 +65,16 @@ export class NotificationsService {
   }
 
   async markAllAsRead(userId: string) {
-    return this.notificationModel.updateMany({ userId, isRead: false }, { isRead: true });
+    return this.notificationModel.updateMany(
+      { userId, isRead: false },
+      { isRead: true },
+    );
   }
 
-  async hasUnreadLowStockNotification(userId: string, productId: string): Promise<boolean> {
+  async hasUnreadLowStockNotification(
+    userId: string,
+    productId: string,
+  ): Promise<boolean> {
     const notification = await this.notificationModel.findOne({
       userId,
       type: NotificationType.LOW_STOCK,
@@ -69,8 +85,16 @@ export class NotificationsService {
     return !!notification;
   }
 
-  async createLowStockNotification(userId: string, productId: string, productName: string, currentStock: number) {
-    const existingUnread = await this.hasUnreadLowStockNotification(userId, productId);
+  async createLowStockNotification(
+    userId: string,
+    productId: string,
+    productName: string,
+    currentStock: number,
+  ) {
+    const existingUnread = await this.hasUnreadLowStockNotification(
+      userId,
+      productId,
+    );
     if (existingUnread) {
       return null;
     }

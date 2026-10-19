@@ -54,7 +54,11 @@ describe('ProductsController', () => {
 
     const result = await controller.findAll({ user: { userId: 'store1' } });
 
-    expect(mockProductsService.findAllByStore).toHaveBeenCalledWith('store1', undefined, undefined);
+    expect(mockProductsService.findAllByStore).toHaveBeenCalledWith(
+      'store1',
+      undefined,
+      undefined,
+    );
     expect(result[0]._id).toBe('prod1');
   });
 
@@ -77,7 +81,11 @@ describe('ProductsController', () => {
       user: { userId: 'store1' },
     });
 
-    expect(mockProductsService.update).toHaveBeenCalledWith('prod1', 'store1', dto);
+    expect(mockProductsService.update).toHaveBeenCalledWith(
+      'prod1',
+      'store1',
+      dto,
+    );
     expect(result.name).toBe('Updated Dress');
   });
 
@@ -101,7 +109,10 @@ describe('ProductsController', () => {
       user: { userId: 'store1' },
     });
 
-    expect(mockProductsService.getShareUrl).toHaveBeenCalledWith('prod1', 'store1');
+    expect(mockProductsService.getShareUrl).toHaveBeenCalledWith(
+      'prod1',
+      'store1',
+    );
     expect(result.shareUrl).toBe('http://localhost:4000/p/abc123');
   });
 
@@ -129,7 +140,9 @@ describe('ProductsController', () => {
 
     const result = await controller.getPublicProduct('nonexistent');
 
-    expect(mockProductsService.findByPublicId).toHaveBeenCalledWith('nonexistent');
+    expect(mockProductsService.findByPublicId).toHaveBeenCalledWith(
+      'nonexistent',
+    );
     expect(result.name).toBeNull();
     expect(result.availability).toBe('Out of Stock');
   });

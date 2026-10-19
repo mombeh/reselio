@@ -19,10 +19,11 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
-import { extname, join } from 'path';
+import { extname } from 'path';
+import { UPLOADS_DIR } from '../uploads.config';
 
 const storage = diskStorage({
-  destination: join(process.cwd(), 'uploads'),
+  destination: UPLOADS_DIR,
   filename: (req, file, callback) => {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
     callback(
@@ -77,8 +78,16 @@ export class ProductsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll(@Req() req: any, @Query('search') search?: string, @Query('category') category?: string) {
-    return this.productsService.findAllByStore(req.user.userId, search, category);
+  findAll(
+    @Req() req: any,
+    @Query('search') search?: string,
+    @Query('category') category?: string,
+  ) {
+    return this.productsService.findAllByStore(
+      req.user.userId,
+      search,
+      category,
+    );
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -111,14 +120,38 @@ export class ProductsController {
 
   @UseGuards(AuthGuard('jwt'))
   @Post('upload')
-  @UseInterceptors(FileInterceptor('file', { storage }))
-  uploadFile(@UploadedFile() file: Express.Multer.File) {
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage,
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+      fileFilter: (req, file, callback) => {
+        const allowedTypes = [
+          'image/jpeg',
+          'image/png',
+          'image/webp',
+          'image/gif',
+        ];
+        if (allowedTypes.includes(file.mimetype)) {
+          callback(null, true);
+        } else {
+          callback(
+            new BadRequestException(
+              'Invalid file type. Only JPEG, PNG, WEBP, and GIF are allowed.',
+            ),
+            false,
+          );
+        }
+      },
+    }),
+  )
+  uploadFile(@UploadedFile() file: Express.Multer.File, @Req() req: any) {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-    const protocol = process.env.NODE_ENV === 'production' ? 'https' : 'http';
-    const host =
-      process.env.FRONTEND_URL?.replace(/^https?:\/\//, '') || 'localhost:4000';
+    const host = req.headers.host;
+    const protocol = req.protocol;
     const imageUrl = `${protocol}://${host}/uploads/${file.filename}`;
     return { imageUrl };
   }

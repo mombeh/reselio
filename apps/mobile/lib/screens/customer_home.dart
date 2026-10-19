@@ -6,6 +6,7 @@ import 'package:mobile/screens/customer_product_list_screen.dart';
 import 'package:mobile/screens/order_list_screen.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/widgets/notification_icon_badge.dart';
+import 'package:mobile/utils/currency.dart';
 
 class CustomerHome extends StatefulWidget {
   final AuthService authService;
@@ -1098,6 +1099,8 @@ class _ProductCard extends StatelessWidget {
                     ),
                     style:
                         const TextStyle(
+                    Currency.format(product.price),
+                    style: const TextStyle(
                       fontSize: 12,
                       fontWeight:
                           FontWeight.w800,
@@ -1135,6 +1138,10 @@ class _ProductCard extends StatelessWidget {
 
 class _ImagePlaceholder
     extends StatelessWidget {
+}
+
+
+class _ImagePlaceholder extends StatelessWidget {
   const _ImagePlaceholder();
 
   @override

@@ -20,7 +20,6 @@ class AdminCustomerDetailScreen extends StatefulWidget {
 class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
   late Future<Customer> _customerFuture;
   late Future<Map<String, dynamic>> _ordersFuture;
-  bool _isUpdating = false;
 
   @override
   void initState() {
@@ -37,46 +36,6 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
     await Future.wait([_customerFuture, _ordersFuture]);
   }
 
-  Future<void> _toggleStatus(bool currentStatus) async {
-    setState(() {
-      _isUpdating = true;
-    });
-
-    try {
-      await widget.authService.apiService.updateCustomerStatus(
-        widget.customerId,
-        !currentStatus,
-      );
-
-      setState(() {
-        _customerFuture = widget.authService.apiService.getAdminCustomerById(widget.customerId);
-      });
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            !currentStatus ? 'Customer activated' : 'Customer suspended',
-          ),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(widget.authService.apiService.getErrorMessage(e)),
-          backgroundColor: Colors.red,
-        ),
-      );
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isUpdating = false;
-        });
-      }
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -320,27 +279,6 @@ class _AdminCustomerDetailScreenState extends State<AdminCustomerDetailScreen> {
                 ),
               ],
             ),
-          ),
-          ElevatedButton(
-            onPressed: _isUpdating ? null : () => _toggleStatus(customer.isActive),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: customer.isActive ? Colors.red : Colors.green,
-              foregroundColor: Colors.white,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              elevation: 0,
-            ),
-            child: _isUpdating
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: Colors.white,
-                    ),
-                  )
-                : Text(customer.isActive ? 'Suspend' : 'Activate'),
           ),
         ],
       ),

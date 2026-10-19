@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:mobile/screens/welcome_screen.dart';
 import 'package:mobile/screens/login_screen.dart';
 import 'package:mobile/screens/register_screen.dart';
+import 'package:mobile/screens/forgot_password_screen.dart';
+import 'package:mobile/screens/reset_password_screen.dart';
 import 'package:mobile/screens/role_selection_screen.dart';
 import 'package:mobile/screens/customer_home.dart';
 import 'package:mobile/screens/client_home.dart';
@@ -33,6 +35,8 @@ import 'package:mobile/screens/seller_detail_screen.dart';
 import 'package:mobile/screens/admin_customer_list_screen.dart';
 import 'package:mobile/screens/admin_customer_detail_screen.dart';
 import 'package:mobile/screens/admin_reports_screen.dart';
+import 'package:mobile/screens/admin_product_list_screen.dart';
+import 'package:mobile/screens/admin_order_list_screen.dart';
 import 'package:mobile/models/store.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/models/customer.dart';
@@ -44,6 +48,8 @@ class AppRouter {
   static const String welcome = '/welcome';
   static const String login = '/login';
   static const String register = '/register';
+  static const String forgotPassword = '/forgot-password';
+  static const String resetPassword = '/reset-password';
   static const String roleSelection = '/role-selection';
   static const String customerHome = '/customer-home';
   static const String clientHome = '/client-home';
@@ -74,6 +80,8 @@ class AppRouter {
   static const String adminCustomerList = '/admin-customer-list';
   static const String adminCustomerDetail = '/admin-customer-detail';
   static const String adminReports = '/admin-reports';
+  static const String adminProductList = '/admin-product-list';
+  static const String adminOrderList = '/admin-order-list';
 
   static Route<dynamic> onGenerateRoute(
     RouteSettings settings,
@@ -104,6 +112,20 @@ class AppRouter {
       case register:
         return MaterialPageRoute(
           builder: (_) => RegisterScreen(authService: authService!),
+          settings: settings,
+        );
+      case forgotPassword:
+        return MaterialPageRoute(
+          builder: (_) => ForgotPasswordScreen(authService: authService!),
+          settings: settings,
+        );
+      case resetPassword:
+        return MaterialPageRoute(
+          builder: (_) => ResetPasswordScreen(
+            authService: authService!,
+            token: args['token'] as String?,
+            email: args['email'] as String?,
+          ),
           settings: settings,
         );
       case roleSelection:
@@ -287,6 +309,16 @@ class AppRouter {
       case adminReports:
         return MaterialPageRoute(
           builder: (_) => AdminReportsScreen(authService: authService!),
+          settings: settings,
+        );
+      case adminProductList:
+        return MaterialPageRoute(
+          builder: (_) => AdminProductListScreen(authService: authService!),
+          settings: settings,
+        );
+      case adminOrderList:
+        return MaterialPageRoute(
+          builder: (_) => AdminOrderListScreen(authService: authService!),
           settings: settings,
         );
       default:

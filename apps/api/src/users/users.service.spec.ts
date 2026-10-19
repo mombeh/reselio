@@ -9,12 +9,22 @@ describe('UsersService', () => {
 
   const createQueryChain = (result: any) => {
     const chain: any = {
-      select: jest.fn(function() { return chain; }),
-      sort: jest.fn(function() { return chain; }),
-      skip: jest.fn(function() { return chain; }),
-      limit: jest.fn(function() { return chain; }),
+      select: jest.fn(function () {
+        return chain;
+      }),
+      sort: jest.fn(function () {
+        return chain;
+      }),
+      skip: jest.fn(function () {
+        return chain;
+      }),
+      limit: jest.fn(function () {
+        return chain;
+      }),
       exec: jest.fn().mockResolvedValue(result),
-      then: jest.fn(function(resolve: any) { return resolve(result); }),
+      then: jest.fn(function (resolve: any) {
+        return resolve(result);
+      }),
     };
     return chain;
   };
@@ -22,7 +32,7 @@ describe('UsersService', () => {
   const mockUserModel = {
     find: jest.fn(),
     findOne: jest.fn(),
-    findById: jest.fn((id: string) => createQueryChain(null)),
+    findById: jest.fn((_id: string) => createQueryChain(null)),
     countDocuments: jest.fn(),
     create: jest.fn(),
   };
@@ -73,7 +83,10 @@ describe('UsersService', () => {
 
       await service.findSellers({ isActive: true });
 
-      expect(userModel.find).toHaveBeenCalledWith({ role: Role.Client, isActive: true });
+      expect(userModel.find).toHaveBeenCalledWith({
+        role: Role.Client,
+        isActive: true,
+      });
     });
   });
 
@@ -91,7 +104,9 @@ describe('UsersService', () => {
     it('should throw error if seller not found', async () => {
       mockUserModel.findById.mockReturnValue(createQueryChain(null));
 
-      await expect(service.findSellerById('1')).rejects.toThrow('Seller not found');
+      await expect(service.findSellerById('1')).rejects.toThrow(
+        'Seller not found',
+      );
     });
   });
 
@@ -120,13 +135,17 @@ describe('UsersService', () => {
       };
       mockUserModel.findById.mockReturnValue(createQueryChain(mockUser));
 
-      await expect(service.toggleSellerStatus('1', true)).rejects.toThrow('User is not a seller');
+      await expect(service.toggleSellerStatus('1', true)).rejects.toThrow(
+        'User is not a seller',
+      );
     });
 
     it('should throw error if seller not found', async () => {
       mockUserModel.findById.mockReturnValue(createQueryChain(null));
 
-      await expect(service.toggleSellerStatus('1', true)).rejects.toThrow('Seller not found');
+      await expect(service.toggleSellerStatus('1', true)).rejects.toThrow(
+        'Seller not found',
+      );
     });
   });
 });

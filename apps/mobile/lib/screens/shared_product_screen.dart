@@ -188,7 +188,7 @@ class _SharedProductScreenState extends State<SharedProductScreen> {
               if (product.price != null)
                 Card(
                   child: ListTile(
-                    leading: const Icon(Icons.attach_money_outlined, color: Colors.green),
+                    leading: const Icon(Icons.payments_outlined, color: Colors.green),
                     title: const Text('Price'),
                     subtitle: Text(_formatPrice(product.price)),
                   ),

@@ -1,9 +1,9 @@
-import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:mobile/models/product.dart';
 import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/utils/currency.dart';
 
 class AddProductScreen extends StatefulWidget {
   final AuthService authService;
@@ -27,13 +27,17 @@ class _AddProductScreenState extends State<AddProductScreen> {
   final _priceController = TextEditingController();
   final _quantityController = TextEditingController();
   final _categoryController = TextEditingController();
-  final _imageUrlController = TextEditingController();
 
   String? _error;
   bool _isEditing = false;
   bool _isSubmitting = false;
   Uint8List? _pickedImageBytes;
-  String? _pickedImageExtension;
+  String? _pickedImageMimeType;
+  String? _existingImageUrl;
+  bool _isPickingImage = false;
+  List<String> _categories = [];
+  String? _selectedCategory;
+  bool _isLoadingCategories = true;
 
   @override
   void initState() {
@@ -49,10 +53,42 @@ class _AddProductScreenState extends State<AddProductScreen> {
       _priceController.text = product.price.toString();
       _quantityController.text = product.quantity.toString();
       _categoryController.text = product.category;
-      _imageUrlController.text = product.imageUrl ?? '';
+      _selectedCategory = product.category;
+      _existingImageUrl = product.imageUrl;
     }
 
-    _imageUrlController.addListener(_onImageUrlChanged);
+    _loadCategories();
+  }
+
+  Future<void> _loadCategories() async {
+    try {
+      final products =
+              await widget.authService.apiService.getProducts();
+      final categories = products
+          .map((product) => product.category)
+          .where((category) => category.isNotEmpty)
+          .toSet()
+          .toList()
+        ..sort();
+
+      if (!mounted) return;
+
+      setState(() {
+        _categories = categories;
+        _isLoadingCategories = false;
+
+        if (_selectedCategory != null &&
+            !_categories.contains(_selectedCategory)) {
+          _categories.insert(0, _selectedCategory!);
+        }
+      });
+    } catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _isLoadingCategories = false;
+      });
+    }
   }
 
   @override
@@ -62,17 +98,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
     _priceController.dispose();
     _quantityController.dispose();
     _categoryController.dispose();
-    _imageUrlController.dispose();
     super.dispose();
   }
 
-  void _onImageUrlChanged() {
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
   Future<void> _pickImage() async {
+    if (_isPickingImage) return;
+
+    setState(() {
+      _isPickingImage = true;
+    });
+
     try {
       final picker = ImagePicker();
       final pickedFile = await picker.pickImage(
@@ -85,28 +120,38 @@ class _AddProductScreenState extends State<AddProductScreen> {
       if (pickedFile == null) return;
 
       final bytes = await pickedFile.readAsBytes();
-      final extension = pickedFile.mimeType?.split('/').last ?? 'png';
+
+      if (!mounted) return;
 
       setState(() {
         _pickedImageBytes = bytes;
-        _pickedImageExtension = extension;
+        _pickedImageMimeType = pickedFile.mimeType;
       });
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Failed to pick image: $e')),
       );
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isPickingImage = false;
+        });
+      }
     }
   }
 
-  String? _getImageUrl() {
-    if (_pickedImageBytes != null) {
-      final base64 = base64Encode(_pickedImageBytes!);
-      return 'data:image/$_pickedImageExtension;base64,$base64';
-    }
-    final url = _imageUrlController.text.trim();
-    return url.isEmpty ? null : url;
+  void _removeImage() {
+    setState(() {
+      _pickedImageBytes = null;
+      _pickedImageMimeType = null;
+      _existingImageUrl = null;
+    });
   }
+
+  bool get _hasImage =>
+      _pickedImageBytes != null ||
+      (_existingImageUrl != null && _existingImageUrl!.isNotEmpty);
 
   Future<void> _handleSubmit() async {
     if (!_formKey.currentState!.validate()) {
@@ -119,9 +164,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
     });
 
     try {
-      final price = double.parse(_priceController.text.trim());
+      final price = Currency.parse(_priceController.text.trim()) ?? 0;
       final quantity = int.parse(_quantityController.text.trim());
-      final imageUrl = _getImageUrl();
+
+      String? imageUrl;
+
+      if (_pickedImageBytes != null) {
+        imageUrl = await widget.authService.apiService.uploadProductImage(
+          _pickedImageBytes!,
+          _nameController.text.trim(),
+          mimeType: _pickedImageMimeType,
+        );
+      } else {
+        imageUrl = _existingImageUrl;
+      }
 
       if (_isEditing) {
         await widget.authService.apiService.updateProduct(
@@ -130,7 +186,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           description: _descriptionController.text.trim(),
           price: price,
           quantity: quantity,
-          category: _categoryController.text.trim(),
+          category: _selectedCategory ?? _categoryController.text.trim(),
           imageUrl: imageUrl,
         );
       } else {
@@ -139,7 +195,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
           description: _descriptionController.text.trim(),
           price: price,
           quantity: quantity,
-          category: _categoryController.text.trim(),
+          category: _selectedCategory ?? _categoryController.text.trim(),
           imageUrl: imageUrl,
         );
       }
@@ -172,11 +228,20 @@ class _AddProductScreenState extends State<AddProductScreen> {
     required String label,
     required IconData icon,
     String? hint,
+    String? suffixText,
   }) {
     return InputDecoration(
       labelText: label,
       hintText: hint,
       prefixIcon: Icon(icon),
+      suffixText: suffixText,
+      suffixStyle: suffixText == null
+          ? null
+          : const TextStyle(
+              color: Color(0xFF6C4AB6),
+              fontWeight: FontWeight.w700,
+              fontSize: 13,
+            ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(12),
       ),
@@ -243,9 +308,8 @@ class _AddProductScreenState extends State<AddProductScreen> {
   }
 
   Widget _buildImagePreview() {
-    final imageUrl = _getImageUrl();
-
     Widget preview;
+
     if (_pickedImageBytes != null) {
       preview = Image.memory(
         _pickedImageBytes!,
@@ -253,11 +317,11 @@ class _AddProductScreenState extends State<AddProductScreen> {
         height: 180,
         fit: BoxFit.cover,
       );
-    } else if (imageUrl != null && imageUrl.isNotEmpty) {
+    } else if (_existingImageUrl != null && _existingImageUrl!.isNotEmpty) {
       preview = ClipRRect(
         borderRadius: BorderRadius.circular(14),
         child: Image.network(
-          imageUrl,
+          _existingImageUrl!,
           width: double.infinity,
           height: 180,
           fit: BoxFit.cover,
@@ -329,10 +393,47 @@ class _AddProductScreenState extends State<AddProductScreen> {
               borderRadius: BorderRadius.circular(14),
               child: preview,
             ),
-            if (_pickedImageBytes != null || (imageUrl != null && imageUrl.isNotEmpty))
+            if (_hasImage) ...[
               Positioned(
                 top: 8,
                 right: 8,
+                child: Material(
+                  color: Colors.black.withValues(alpha: 0.6),
+                  borderRadius: BorderRadius.circular(20),
+                  child: InkWell(
+                    onTap: _removeImage,
+                    borderRadius: BorderRadius.circular(20),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.delete_outline,
+                            color: Colors.white,
+                            size: 13,
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Remove',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 8,
+                left: 8,
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
@@ -345,6 +446,21 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       color: Colors.white,
                       fontSize: 11,
                       fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+            if (_isPickingImage)
+              const ColoredBox(
+                color: Color(0x66000000),
+                child: Center(
+                  child: SizedBox(
+                    width: 28,
+                    height: 28,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -488,20 +604,49 @@ class _AddProductScreenState extends State<AddProductScreen> {
 
               const SizedBox(height: 16),
 
-              TextFormField(
-                controller: _categoryController,
-                textCapitalization: TextCapitalization.words,
-                decoration: _inputDecoration(
-                  label: 'Category',
-                  icon: Icons.category_outlined,
-                  hint: 'e.g. Electronics',
-                ),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return 'Please enter a category';
-                  }
-                  return null;
-                },
+              SizedBox(
+                height: 60,
+                child: _isLoadingCategories
+                    ? TextField(
+                        enabled: false,
+                        decoration: _inputDecoration(
+                          label: 'Category',
+                          icon: Icons.category_outlined,
+                          hint: 'Loading categories...',
+                        ),
+                      )
+                    : DropdownButtonFormField<String>(
+                        initialValue: _selectedCategory,
+                        isExpanded: true,
+                        decoration: _inputDecoration(
+                          label: 'Category',
+                          icon: Icons.category_outlined,
+                          hint: 'Select a category',
+                        ),
+                        hint: const Text('Select a category'),
+                        items: _categories
+                            .map(
+                              (category) => DropdownMenuItem(
+                                value: category,
+                                child: Text(
+                                  category,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            )
+                            .toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            _selectedCategory = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'Please select a category';
+                          }
+                          return null;
+                        },
+                      ),
               ),
 
               const SizedBox(height: 28),
@@ -526,15 +671,16 @@ class _AddProductScreenState extends State<AddProductScreen> {
                       ),
                       decoration: _inputDecoration(
                         label: 'Price',
-                        icon: Icons.attach_money_outlined,
-                        hint: '0.00',
+                        icon: Icons.payments_outlined,
+                        hint: '0',
+                        suffixText: Currency.code,
                       ),
                       validator: (value) {
                         if (value == null || value.trim().isEmpty) {
                           return 'Enter price';
                         }
 
-                        final price = double.tryParse(value.trim());
+                        final price = Currency.parse(value.trim());
 
                         if (price == null || price < 0) {
                           return 'Invalid price';
@@ -585,7 +731,7 @@ class _AddProductScreenState extends State<AddProductScreen> {
               // Image
               _buildSectionTitle(
                 title: 'Product Image',
-                subtitle: 'Add an image URL to display your product.',
+                subtitle: 'Upload a clear photo so customers can recognise it.',
                 icon: Icons.image_outlined,
               ),
 
@@ -596,9 +742,15 @@ class _AddProductScreenState extends State<AddProductScreen> {
               const SizedBox(height: 12),
 
               OutlinedButton.icon(
-                onPressed: _pickImage,
+                onPressed: _isPickingImage ? null : _pickImage,
                 icon: const Icon(Icons.upload_outlined),
-                label: const Text('Upload Image'),
+                label: Text(
+                  _isPickingImage
+                      ? 'Loading...'
+                      : _hasImage
+                          ? 'Change Image'
+                          : 'Upload Image',
+                ),
                 style: OutlinedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(vertical: 14),
                   shape: RoundedRectangleBorder(
@@ -607,15 +759,14 @@ class _AddProductScreenState extends State<AddProductScreen> {
                 ),
               ),
 
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
 
-              TextFormField(
-                controller: _imageUrlController,
-                keyboardType: TextInputType.url,
-                decoration: _inputDecoration(
-                  label: 'Image URL',
-                  icon: Icons.link_outlined,
-                  hint: 'https://...',
+              Text(
+                'JPEG, PNG, WEBP or GIF. Up to 5 MB.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 11,
+                  color: Colors.grey.shade500,
                 ),
               ),
 

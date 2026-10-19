@@ -198,8 +198,15 @@ describe('ProductsService', () => {
     });
 
     it('should throw ConflictException if product has associated orders', async () => {
-      model.findOneAndDelete.mockResolvedValue({ _id: 'prod1', name: 'Red Dress', storeId: 'store1' });
-      mockOrderItemModel.findOne.mockResolvedValue({ _id: 'item1', productId: 'prod1' });
+      model.findOneAndDelete.mockResolvedValue({
+        _id: 'prod1',
+        name: 'Red Dress',
+        storeId: 'store1',
+      });
+      mockOrderItemModel.findOne.mockResolvedValue({
+        _id: 'item1',
+        productId: 'prod1',
+      });
 
       await expect(service.remove('prod1', 'store1')).rejects.toThrow(
         'Cannot delete product that is associated with existing orders',
@@ -215,7 +222,10 @@ describe('ProductsService', () => {
 
       const result = await service.getShareUrl('prod1', 'store1');
 
-      expect(model.findOne).toHaveBeenCalledWith({ _id: 'prod1', storeId: 'store1' });
+      expect(model.findOne).toHaveBeenCalledWith({
+        _id: 'prod1',
+        storeId: 'store1',
+      });
       expect(result.shareUrl).toBe('https://reselio.com/p/abc123');
     });
 

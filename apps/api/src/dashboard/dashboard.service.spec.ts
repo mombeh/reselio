@@ -120,8 +120,8 @@ describe('DashboardService', () => {
     it('should return platform-wide admin dashboard data', async () => {
       userModel.countDocuments
         .mockResolvedValueOnce(125)
-        .mockResolvedValueOnce(1240)
         .mockResolvedValueOnce(89);
+      customerModel.countDocuments.mockResolvedValue(1240);
       productModel.countDocuments.mockResolvedValue(850);
       orderModel.countDocuments
         .mockResolvedValueOnce(2430)

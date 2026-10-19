@@ -1,5 +1,6 @@
 class DashboardMetrics {
   final int totalOrders;
+  final int completedOrders;
   final double totalRevenue;
   final double totalProfit;
   final int pendingDeliveries;
@@ -9,6 +10,7 @@ class DashboardMetrics {
 
   DashboardMetrics({
     required this.totalOrders,
+    required this.completedOrders,
     required this.totalRevenue,
     required this.totalProfit,
     required this.pendingDeliveries,
@@ -21,6 +23,9 @@ class DashboardMetrics {
     return DashboardMetrics(
       totalOrders: (json['totalOrders'] is int)
           ? json['totalOrders'] as int
+          : 0,
+      completedOrders: (json['completedOrders'] is int)
+          ? json['completedOrders'] as int
           : 0,
       totalRevenue: (json['totalRevenue'] is num)
           ? (json['totalRevenue'] as num).toDouble()

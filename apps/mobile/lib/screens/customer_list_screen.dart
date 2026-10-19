@@ -256,6 +256,8 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addCustomer,
+        backgroundColor: Colors.deepPurple.shade700,
+        foregroundColor: Colors.white,
         icon: const Icon(Icons.person_add_outlined),
         label: const Text('Add Customer'),
       ),
@@ -308,12 +310,12 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
               vertical: 10,
             ),
             decoration: BoxDecoration(
-              color: Colors.blue.shade50,
+              color: Colors.deepPurple.shade50,
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(
               Icons.people_outline,
-              color: Colors.blue.shade700,
+              color: Colors.deepPurple.shade700,
             ),
           ),
         ],
@@ -338,13 +340,13 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
             children: [
               CircleAvatar(
                 radius: 26,
-                backgroundColor: Colors.blue.shade50,
+                backgroundColor: Colors.deepPurple.shade50,
                 child: Text(
                   initial,
                   style: TextStyle(
                     fontSize: 19,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue.shade700,
+                    color: Colors.deepPurple.shade700,
                   ),
                 ),
               ),
@@ -459,67 +461,78 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
     final hasSearch =
         _searchController.text.trim().isNotEmpty;
 
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          mainAxisAlignment:
-              MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: Colors.blue.shade50,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(
-                hasSearch
-                    ? Icons.search_off_outlined
-                    : Icons.people_outline,
-                size: 48,
-                color: Colors.blue.shade400,
-              ),
-            ),
-
-            const SizedBox(height: 20),
-
-            Text(
-              hasSearch
-                  ? 'No customers found'
-                  : 'No customers yet',
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-
-            const SizedBox(height: 8),
-
-            Text(
-              hasSearch
-                  ? 'Try searching with a different name or phone number.'
-                  : 'Add your first customer to start managing your orders.',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: Colors.grey.shade600,
-                height: 1.4,
-              ),
-            ),
-
-            if (!hasSearch) ...[
-              const SizedBox(height: 20),
-              OutlinedButton.icon(
-                onPressed: _addCustomer,
-                icon: const Icon(
-                  Icons.person_add_outlined,
-                ),
-                label: const Text('Add Customer'),
-              ),
-            ],
-          ],
+    return ListView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.fromLTRB(24, 0, 24, 120),
+      children: [
+        SizedBox(
+          height: MediaQuery.of(context).size.height * 0.18,
         ),
-      ),
+        Container(
+          width: 100,
+          height: 100,
+          decoration: BoxDecoration(
+            color: Colors.deepPurple.shade50,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            hasSearch
+                ? Icons.search_off_outlined
+                : Icons.people_outline,
+            size: 48,
+            color: Colors.deepPurple.shade400,
+          ),
+        ),
+
+        const SizedBox(height: 20),
+
+        Text(
+          hasSearch
+              ? 'No customers found'
+              : 'No customers yet',
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+
+        const SizedBox(height: 8),
+
+        Text(
+          hasSearch
+              ? 'Try searching with a different name or phone number.'
+              : 'Add your first customer to start managing your orders.',
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            color: Colors.grey.shade600,
+            height: 1.4,
+          ),
+        ),
+
+        if (!hasSearch) ...[
+          const SizedBox(height: 20),
+          FilledButton.icon(
+            onPressed: _addCustomer,
+            style: FilledButton.styleFrom(
+              backgroundColor: Colors.deepPurple.shade700,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 20,
+                vertical: 13,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
+            icon: const Icon(Icons.person_add_outlined),
+            label: const Text(
+              'Add Customer',
+              style: TextStyle(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 

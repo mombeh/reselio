@@ -61,7 +61,10 @@ describe('CustomersService', () => {
     });
 
     it('should throw ConflictException for duplicate phone number', async () => {
-      mockCustomerModel.findOne.mockResolvedValue({ _id: 'cust2', phoneNumber: '1234567890' });
+      mockCustomerModel.findOne.mockResolvedValue({
+        _id: 'cust2',
+        phoneNumber: '1234567890',
+      });
 
       await expect(
         service.create('store1', {
@@ -130,7 +133,10 @@ describe('CustomersService', () => {
     });
 
     it('should throw ConflictException for duplicate phone on update', async () => {
-      mockCustomerModel.findOne.mockResolvedValue({ _id: 'cust2', phoneNumber: '9999999999' });
+      mockCustomerModel.findOne.mockResolvedValue({
+        _id: 'cust2',
+        phoneNumber: '9999999999',
+      });
 
       await expect(
         service.update('cust1', 'store1', { phoneNumber: '9999999999' }),
