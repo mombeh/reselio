@@ -632,8 +632,25 @@ export class OrdersService {
       {
         $lookup: {
           from: 'orders',
-          localField: 'orderId',
-          foreignField: '_id',
+          let: { orderId: '$orderId' },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [
+                    '$_id',
+                    {
+                      $convert: {
+                        input: '$$orderId',
+                        to: 'objectId',
+                        onError: '$$orderId',
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+          ],
           as: 'order',
         },
       },
@@ -641,7 +658,7 @@ export class OrdersService {
       {
         $match: {
           'order.storeId': storeId,
-          'order.status': 'Delivered',
+          'order.status': { $ne: 'Cancelled' },
         },
       },
       {
@@ -681,7 +698,7 @@ export class OrdersService {
       {
         $match: {
           storeId,
-          status: 'Delivered',
+          status: { $ne: 'Cancelled' },
           createdAt: { $gte: startDate },
         },
       },
