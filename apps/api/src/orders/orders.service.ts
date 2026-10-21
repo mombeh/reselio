@@ -632,21 +632,12 @@ export class OrdersService {
       {
         $lookup: {
           from: 'orders',
-          let: { orderId: '$orderId' },
+          let: { orderId: { $toString: '$orderId' } },
           pipeline: [
             {
               $match: {
                 $expr: {
-                  $eq: [
-                    '$_id',
-                    {
-                      $convert: {
-                        input: '$$orderId',
-                        to: 'objectId',
-                        onError: '$$orderId',
-                      },
-                    },
-                  ],
+                  $eq: [{ $toString: '$_id' }, '$$orderId'],
                 },
               },
             },

@@ -38,7 +38,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final metrics = await widget.authService.apiService.getDashboardMetrics();
 
     final dailySales = await widget.authService.apiService.getDailySales(
-      days: 7,
+      days: 30,
     );
 
     final topProducts = await widget.authService.apiService.getTopProducts();
