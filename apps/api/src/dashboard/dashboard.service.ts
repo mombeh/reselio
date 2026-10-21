@@ -124,8 +124,16 @@ export class DashboardService {
       {
         $lookup: {
           from: 'orders',
-          localField: 'orderId',
-          foreignField: '_id',
+          let: { orderId: { $toString: '$orderId' } },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [{ $toString: '$_id' }, '$$orderId'],
+                },
+              },
+            },
+          ],
           as: 'order',
         },
       },

@@ -99,13 +99,26 @@ export class ReportsService {
       {
         $lookup: {
           from: 'orders',
-          localField: 'orderId',
-          foreignField: '_id',
+          let: { orderId: { $toString: '$orderId' } },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [{ $toString: '$_id' }, '$$orderId'],
+                },
+              },
+            },
+          ],
           as: 'order',
         },
       },
       { $unwind: '$order' },
-      { $match: { 'order.storeId': storeId, 'order.status': 'Delivered' } },
+      {
+        $match: {
+          'order.storeId': storeId,
+          'order.status': { $ne: 'Cancelled' },
+        },
+      },
       {
         $group: {
           _id: '$productId',
@@ -368,13 +381,21 @@ export class ReportsService {
       {
         $lookup: {
           from: 'orders',
-          localField: 'orderId',
-          foreignField: '_id',
+          let: { orderId: { $toString: '$orderId' } },
+          pipeline: [
+            {
+              $match: {
+                $expr: {
+                  $eq: [{ $toString: '$_id' }, '$$orderId'],
+                },
+              },
+            },
+          ],
           as: 'order',
         },
       },
       { $unwind: '$order' },
-      { $match: { 'order.status': 'Delivered' } },
+      { $match: { 'order.status': { $ne: 'Cancelled' } } },
       {
         $group: {
           _id: '$productId',
