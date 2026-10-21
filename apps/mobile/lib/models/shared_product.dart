@@ -4,6 +4,7 @@ class SharedProduct {
   final double? price;
   final String? imageUrl;
   final String? storeName;
+  final String? storeId;
   final int? quantity;
   final String? availability;
 
@@ -13,6 +14,7 @@ class SharedProduct {
     this.price,
     this.imageUrl,
     this.storeName,
+    this.storeId,
     this.quantity,
     this.availability,
   });
@@ -26,6 +28,7 @@ class SharedProduct {
           : null,
       imageUrl: json['imageUrl'],
       storeName: json['storeName'],
+      storeId: json['storeId'],
       quantity: json['quantity'] is int ? json['quantity'] as int : null,
       availability: json['availability'],
     );

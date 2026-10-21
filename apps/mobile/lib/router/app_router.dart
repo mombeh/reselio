@@ -173,7 +173,10 @@ class AppRouter {
         );
       case customerProductList:
         return MaterialPageRoute(
-          builder: (_) => CustomerProductListScreen(authService: authService!),
+          builder: (_) => CustomerProductListScreen(
+            authService: authService!,
+            storeId: args['storeId'] as String?,
+          ),
           settings: settings,
         );
       case favorites:
@@ -207,6 +210,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => SharedProductScreen(
             publicId: args['publicId'] as String,
+            authService: authService,
           ),
           settings: settings,
         );

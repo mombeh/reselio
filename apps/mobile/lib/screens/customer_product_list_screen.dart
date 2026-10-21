@@ -6,10 +6,12 @@ import 'package:mobile/utils/currency.dart';
 
 class CustomerProductListScreen extends StatefulWidget {
   final AuthService authService;
+  final String? storeId;
 
   const CustomerProductListScreen({
     super.key,
     required this.authService,
+    this.storeId,
   });
 
   @override
@@ -37,10 +39,11 @@ class _CustomerProductListScreenState extends State<CustomerProductListScreen> {
     _loadFavorites();
   }
 
-  void _loadProducts() {
+void _loadProducts() {
     _productsFuture = widget.authService.apiService.getPublicProducts(
       search: _searchQuery.isNotEmpty ? _searchQuery : null,
       category: _selectedCategory,
+      storeId: widget.storeId,
     );
   }
 

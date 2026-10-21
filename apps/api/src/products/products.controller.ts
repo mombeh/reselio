@@ -47,8 +47,9 @@ export class ProductsController {
   async findAllPublic(
     @Query('search') search?: string,
     @Query('category') category?: string,
+    @Query('storeId') storeId?: string,
   ) {
-    return this.productsService.findAllPublic(search, category);
+    return this.productsService.findAllPublic(search, category, storeId);
   }
 
   @Get('public/:publicId')
