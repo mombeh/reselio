@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/models/customer_summary.dart';
 import 'package:mobile/models/daily_sale.dart';
-import 'package:mobile/models/dashboard_metrics.dart';
 import 'package:mobile/models/order.dart';
 import 'package:mobile/models/top_product.dart';
 import 'package:mobile/services/auth_service.dart';
@@ -38,14 +37,6 @@ class _ReportsScreenState extends State<ReportsScreen> {
   }
 
   String _formatShortCurrency(double amount) {
-    if (amount >= 1000000) {
-      return '${(amount / 1000000).toStringAsFixed(1)}M FCFA';
-    }
-
-    if (amount >= 1000) {
-      return '${(amount / 1000).toStringAsFixed(1)}K FCFA';
-    }
-
     return '${amount.toStringAsFixed(0)} FCFA';
   }
 
@@ -100,8 +91,35 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Future<Map<String, dynamic>> _loadReport() async {
     final days = _daysForPeriod;
 
-    final metrics =
-        await widget.authService.apiService.getDashboardMetrics();
+    String period;
+    switch (_selectedPeriod) {
+      case ReportPeriod.today:
+        period = 'today';
+        break;
+      case ReportPeriod.week:
+        period = 'week';
+        break;
+      case ReportPeriod.month:
+        period = 'month';
+        break;
+      case ReportPeriod.custom:
+        period = 'custom';
+        break;
+    }
+
+    String? startDate;
+    String? endDate;
+    if (_selectedPeriod == ReportPeriod.custom && _customRange != null) {
+      startDate = _customRange!.start.toIso8601String();
+      endDate = _customRange!.end.toIso8601String();
+    }
+
+    final salesReport =
+        await widget.authService.apiService.getSalesReport(
+      period: period,
+      startDate: startDate,
+      endDate: endDate,
+    );
 
     final dailySales =
         await widget.authService.apiService.getDailySales(days: days);
@@ -116,7 +134,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         await widget.authService.apiService.getOrders(limit: 5);
 
     return {
-      'metrics': metrics,
+      'salesReport': salesReport,
       'dailySales': dailySales,
       'topProducts': topProducts,
       'topCustomers': topCustomers,
@@ -206,8 +224,9 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
                   final data = snapshot.data ?? {};
 
-                  final metrics =
-                      data['metrics'] as DashboardMetrics;
+                  final salesReport =
+                      data['salesReport'] as Map<String, dynamic>? ??
+                          {};
 
                   final dailySales =
                       (data['dailySales'] as List<dynamic>?)
@@ -250,7 +269,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                         _buildPeriodHeading(),
                         const SizedBox(height: 16),
 
-                        _buildSummaryCards(metrics),
+                        _buildSummaryCards(salesReport),
 
                         const SizedBox(height: 28),
 
@@ -513,7 +532,13 @@ class _ReportsScreenState extends State<ReportsScreen> {
     );
   }
 
-  Widget _buildSummaryCards(DashboardMetrics metrics) {
+  Widget _buildSummaryCards(Map<String, dynamic> salesReport) {
+    final totalRevenue = (salesReport['totalRevenue'] as num?)?.toDouble() ?? 0.0;
+    final totalOrders = salesReport['totalOrders'] as int? ?? 0;
+    final totalProfit = (salesReport['totalProfit'] as num?)?.toDouble() ?? 0.0;
+    final averageOrderValue =
+        (salesReport['averageOrderValue'] as num?)?.toDouble() ?? 0.0;
+
     return GridView.count(
       crossAxisCount: 2,
       crossAxisSpacing: 12,
@@ -525,28 +550,26 @@ class _ReportsScreenState extends State<ReportsScreen> {
         _summaryCard(
           icon: Icons.payments_outlined,
           title: 'Revenue',
-          value: _formatShortCurrency(metrics.totalRevenue),
+          value: _formatCurrency(totalRevenue),
           color: Colors.deepPurple,
         ),
         _summaryCard(
           icon: Icons.receipt_long_outlined,
           title: 'Orders',
-          value: '${metrics.totalOrders}',
+          value: '$totalOrders',
           color: Colors.blue,
         ),
         _summaryCard(
-          icon: Icons.account_balance_wallet_outlined,
-          title: 'Balance',
-          value: _formatShortCurrency(
-            metrics.outstandingBalances,
-          ),
-          color: Colors.orange,
+          icon: Icons.trending_up,
+          title: 'Profit',
+          value: _formatCurrency(totalProfit),
+          color: Colors.green,
         ),
         _summaryCard(
-          icon: Icons.local_shipping_outlined,
-          title: 'Pending',
-          value: '${metrics.pendingDeliveries}',
-          color: Colors.red,
+          icon: Icons.analytics_outlined,
+          title: 'Avg Order',
+          value: _formatCurrency(averageOrderValue),
+          color: Colors.orange,
         ),
       ],
     );
