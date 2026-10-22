@@ -86,7 +86,7 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
     }
 
     if (widget.product.publicId != null) {
-      return 'https://example.com/p/${widget.product.publicId}';
+      return 'reselio://p/${widget.product.publicId}';
     }
 
     return null;

@@ -44,12 +44,12 @@ class _SharedProductScreenState extends State<SharedProductScreen> {
   }
 
   void _shareProduct(SharedProduct product) {
-    final url = 'https://example.com/p/${widget.publicId}';
+    final url = 'reselio://p/${widget.publicId}';
     Share.share('$url\n\n${product.name ?? 'Check out this product!'} - ${_formatPrice(product.price)}');
   }
 
   void _copyLink() {
-    final url = 'https://example.com/p/${widget.publicId}';
+    final url = 'reselio://p/${widget.publicId}';
     Clipboard.setData(ClipboardData(text: url));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Link copied to clipboard')),

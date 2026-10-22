@@ -43,7 +43,20 @@
 					<string>$(PRODUCT_MODULE_NAME).SceneDelegate</string>
 					<key>UISceneStoryboardFile</key>
 					<string>Main</string>
-				</dict>
+<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.reselio.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>reselio</string>
+			</array>
+		</dict>
+	</array>
+</dict>
 			</array>
 		</dict>
 	</dict>

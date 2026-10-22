@@ -326,6 +326,27 @@ class AppRouter {
           settings: settings,
         );
       default:
+        // Deep link handling for shared product links
+        // Handles both /p/{publicId} and reselio://p/{publicId}
+        String? deepLinkPath = settings.name;
+        if (deepLinkPath != null && deepLinkPath.startsWith('reselio://')) {
+          final uri = Uri.tryParse(deepLinkPath);
+          if (uri != null && uri.path.isNotEmpty) {
+            deepLinkPath = uri.path;
+          }
+        }
+        if (deepLinkPath != null && deepLinkPath.startsWith('/p/')) {
+          final publicId = deepLinkPath.substring(3);
+          if (publicId.isNotEmpty) {
+            return MaterialPageRoute(
+              builder: (_) => SharedProductScreen(
+                publicId: publicId,
+                authService: authService,
+              ),
+              settings: settings,
+            );
+          }
+        }
         return MaterialPageRoute(
           builder: (_) => SplashScreen(authService: authService),
           settings: settings,

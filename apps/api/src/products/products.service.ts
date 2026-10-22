@@ -131,9 +131,9 @@ export class ProductsService {
       await product.save();
     }
 
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
+    const baseUrl = process.env.FRONTEND_URL || 'reselio://p';
     return {
-      shareUrl: `${baseUrl}/p/${product.publicId}`,
+      shareUrl: `${baseUrl}/${product.publicId}`,
     };
   }
 
