@@ -3,16 +3,20 @@ import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:mobile/models/shared_product.dart';
 import 'package:mobile/services/api_service.dart';
+import 'package:mobile/services/auth_service.dart';
+import 'package:mobile/router/app_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SharedProductScreen extends StatefulWidget {
   final String publicId;
   final ApiService? apiService;
+  final AuthService? authService;
 
   const SharedProductScreen({
     super.key,
     required this.publicId,
     this.apiService,
+    this.authService,
   });
 
   @override
@@ -40,12 +44,12 @@ class _SharedProductScreenState extends State<SharedProductScreen> {
   }
 
   void _shareProduct(SharedProduct product) {
-    final url = 'https://example.com/p/${widget.publicId}';
+    final url = 'reselio://p/${widget.publicId}';
     Share.share('$url\n\n${product.name ?? 'Check out this product!'} - ${_formatPrice(product.price)}');
   }
 
   void _copyLink() {
-    final url = 'https://example.com/p/${widget.publicId}';
+    final url = 'reselio://p/${widget.publicId}';
     Clipboard.setData(ClipboardData(text: url));
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Link copied to clipboard')),
@@ -203,21 +207,40 @@ class _SharedProductScreenState extends State<SharedProductScreen> {
                   ),
                 ),
               ],
-              const SizedBox(height: 24),
-              ElevatedButton.icon(
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Contact seller feature coming soon'),
-                    ),
-                  );
-                },
-                icon: const Icon(Icons.message_outlined),
-                label: const Text('Contact Seller'),
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
+const SizedBox(height: 16),
+               if (product.storeId != null && product.storeId!.isNotEmpty)
+                 ElevatedButton.icon(
+                   onPressed: () {
+                     Navigator.pushNamed(
+                       context,
+                       AppRouter.customerProductList,
+                       arguments: {
+                         'authService': widget.authService,
+                         'storeId': product.storeId,
+                       },
+                     );
+                   },
+                   icon: const Icon(Icons.storefront_outlined),
+                   label: const Text('Browse Store Products'),
+                   style: ElevatedButton.styleFrom(
+                     padding: const EdgeInsets.symmetric(vertical: 16),
+                   ),
+                 ),
+               const SizedBox(height: 8),
+               ElevatedButton.icon(
+                 onPressed: () {
+                   ScaffoldMessenger.of(context).showSnackBar(
+                     const SnackBar(
+                       content: Text('Contact seller feature coming soon'),
+                     ),
+                   );
+                 },
+                 icon: const Icon(Icons.message_outlined),
+                 label: const Text('Contact Seller'),
+                 style: ElevatedButton.styleFrom(
+                   padding: const EdgeInsets.symmetric(vertical: 16),
+                 ),
+               ),
             ],
           );
         },

@@ -173,7 +173,10 @@ class AppRouter {
         );
       case customerProductList:
         return MaterialPageRoute(
-          builder: (_) => CustomerProductListScreen(authService: authService!),
+          builder: (_) => CustomerProductListScreen(
+            authService: authService!,
+            storeId: args['storeId'] as String?,
+          ),
           settings: settings,
         );
       case favorites:
@@ -207,6 +210,7 @@ class AppRouter {
         return MaterialPageRoute(
           builder: (_) => SharedProductScreen(
             publicId: args['publicId'] as String,
+            authService: authService,
           ),
           settings: settings,
         );
@@ -322,6 +326,27 @@ class AppRouter {
           settings: settings,
         );
       default:
+        // Deep link handling for shared product links
+        // Handles both /p/{publicId} and reselio://p/{publicId}
+        String? deepLinkPath = settings.name;
+        if (deepLinkPath != null && deepLinkPath.startsWith('reselio://')) {
+          final uri = Uri.tryParse(deepLinkPath);
+          if (uri != null && uri.path.isNotEmpty) {
+            deepLinkPath = uri.path;
+          }
+        }
+        if (deepLinkPath != null && deepLinkPath.startsWith('/p/')) {
+          final publicId = deepLinkPath.substring(3);
+          if (publicId.isNotEmpty) {
+            return MaterialPageRoute(
+              builder: (_) => SharedProductScreen(
+                publicId: publicId,
+                authService: authService,
+              ),
+              settings: settings,
+            );
+          }
+        }
         return MaterialPageRoute(
           builder: (_) => SplashScreen(authService: authService),
           settings: settings,

@@ -131,9 +131,9 @@ export class ProductsService {
       await product.save();
     }
 
-    const baseUrl = process.env.FRONTEND_URL || 'http://localhost:4000';
+    const baseUrl = process.env.FRONTEND_URL || 'reselio://p';
     return {
-      shareUrl: `${baseUrl}/p/${product.publicId}`,
+      shareUrl: `${baseUrl}/${product.publicId}`,
     };
   }
 
@@ -143,8 +143,12 @@ export class ProductsService {
     return 'In Stock';
   }
 
-  async findAllPublic(search?: string, category?: string) {
+  async findAllPublic(search?: string, category?: string, storeId?: string) {
     const filter: Record<string, unknown> = {};
+
+    if (storeId && storeId.length > 0) {
+      filter.storeId = storeId;
+    }
 
     if (category && category.length > 0) {
       filter.category = category;
