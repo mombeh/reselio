@@ -134,7 +134,7 @@ export class ProductsService {
     const envUrl = process.env.FRONTEND_URL;
     const baseUrl =
       envUrl && !envUrl.includes('localhost') && !envUrl.includes('127.0.0.1')
-        ? envUrl
+        ? `${envUrl}/p`
         : 'reselio://p';
     return {
       shareUrl: `${baseUrl}/${product.publicId}`,
