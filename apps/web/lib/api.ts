@@ -22,6 +22,25 @@ export async function fetchProducts(userId: string): Promise<Product[]> {
   return res.json();
 }
 
+export type GuestOrderResponse = { orderNumber: string; message: string };
+
+export async function submitGuestOrder(payload: {
+  storeId: string;
+  items: { productId: string; quantity: number }[];
+  guest: { fullName: string; phoneNumber: string; email?: string; address?: string; notes?: string };
+}): Promise<GuestOrderResponse> {
+  const res = await fetch(apiUrl('/orders/guest'), {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(text || 'Order failed');
+  }
+  return res.json();
+}
+
 export async function fetchPublicProduct(publicId: string): Promise<{ storeId: string } & Record<string, unknown>> {
   const res = await fetch(apiUrl(`/products/public/${publicId}`));
   if (!res.ok) throw new Error('Product not found');
