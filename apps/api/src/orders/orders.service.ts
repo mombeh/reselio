@@ -10,6 +10,7 @@ import { Order, OrderDocument } from './schemas/order.schema';
 import { OrderItem, OrderItemDocument } from './schemas/order-item.schema';
 import { Customer, CustomerDocument } from './schemas/customer.schema';
 import { Product, ProductDocument } from '../products/schemas/product.schema';
+import { Store, StoreDocument } from '../stores/schemas/store.schema';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { NotificationsService } from '../notifications/notifications.service';
 import { NotificationType } from '../notifications/enums/notification-type.enum';
@@ -23,8 +24,119 @@ export class OrdersService {
     private orderItemModel: Model<OrderItemDocument>,
     @InjectModel(Customer.name) private customerModel: Model<CustomerDocument>,
     @InjectModel(Product.name) private productModel: Model<ProductDocument>,
+    @InjectModel(Store.name) private storeModel: Model<StoreDocument>,
     private notificationsService: NotificationsService,
   ) {}
+
+  async createGuest(createOrderDto: any) {
+    const { storeId, guest, items = [] } = createOrderDto;
+
+    const store = await this.storeModel.findOne({ userId: storeId });
+    if (!store) {
+      throw new NotFoundException('Store not found');
+    }
+    const actualStoreId = store.userId;
+
+    if (!Array.isArray(items) || items.length === 0) {
+      throw new ConflictException('Order must contain at least one item');
+    }
+    for (const item of items) {
+      if (!item.productId || typeof item.productId !== 'string') {
+        throw new ConflictException('Product ID is required for each item');
+      }
+      if (typeof item.quantity !== 'number' || !Number.isInteger(item.quantity) || item.quantity < 1) {
+        throw new ConflictException('Quantity must be a positive integer for each item');
+      }
+    }
+
+    // Reuse or create customer by store + phone
+    let customer = await this.customerModel.findOne({
+      storeId: actualStoreId,
+      phoneNumber: guest.phoneNumber,
+    });
+    if (!customer) {
+      customer = new this.customerModel({
+        storeId: actualStoreId,
+        fullName: guest.fullName,
+        phoneNumber: guest.phoneNumber,
+        email: guest.email,
+        address: guest.address,
+        notes: guest.notes,
+      });
+      await customer.save();
+    } else {
+      // update contact details
+      customer.fullName = guest.fullName;
+      if (guest.email) customer.email = guest.email;
+      if (guest.address) customer.address = guest.address;
+      if (guest.notes) customer.notes = guest.notes;
+      await customer.save();
+    }
+
+    let subtotal = 0;
+    let totalCost = 0;
+    const orderItems: any[] = [];
+    const deducted: { productId: string; quantity: number }[] = [];
+
+    for (const item of items) {
+      const updatedProduct = await this.productModel.findOneAndUpdate(
+        { _id: item.productId, storeId: actualStoreId, quantity: { $gte: item.quantity } },
+        { $inc: { quantity: -item.quantity } },
+        { new: true },
+      );
+      if (!updatedProduct) {
+        // rollback
+        for (const d of deducted) {
+          await this.productModel.findByIdAndUpdate(d.productId, { $inc: { quantity: d.quantity } });
+        }
+        throw new ConflictException(`Insufficient stock or product not found for ${item.productId}`);
+      }
+      const product = updatedProduct;
+      const itemTotal = item.quantity * product.price;
+      const itemCost = item.quantity * (product.costPrice || 0);
+      subtotal += itemTotal;
+      totalCost += itemCost;
+      orderItems.push({
+        productId: item.productId,
+        quantity: item.quantity,
+        unitPrice: product.price,
+        totalPrice: itemTotal,
+      });
+      deducted.push({ productId: item.productId, quantity: item.quantity });
+    }
+
+    const total = subtotal;
+    const profit = total - totalCost;
+    const orderNumber = this.generateOrderNumber();
+
+    const order = new this.orderModel({
+      storeId: actualStoreId,
+      customerId: customer._id,
+      orderNumber,
+      status: 'Pending',
+      subtotal,
+      total,
+      advancePaid: 0,
+      balance: total,
+      profit,
+    });
+    const savedOrder = await order.save();
+
+    for (const item of orderItems) {
+      const orderItem = new this.orderItemModel({ ...item, orderId: savedOrder._id });
+      await orderItem.save();
+    }
+
+    await this.notificationsService.create(actualStoreId, {
+      type: NotificationType.ORDER_CREATED,
+      title: 'New Order Received',
+      message: `Order ${orderNumber} has been created successfully.`,
+      referenceId: savedOrder._id.toString(),
+      referenceType: 'order',
+    });
+
+    return { orderNumber: savedOrder.orderNumber, message: 'Order placed successfully' };
+  }
 
   private generateOrderNumber(): string {
     const timestamp = Date.now().toString(36).toUpperCase();

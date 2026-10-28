@@ -34,6 +34,11 @@ describe('OrdersService', () => {
   const mockProductModel = {
     findOne: jest.fn(),
     findByIdAndUpdate: jest.fn(),
+    findOneAndUpdate: jest.fn(),
+  };
+
+  const mockStoreModel = {
+    findOne: jest.fn(),
   };
 
   const mockNotificationsService = {
@@ -60,6 +65,10 @@ describe('OrdersService', () => {
         {
           provide: getModelToken('Product'),
           useValue: mockProductModel,
+        },
+        {
+          provide: getModelToken('Store'),
+          useValue: mockStoreModel,
         },
         {
           provide: NotificationsService,
