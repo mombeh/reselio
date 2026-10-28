@@ -147,11 +147,20 @@ export class ProductsService {
     return 'In Stock';
   }
 
-  async findAllPublic(search?: string, category?: string, storeId?: string) {
+  async findAllPublic(
+    search?: string,
+    category?: string,
+    storeId?: string,
+    available?: string,
+  ) {
     const filter: Record<string, unknown> = {};
 
     if (storeId && storeId.length > 0) {
       filter.storeId = storeId;
+    }
+
+    if (available === 'true' || available === '1') {
+      filter.quantity = { $gt: 0 };
     }
 
     if (category && category.length > 0) {
