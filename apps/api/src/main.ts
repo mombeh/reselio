@@ -45,7 +45,13 @@ async function bootstrap() {
               return callback(null, true);
             }
 
-            if (allowedOrigins.includes(origin)) {
+            const envOrigins = (process.env.CORS_ALLOWED_ORIGINS || '')
+              .split(',')
+              .map((o) => o.trim())
+              .filter(Boolean);
+            const allowed = new Set([...allowedOrigins, ...envOrigins]);
+
+            if (allowed.has(origin)) {
               return callback(null, true);
             }
 
