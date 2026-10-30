@@ -15,6 +15,7 @@ import { ReportsModule } from './reports/reports.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { FavoritesModule } from './favorites/favorites.module';
 import { AdminModule } from './admin/admin.module';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 ensureUploadsDir();
 
@@ -23,6 +24,7 @@ ensureUploadsDir();
     ConfigModule.forRoot({
       isGlobal: true,
     }),
+    ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }]),
     MongooseModule.forRoot(process.env.MONGO_URL as string),
     UsersModule,
     AuthModule,

@@ -12,8 +12,11 @@ import {
   Query,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import { Throttle } from '@nestjs/throttler';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
+import { CreateGuestOrderDto } from './dto/create-guest-order.dto';
 import { UpdateOrderStatusDto } from './dto/update-order-status.dto';
 import { GetOrdersQueryDto } from './dto/get-orders-query.dto';
 import { CustomersService } from '../customers/customers.service';
@@ -26,6 +29,13 @@ export class OrdersController {
     private readonly ordersService: OrdersService,
     private readonly customersService: CustomersService,
   ) {}
+
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Post('guest')
+  createGuest(@Body() createOrderDto: CreateGuestOrderDto) {
+    return this.ordersService.createGuest(createOrderDto);
+  }
 
   @UseGuards(AuthGuard('jwt'))
   @Post()

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:share_plus/share_plus.dart';
+import 'package:mobile/models/product.dart';
 import 'package:mobile/models/shared_product.dart';
+import 'package:mobile/models/store.dart';
+import 'package:mobile/screens/product_detail_screen.dart';
 import 'package:mobile/services/api_service.dart';
-import 'package:mobile/services/auth_service.dart';
-import 'package:mobile/router/app_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:mobile/services/auth_service.dart';
 
 class SharedProductScreen extends StatefulWidget {
   final String publicId;
@@ -24,18 +24,33 @@ class SharedProductScreen extends StatefulWidget {
 }
 
 class _SharedProductScreenState extends State<SharedProductScreen> {
-  late Future<SharedProduct> _productFuture;
+  late Future<_StoreData> _future;
 
   @override
   void initState() {
     super.initState();
-    _productFuture = _fetchProduct();
+    _future = _load();
   }
 
-  Future<SharedProduct> _fetchProduct() async {
-    final apiService = widget.apiService ??
+  Future<_StoreData> _load() async {
+    final api = widget.apiService ??
         ApiService(await SharedPreferences.getInstance());
-    return apiService.getPublicProduct(widget.publicId);
+    final shared = await api.getPublicProduct(widget.publicId);
+    final storeId = shared.storeId;
+    Store? store;
+    List<Product> products = [];
+    if (storeId != null && storeId.isNotEmpty) {
+      try {
+        final storeJson = await api.getPublicStore(storeId);
+        if (storeJson != null) {
+          store = Store.fromJson({...storeJson, 'userId': storeId});
+        }
+      } catch (_) {}
+      try {
+        products = await api.getPublicProducts(storeId: storeId, available: true);
+      } catch (_) {}
+    }
+    return _StoreData(shared: shared, store: store, products: products);
   }
 
   String _formatPrice(double? price) {
@@ -43,69 +58,30 @@ class _SharedProductScreenState extends State<SharedProductScreen> {
     return '${price.toStringAsFixed(0)} FCFA';
   }
 
-  void _shareProduct(SharedProduct product) {
-    final url = 'reselio://p/${widget.publicId}';
-    Share.share('$url\n\n${product.name ?? 'Check out this product!'} - ${_formatPrice(product.price)}');
-  }
-
-  void _copyLink() {
-    final url = 'reselio://p/${widget.publicId}';
-    Clipboard.setData(ClipboardData(text: url));
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Link copied to clipboard')),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Shared Product'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.share_outlined),
-            onPressed: () async {
-              final product = await _productFuture;
-              _shareProduct(product);
-            },
-          ),
-          IconButton(
-            icon: const Icon(Icons.link_outlined),
-            onPressed: _copyLink,
-          ),
-        ],
-      ),
-      body: FutureBuilder<SharedProduct>(
-        future: _productFuture,
+      appBar: AppBar(title: const Text('Store')),
+      body: FutureBuilder<_StoreData>(
+        future: _future,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
           }
-
-          if (snapshot.hasError) {
+          if (snapshot.hasError || !snapshot.hasData) {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(24),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.error_outline,
-                      size: 60,
-                      color: Colors.red,
-                    ),
+                    const Icon(Icons.error_outline, size: 60, color: Colors.red),
                     const SizedBox(height: 16),
-                    Text(
-                      'Product not found or has been removed',
-                      style: TextStyle(
-                        fontSize: 18,
-                        color: Colors.grey.shade600,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
+                    const Text('Product not found or has been removed',
+                        textAlign: TextAlign.center),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () => setState(() => _productFuture = _fetchProduct()),
+                      onPressed: () => setState(() => _future = _load()),
                       child: const Text('Try Again'),
                     ),
                   ],
@@ -113,138 +89,69 @@ class _SharedProductScreenState extends State<SharedProductScreen> {
               ),
             );
           }
-
-          final product = snapshot.data!;
-
-          if (product.availability == 'Out of Stock') {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.inventory_2_outlined,
-                      size: 60,
-                      color: Colors.orange,
-                    ),
-                    const SizedBox(height: 16),
-                    const Text(
-                      'This product is currently out of stock',
-                      style: TextStyle(fontSize: 18),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
+          final data = snapshot.data!;
+          final store = data.store;
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              if (product.imageUrl != null && product.imageUrl!.isNotEmpty)
-                Card(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(8),
-                    child: Image.network(
-                      product.imageUrl!,
-                      width: double.infinity,
-                      height: 200,
-                      fit: BoxFit.cover,
-                      errorBuilder: (_, _, _) => const SizedBox(
-                        height: 200,
-                        child: Center(child: Icon(Icons.broken_image, size: 60)),
-                      ),
-                    ),
+              if (store != null) ...[
+                Text(store.name,
+                    style: Theme.of(context).textTheme.headlineSmall),
+                if (store.description.isNotEmpty)
+                  Padding(
+                    padding: const EdgeInsets.only(top: 4),
+                    child: Text(store.description),
                   ),
-                ),
-              if (product.imageUrl == null || product.imageUrl!.isEmpty)
-                Card(
-                  child: SizedBox(
-                    height: 200,
-                    child: Center(
-                      child: Icon(
-                        Icons.image_not_supported_outlined,
-                        size: 60,
-                        color: Colors.grey.shade400,
-                      ),
-                    ),
-                  ),
-                ),
-              const SizedBox(height: 16),
-              if (product.storeName != null && product.storeName!.isNotEmpty)
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.store_outlined, color: Colors.deepPurple),
-                    title: const Text('Store'),
-                    subtitle: Text(product.storeName!),
-                  ),
-                ),
-              Card(
-                child: ListTile(
-                  leading: const Icon(Icons.spellcheck_outlined, color: Colors.deepPurple),
-                  title: const Text('Name'),
-                  subtitle: Text(product.name ?? 'Unknown Product'),
-                ),
-              ),
-              const SizedBox(height: 8),
-              if (product.price != null)
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.payments_outlined, color: Colors.green),
-                    title: const Text('Price'),
-                    subtitle: Text(_formatPrice(product.price)),
-                  ),
-                ),
-              if (product.description != null && product.description!.isNotEmpty) ...[
                 const SizedBox(height: 8),
-                Card(
-                  child: ListTile(
-                    leading: const Icon(Icons.description_outlined, color: Colors.blue),
-                    title: const Text('Description'),
-                    subtitle: Text(product.description!),
-                  ),
-                ),
+                if (store.address.isNotEmpty) Text('Address: ${store.address}'),
+                if (store.phone.isNotEmpty) Text('Phone: ${store.phone}'),
+                const SizedBox(height: 16),
               ],
-const SizedBox(height: 16),
-               if (product.storeId != null && product.storeId!.isNotEmpty)
-                 ElevatedButton.icon(
-                   onPressed: () {
-                     Navigator.pushNamed(
-                       context,
-                       AppRouter.customerProductList,
-                       arguments: {
-                         'authService': widget.authService,
-                         'storeId': product.storeId,
-                       },
-                     );
-                   },
-                   icon: const Icon(Icons.storefront_outlined),
-                   label: const Text('Browse Store Products'),
-                   style: ElevatedButton.styleFrom(
-                     padding: const EdgeInsets.symmetric(vertical: 16),
-                   ),
-                 ),
-               const SizedBox(height: 8),
-               ElevatedButton.icon(
-                 onPressed: () {
-                   ScaffoldMessenger.of(context).showSnackBar(
-                     const SnackBar(
-                       content: Text('Contact seller feature coming soon'),
-                     ),
-                   );
-                 },
-                 icon: const Icon(Icons.message_outlined),
-                 label: const Text('Contact Seller'),
-                 style: ElevatedButton.styleFrom(
-                   padding: const EdgeInsets.symmetric(vertical: 16),
-                 ),
-               ),
+              Text('Available Products',
+                  style: Theme.of(context).textTheme.titleMedium),
+              const SizedBox(height: 8),
+              if (data.products.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Center(child: Text('No available products')),
+                )
+              else
+                ...data.products.map((p) => Card(
+                      child: ListTile(
+                        leading: Image.network(
+                          p.imageUrl ?? '',
+                          width: 56,
+                          height: 56,
+                          fit: BoxFit.cover,
+                          errorBuilder: (_, _, _) =>
+                              const Icon(Icons.image_not_supported),
+                        ),
+                        title: Text(p.name),
+                        subtitle: Text(_formatPrice(p.price)),
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (_) => ProductDetailScreen(
+                                authService: widget.authService,
+                                product: p,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )),
             ],
           );
         },
       ),
     );
   }
+}
+
+class _StoreData {
+  final SharedProduct shared;
+  final Store? store;
+  final List<Product> products;
+  _StoreData({required this.shared, this.store, required this.products});
 }

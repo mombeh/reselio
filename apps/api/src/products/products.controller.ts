@@ -48,8 +48,9 @@ export class ProductsController {
     @Query('search') search?: string,
     @Query('category') category?: string,
     @Query('storeId') storeId?: string,
+    @Query('available') available?: string,
   ) {
-    return this.productsService.findAllPublic(search, category, storeId);
+    return this.productsService.findAllPublic(search, category, storeId, available);
   }
 
   @Get('public/:publicId')
