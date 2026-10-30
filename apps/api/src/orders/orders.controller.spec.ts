@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { OrdersController } from './orders.controller';
 import { OrdersService } from './orders.service';
 import { CustomersService } from '../customers/customers.service';
+import { ThrottlerModule } from '@nestjs/throttler';
 
 describe('OrdersController', () => {
   let controller: OrdersController;
@@ -38,6 +39,7 @@ describe('OrdersController', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
+      imports: [ThrottlerModule.forRoot([{ ttl: 60000, limit: 5 }])],
       controllers: [OrdersController],
       providers: [
         {
