@@ -6,6 +6,7 @@ import { Order, OrderSchema } from './schemas/order.schema';
 import { OrderItem, OrderItemSchema } from './schemas/order-item.schema';
 import { Customer, CustomerSchema } from './schemas/customer.schema';
 import { Product, ProductSchema } from '../products/schemas/product.schema';
+import { Store, StoreSchema } from '../stores/schemas/store.schema';
 import { CustomersModule } from '../customers/customers.module';
 import { ProductsModule } from '../products/products.module';
 import { NotificationsModule } from '../notifications/notifications.module';
@@ -17,6 +18,7 @@ import { NotificationsModule } from '../notifications/notifications.module';
       { name: OrderItem.name, schema: OrderItemSchema },
       { name: Customer.name, schema: CustomerSchema },
       { name: Product.name, schema: ProductSchema },
+      { name: Store.name, schema: StoreSchema },
     ]),
     CustomersModule,
     ProductsModule,
