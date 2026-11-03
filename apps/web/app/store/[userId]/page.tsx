@@ -132,7 +132,7 @@ export default function StorePage() {
         </section>
       )}
 
-      <section style={{marginTop:24}}>
+      <section className="section checkout">
         <h2>Guest Checkout</h2>
         <div style={{display:'grid',gap:8,maxWidth:480}}>
           <label>Full name *<input value={fullName} onChange={(e)=>setFullName(e.target.value)} required /></label>
