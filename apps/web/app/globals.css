@@ -22,3 +22,7 @@ label input, label textarea { margin-top:4px; }
 .section-title { margin:24px 0 12px; }
 .field { display:block; margin-bottom:12px; }
 .checkout .input { margin-top:4px; }
+
+.cart-bar { position:fixed; bottom:0; left:0; right:0; background:#fff; padding:12px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 -2px 8px rgba(0,0,0,.1); }
+.cart-sheet { position:fixed; bottom:0; left:0; right:0; background:#fff; padding:16px; border-radius:12px 12px 0 0; box-shadow:0 -4px 16px rgba(0,0,0,.15); max-height:70vh; overflow:auto; }
+.cart-row { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
