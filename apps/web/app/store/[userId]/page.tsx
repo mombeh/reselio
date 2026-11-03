@@ -9,6 +9,8 @@ export default function StorePage() {
   const params = useParams<{ userId: string }>();
   const [store, setStore] = useState<Store | null>(null);
   const [products, setProducts] = useState<Product[]>([]);
+  const [search, setSearch] = useState('');
+  const [cartOpen, setCartOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selection, setSelection] = useState<Selection[]>([]);
@@ -49,6 +51,7 @@ export default function StorePage() {
 
   const remove = (id: string) => setSelection((prev) => prev.filter((s) => s.product._id !== id));
 
+  const filtered = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
   const estimate = selection.reduce((sum, s) => sum + s.product.price * s.quantity, 0);
 
   const submit = async () => {
@@ -101,10 +104,11 @@ export default function StorePage() {
         {store.phone && <p className="store-meta">Phone: {store.phone}</p>}
       </div>
 
+      <input className="input" placeholder="Search products" value={search} onChange={(e)=>setSearch(e.target.value)} style={{marginBottom:12}} />
       <h2 className="section-title">Available Products</h2>
       {products.length === 0 ? <p>No available products.</p> : (
         <ul className="grid" style={{listStyle:'none',padding:0}}>
-          {products.map((p) => (
+          {filtered.map((p) => (
             <li key={p._id} className="card">
               {p.imageUrl && <img src={p.imageUrl} alt={p.name} style={{width:'100%',height:160,objectFit:'cover'}} />}
               <h3>{p.name}</h3>
@@ -134,6 +138,26 @@ export default function StorePage() {
         </section>
       )}
 
+      {selection.length > 0 && (
+        <div className="cart-bar">
+          <span>{selection.length} items • {Math.round(estimate)} FCFA</span>
+          <button className="btn" onClick={() => setCartOpen(true)}>View Cart</button>
+        </div>
+      )}
+      {cartOpen && (
+        <div className="cart-sheet">
+          <h2>Cart</h2>
+          {selection.map((s) => (
+            <div key={s.product._id} className="cart-row">
+              <span>{s.product.name}</span>
+              <input className="input" type="number" min={1} value={s.quantity} onChange={(e)=>updateQty(s.product._id, Number(e.target.value))} style={{width:60}} />
+              <button className="btn" onClick={() => remove(s.product._id)}>Remove</button>
+            </div>
+          ))}
+          <p>Estimated total: {Math.round(estimate)} FCFA</p>
+          <button className="btn" onClick={() => setCartOpen(false)}>Proceed to Checkout</button>
+        </div>
+      )}
       <section className="section checkout">
         <h2>Guest Checkout</h2>
         <div style={{display:'grid',gap:8,maxWidth:480}}>
