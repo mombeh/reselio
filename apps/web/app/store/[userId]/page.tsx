@@ -94,12 +94,14 @@ export default function StorePage() {
 
   return (
     <main className="container">
-      <h1>{store.name}</h1>
-      <p>{store.description}</p>
-      {store.address && <p>Address: {store.address}</p>}
-      {store.phone && <p>Phone: {store.phone}</p>}
+      <div className="store-header">
+        <h1>{store.name}</h1>
+        <p className="store-desc">{store.description}</p>
+        {store.address && <p className="store-meta">Address: {store.address}</p>}
+        {store.phone && <p className="store-meta">Phone: {store.phone}</p>}
+      </div>
 
-      <h2>Available Products</h2>
+      <h2 className="section-title">Available Products</h2>
       {products.length === 0 ? <p>No available products.</p> : (
         <ul className="grid" style={{listStyle:'none',padding:0}}>
           {products.map((p) => (
@@ -135,13 +137,13 @@ export default function StorePage() {
       <section className="section checkout">
         <h2>Guest Checkout</h2>
         <div style={{display:'grid',gap:8,maxWidth:480}}>
-          <label>Full name *<input value={fullName} onChange={(e)=>setFullName(e.target.value)} required /></label>
-          <label>Phone number *<input value={phone} onChange={(e)=>setPhone(e.target.value)} required type="tel" /></label>
-          <label>Email (optional)<input value={email} onChange={(e)=>setEmail(e.target.value)} type="email" /></label>
-          <label>Delivery address (optional)<input value={address} onChange={(e)=>setAddress(e.target.value)} /></label>
-          <label>Notes (optional)<textarea value={notes} onChange={(e)=>setNotes(e.target.value)} /></label>
+          <label className="field">Full name *<input className="input" value={fullName} onChange={(e)=>setFullName(e.target.value)} required /></label>
+          <label className="field">Phone number *<input className="input" value={phone} onChange={(e)=>setPhone(e.target.value)} required type="tel" /></label>
+          <label className="field">Email (optional)<input className="input" value={email} onChange={(e)=>setEmail(e.target.value)} type="email" /></label>
+          <label className="field">Delivery address (optional)<input className="input" value={address} onChange={(e)=>setAddress(e.target.value)} /></label>
+          <label className="field">Notes (optional)<textarea className="input" value={notes} onChange={(e)=>setNotes(e.target.value)} /></label>
           {submitError && <p style={{color:'red'}}>{submitError}</p>}
-          <button onClick={submit} disabled={submitting}>{submitting ? 'Submitting…' : 'Place Order'}</button>
+          <button className="btn" onClick={submit} disabled={submitting}>{submitting ? 'Submitting…' : 'Place Order'}</button>
         </div>
       </section>
     </main>
