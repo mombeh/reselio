@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile/models/order.dart';
+import 'package:mobile/models/order_item.dart';
 import 'package:mobile/services/auth_service.dart';
 import 'package:mobile/utils/currency.dart';
 
@@ -21,6 +22,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
   late String _selectedStatus;
   bool _isUpdating = false;
   bool _isCustomer = false;
+  List<OrderItem> _items = [];
 
   final Map<String, List<String>> _allowedTransitions = {
     'Pending': ['Confirmed', 'Preparing', 'Cancelled'],
@@ -46,6 +48,26 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
     super.initState();
     _selectedStatus = widget.order.status;
     _isCustomer = widget.authService.currentUser?.role == 'customer';
+    _items = widget.order.items;
+    _loadItems();
+  }
+
+  Future<void> _loadItems() async {
+    if (_items.isNotEmpty) {
+      setState(() {});
+      return;
+    }
+    try {
+      final full = await widget.authService.apiService.getOrder(widget.order.id);
+      if (mounted) {
+        setState(() {
+          _items = full.items;
+          
+        });
+      }
+    } catch (_) {
+
+    }
   }
 
   Color _statusColor(String status) {
@@ -507,7 +529,7 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
       icon: Icons.shopping_bag_outlined,
       child: Column(
         children: [
-          ...order.items.map(
+          ..._items.map(
             (item) => Padding(
               padding: const EdgeInsets.only(bottom: 14),
               child: Row(
@@ -558,8 +580,8 @@ class _OrderDetailScreenState extends State<OrderDetailScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                '${order.items.length} '
-                '${order.items.length == 1 ? 'item' : 'items'}',
+                '${_items.length} '
+                '${_items.length == 1 ? 'item' : 'items'}',
                 style: TextStyle(
                   color: Colors.grey.shade600,
                   fontSize: 13,
