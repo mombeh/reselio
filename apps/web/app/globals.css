@@ -8,3 +8,10 @@ body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
 .btn:disabled { opacity:.6; cursor:not-allowed; }
 .input { width:100%; padding:10px; border:1px solid #d1d5db; border-radius:8px; }
 @media (max-width:640px){ .container{padding:16px;} }
+
+h1 { font-size:2rem; margin:0 0 8px; }
+h2 { font-size:1.25rem; margin:24px 0 12px; }
+label { display:block; margin-bottom:8px; font-weight:600; }
+label input, label textarea { margin-top:4px; }
+.section { margin-top:24px; }
+.checkout { background:#fff; border-radius:12px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,.06); }
