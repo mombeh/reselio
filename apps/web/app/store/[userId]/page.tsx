@@ -150,7 +150,9 @@ export default function StorePage() {
           {selection.map((s) => (
             <div key={s.product._id} className="cart-row">
               <span>{s.product.name}</span>
-              <input className="input" type="number" min={1} value={s.quantity} onChange={(e)=>updateQty(s.product._id, Number(e.target.value))} style={{width:60}} />
+              <button className="btn" onClick={() => updateQty(s.product._id, s.quantity - 1)} disabled={s.quantity <= 1}>−</button>
+              <span>{s.quantity}</span>
+              <button className="btn" onClick={() => updateQty(s.product._id, s.quantity + 1)} disabled={s.quantity >= s.product.quantity}>+</button>
               <button className="btn" onClick={() => remove(s.product._id)}>Remove</button>
             </div>
           ))}
