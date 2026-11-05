@@ -142,6 +142,7 @@ export default function StorePage() {
   }
 
   return (
+    <>
     <main className="container">
       <div className="store-header">
         <h1>{store.name}</h1>
@@ -171,5 +172,12 @@ export default function StorePage() {
         </div>
       )}
     </main>
+    <nav className="bottomnav" style={{position:'fixed',bottom:0,left:0,right:0,display:'flex',justifyContent:'space-around',background:'#fff',padding:8,borderTop:'1px solid #ddd'}}>
+      <a href="/home">Home</a>
+      <a href="/browse">Browse</a>
+      <a href="/orders">Orders</a>
+      <a href="/profile">Profile</a>
+    </nav>
+    </>
   );
 }
