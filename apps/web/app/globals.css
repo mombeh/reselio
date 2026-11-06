@@ -26,3 +26,7 @@ label input, label textarea { margin-top:4px; }
 .cart-bar { position:fixed; bottom:0; left:0; right:0; background:#fff; padding:12px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 -2px 8px rgba(0,0,0,.1); }
 .cart-sheet { position:fixed; bottom:0; left:0; right:0; background:#fff; padding:16px; border-radius:12px 12px 0 0; box-shadow:0 -4px 16px rgba(0,0,0,.15); max-height:70vh; overflow:auto; }
 .cart-row { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+
+.bottomnav { position:fixed; bottom:0; left:0; right:0; display:flex; justify-content:space-around; align-items:center; background:#fff; padding:8px 8px calc(8px + env(safe-area-inset-bottom)); border-top:1px solid #e5e7eb; z-index:50; }
+.bottomnav a { text-decoration:none; color:#6b7280; font-size:12px; display:flex; flex-direction:column; align-items:center; gap:2px; }
+.bottomnav a:hover { color:#4f46e5; }
