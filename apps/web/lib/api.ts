@@ -6,7 +6,7 @@ export function apiUrl(path: string): string {
 }
 
 export type Store = { name: string; description: string; phone: string; address: string; logo: string | null };
-export type Product = { _id: string; name: string; description: string; price: number; quantity: number; imageUrl?: string; availability: string };
+export type Product = { _id: string; name: string; description: string; price: number; quantity: number; imageUrl?: string; availability: string; category?: string; storeName?: string | null };
 
 export async function fetchStore(userId: string): Promise<Store | null> {
   const res = await fetch(apiUrl(`/stores/public/${userId}`));
