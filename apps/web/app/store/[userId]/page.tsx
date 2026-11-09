@@ -85,7 +85,7 @@ export default function StorePage() {
     }
   };
 
-  if (loading) return <main className="container">Loading…</main>;
+  if (loading) return <main className="container" style={{paddingBottom:100}}>Loading…</main>;
   if (error) return <main className="container">Error: {error}</main>;
   if (!store) return <main className="container">Store not found</main>;
 
@@ -162,14 +162,15 @@ export default function StorePage() {
       <ul className="grid" style={{listStyle:'none',padding:0}}>
         {filtered.map((p) => (
           <li key={p._id} className="card">
-            {p.imageUrl && <img src={p.imageUrl} alt={p.name} style={{width:'100%',height:160,objectFit:'cover'}} />}
-            <h3>{p.name}</h3>
-            <p>{p.description}</p>
-            <p>{Math.round(p.price)} FCFA</p>
-            <button className="btn" onClick={() => addToSelection(p)} disabled={selection.some((s) => s.product._id === p._id)}>
+            <div style={{position:'relative'}}>
+              <img src={p.imageUrl || ''} alt={p.name} style={{width:'100%',height:120,objectFit:'cover',borderRadius:8,background:'#eee'}} onError={(e)=>{(e.target as HTMLImageElement).style.display='none';}} />
+              <button onClick={() => setFavs((prev)=>{const n=new Set(prev); if(n.has(p._id)) n.delete(p._id); else n.add(p._id); return n;})} style={{position:'absolute',top:6,right:6,background:'#fff',border:'none',borderRadius:999,padding:4}}>{favs.has(p._id)?'♥':'♡'}</button>
+            </div>
+            <h3 style={{margin:'4px 0',fontSize:14}}>{p.name}</h3>
+            <p style={{margin:'2px 0',fontSize:12,color:'#6b7280'}}>{Math.round(p.price)} FCFA</p>
+            <button className="btn" onClick={() => addToSelection(p)} disabled={selection.some((s) => s.product._id === p._id)} style={{width:'100%'}}>
               {selection.some((s) => s.product._id === p._id) ? 'Selected' : 'Select'}
             </button>
-            <button onClick={() => setFavs((prev)=>{const n=new Set(prev); if(n.has(p._id)) n.delete(p._id); else n.add(p._id); return n;})}>{favs.has(p._id)?'♥':'♡'}</button>
           </li>
         ))}
       </ul>
