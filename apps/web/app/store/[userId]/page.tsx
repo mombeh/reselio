@@ -13,6 +13,8 @@ export default function StorePage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [search, setSearch] = useState('');
+  const [category, setCategory] = useState<string | null>(null);
+  const [favs, setFavs] = useState<Set<string>>(new Set());
   const [selection, setSelection] = useState<Selection[]>([]);
   const [view, setView] = useState<View>('catalog');
 
@@ -51,7 +53,8 @@ export default function StorePage() {
   };
   const remove = (id: string) => setSelection((prev) => prev.filter((s) => s.product._id !== id));
 
-  const filtered = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()));
+  const categories = Array.from(new Set(products.map((p) => p.category).filter(Boolean)));
+  const filtered = products.filter((p) => p.name.toLowerCase().includes(search.toLowerCase()) && (category ? p.category === category : true));
   const estimate = selection.reduce((sum, s) => sum + s.product.price * s.quantity, 0);
   const itemCount = selection.reduce((sum, s) => sum + s.quantity, 0);
 
@@ -151,6 +154,10 @@ export default function StorePage() {
         {store.phone && <p className="store-meta">Phone: {store.phone}</p>}
       </div>
       <input className="input" placeholder="Search products" value={search} onChange={(e)=>setSearch(e.target.value)} style={{marginBottom:12}} />
+      <div style={{display:'flex',gap:8,flexWrap:'wrap',margin:'8px 0'}}>
+        <button className="btn" onClick={()=>setCategory(null)}>All</button>
+        {categories.map((c)=>(<button key={c} className="btn" onClick={()=>setCategory(c ?? null)}>{c}</button>))}
+      </div>
       <h2 className="section-title">Available Products</h2>
       <ul className="grid" style={{listStyle:'none',padding:0}}>
         {filtered.map((p) => (
@@ -162,6 +169,7 @@ export default function StorePage() {
             <button className="btn" onClick={() => addToSelection(p)} disabled={selection.some((s) => s.product._id === p._id)}>
               {selection.some((s) => s.product._id === p._id) ? 'Selected' : 'Select'}
             </button>
+            <button onClick={() => setFavs((prev)=>{const n=new Set(prev); if(n.has(p._id)) n.delete(p._id); else n.add(p._id); return n;})}>{favs.has(p._id)?'♥':'♡'}</button>
           </li>
         ))}
       </ul>
