@@ -158,7 +158,7 @@ export class OrdersService {
     if (!token) {
       throw new NotFoundException('Order not found');
     }
-    const order = await this.orderModel.findOne({ orderNumber });
+    const order = await this.orderModel.findOne({ orderNumber }).select('+guestAccessTokenHash');
     if (!order || !order.guestAccessTokenHash || !order.guestAccessTokenExpiresAt) {
       throw new NotFoundException('Order not found');
     }

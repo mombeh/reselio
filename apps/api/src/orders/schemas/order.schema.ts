@@ -43,7 +43,7 @@ export class Order {
   @Prop()
   profit: number;
 
-  @Prop()
+  @Prop({ select: false })
   guestAccessTokenHash?: string;
 
   @Prop()

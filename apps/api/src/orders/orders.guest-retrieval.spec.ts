@@ -76,7 +76,7 @@ describe('Guest order retrieval', () => {
   it('retrieves guest order with valid token and uses historical unitPrice', async () => {
     const token = 'a'.repeat(64);
     const hash = crypto.createHash('sha256').update(token).digest('hex');
-    orderModel.findOne.mockResolvedValue({
+    const select = jest.fn().mockResolvedValue({
       _id: 'o1',
       orderNumber: 'ORD-1',
       status: 'Pending',
@@ -85,48 +85,74 @@ describe('Guest order retrieval', () => {
       guestAccessTokenHash: hash,
       guestAccessTokenExpiresAt: new Date(Date.now() + 100000),
     });
+    orderModel.findOne.mockReturnValue({ select });
     orderItemModel.find.mockReturnValue({
       populate: jest.fn().mockResolvedValue([
         { quantity: 2, unitPrice: 50, productId: { name: 'Item', price: 999 } },
       ]),
     });
     const res = await service.findGuestOrder('ORD-1', token);
+    expect(select).toHaveBeenCalledWith('+guestAccessTokenHash');
     expect(res.items[0].price).toBe(50);
   });
 
   it('rejects cross-order access', async () => {
     const tokenA = 'a'.repeat(64);
-    const hashA = crypto.createHash('sha256').update(tokenA).digest('hex');
-    orderModel.findOne.mockResolvedValue({
+    const tokenB = 'b'.repeat(64);
+    const hashB = crypto.createHash('sha256').update(tokenB).digest('hex');
+    const select = jest.fn().mockResolvedValue({
       _id: 'o2',
       orderNumber: 'ORD-2',
-      guestAccessTokenHash: hashA,
+      guestAccessTokenHash: hashB,
       guestAccessTokenExpiresAt: new Date(Date.now() + 100000),
     });
-    await expect(service.findGuestOrder('ORD-2', 'b'.repeat(64))).rejects.toBeInstanceOf(NotFoundException);
+    orderModel.findOne.mockReturnValue({ select });
+    await expect(service.findGuestOrder('ORD-2', tokenA)).rejects.toBeInstanceOf(NotFoundException);
+  });
+
+  it('explicitly selects hash for guest verification', async () => {
+    const token = 'c'.repeat(64);
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+    const select = jest.fn().mockResolvedValue({
+      _id: 'o3',
+      orderNumber: 'ORD-3',
+      status: 'Pending',
+      total: 1,
+      createdAt: new Date(),
+      guestAccessTokenHash: hash,
+      guestAccessTokenExpiresAt: new Date(Date.now() + 100000),
+    });
+    orderModel.findOne.mockReturnValue({ select });
+    orderItemModel.find.mockReturnValue({ populate: jest.fn().mockResolvedValue([]) });
+    await service.findGuestOrder('ORD-3', token);
+    expect(orderModel.findOne).toHaveBeenCalledWith({ orderNumber: 'ORD-3' });
+    expect(select).toHaveBeenCalledWith('+guestAccessTokenHash');
   });
 
   it('rejects incorrect token with generic 404', async () => {
     const hash = crypto.createHash('sha256').update('good').digest('hex');
-    orderModel.findOne.mockResolvedValue({
+    const select = jest.fn().mockResolvedValue({
       _id: 'o1', orderNumber: 'ORD-1', guestAccessTokenHash: hash,
       guestAccessTokenExpiresAt: new Date(Date.now() + 100000),
     });
+    orderModel.findOne.mockReturnValue({ select });
     await expect(service.findGuestOrder('ORD-1', 'bad')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('rejects incorrect order number with generic 404', async () => {
-    orderModel.findOne.mockResolvedValue(null);
+    const select = jest.fn().mockResolvedValue(null);
+    orderModel.findOne.mockReturnValue({ select });
     await expect(service.findGuestOrder('ORD-X', 't')).rejects.toBeInstanceOf(NotFoundException);
   });
 
   it('rejects expired token with generic 404', async () => {
     const token = 't';
     const hash = crypto.createHash('sha256').update(token).digest('hex');
-    orderModel.findOne.mockResolvedValue({
+    const select = jest.fn().mockResolvedValue({
       _id: 'o1', orderNumber: 'ORD-1', guestAccessTokenHash: hash,
       guestAccessTokenExpiresAt: new Date(Date.now() - 1000),
     });
+    orderModel.findOne.mockReturnValue({ select });
     await expect(service.findGuestOrder('ORD-1', token)).rejects.toBeInstanceOf(NotFoundException);
   });
 
