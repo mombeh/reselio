@@ -42,6 +42,12 @@ export class Order {
 
   @Prop()
   profit: number;
+
+  @Prop()
+  guestAccessTokenHash?: string;
+
+  @Prop()
+  guestAccessTokenExpiresAt?: Date;
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);

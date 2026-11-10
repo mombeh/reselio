@@ -6,6 +6,7 @@ import {
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Parser } from 'json2csv';
+import * as crypto from 'crypto';
 import { Order, OrderDocument } from './schemas/order.schema';
 import { OrderItem, OrderItemDocument } from './schemas/order-item.schema';
 import { Customer, CustomerDocument } from './schemas/customer.schema';
@@ -108,6 +109,14 @@ export class OrdersService {
     const total = subtotal;
     const profit = total - totalCost;
     const orderNumber = this.generateOrderNumber();
+    const guestAccessToken = crypto.randomBytes(32).toString('hex');
+    const guestAccessTokenHash = crypto
+      .createHash('sha256')
+      .update(guestAccessToken)
+      .digest('hex');
+    const guestAccessTokenExpiresAt = new Date(
+      Date.now() + 180 * 24 * 60 * 60 * 1000,
+    );
 
     const order = new this.orderModel({
       storeId: actualStoreId,
@@ -119,6 +128,8 @@ export class OrdersService {
       advancePaid: 0,
       balance: total,
       profit,
+      guestAccessTokenHash,
+      guestAccessTokenExpiresAt,
     });
     const savedOrder = await order.save();
 
@@ -135,7 +146,43 @@ export class OrdersService {
       referenceType: 'order',
     });
 
-    return { orderNumber: savedOrder.orderNumber, message: 'Order placed successfully' };
+    return {
+      orderNumber: savedOrder.orderNumber,
+      message: 'Order placed successfully',
+      guestAccessToken,
+    };
+  }
+
+
+  async findGuestOrder(orderNumber: string, token?: string) {
+    if (!token) {
+      throw new NotFoundException('Order not found');
+    }
+    const order = await this.orderModel.findOne({ orderNumber });
+    if (!order || !order.guestAccessTokenHash || !order.guestAccessTokenExpiresAt) {
+      throw new NotFoundException('Order not found');
+    }
+    if (order.guestAccessTokenExpiresAt.getTime() < Date.now()) {
+      throw new NotFoundException('Order not found');
+    }
+    const hash = crypto.createHash('sha256').update(token).digest('hex');
+    if (hash !== order.guestAccessTokenHash) {
+      throw new NotFoundException('Order not found');
+    }
+    const items = await this.orderItemModel
+      .find({ orderId: order._id })
+      .populate('productId', 'name price');
+    return {
+      orderNumber: order.orderNumber,
+      status: order.status,
+      date: (order as any).createdAt,
+      total: order.total,
+      items: items.map((i: any) => ({
+        name: i.productId?.name || 'Item',
+        quantity: i.quantity,
+        price: i.unitPrice ?? i.productId?.price,
+      })),
+    };
   }
 
   private generateOrderNumber(): string {

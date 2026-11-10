@@ -10,6 +10,8 @@ import {
   Res,
   Delete,
   Query,
+  Headers,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ThrottlerGuard } from '@nestjs/throttler';
@@ -148,6 +150,16 @@ export class OrdersController {
       limit,
       search,
     });
+  }
+
+  @UseGuards(ThrottlerGuard)
+  @Throttle({ default: { limit: 10, ttl: 60000 } })
+  @Get('guest/:orderNumber')
+  findGuestOrder(
+    @Param('orderNumber') orderNumber: string,
+    @Headers('x-guest-access-token') token?: string,
+  ) {
+    return this.ordersService.findGuestOrder(orderNumber, token);
   }
 
   @UseGuards(AuthGuard('jwt'))
