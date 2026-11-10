@@ -166,7 +166,9 @@ export class OrdersService {
       throw new NotFoundException('Order not found');
     }
     const hash = crypto.createHash('sha256').update(token).digest('hex');
-    if (hash !== order.guestAccessTokenHash) {
+    const a = Buffer.from(hash, 'hex');
+    const b = Buffer.from(order.guestAccessTokenHash, 'hex');
+    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) {
       throw new NotFoundException('Order not found');
     }
     const items = await this.orderItemModel
@@ -180,7 +182,7 @@ export class OrdersService {
       items: items.map((i: any) => ({
         name: i.productId?.name || 'Item',
         quantity: i.quantity,
-        price: i.unitPrice ?? i.productId?.price,
+        price: i.unitPrice,
       })),
     };
   }
