@@ -62,6 +62,7 @@ export default function StorePage() {
 
   const submit = async () => {
     setSubmitError(null);
+    setPersistWarning(null);
     if (!fullName.trim() || !phone.trim()) {
       setSubmitError('Full name and phone number are required.');
       return;
