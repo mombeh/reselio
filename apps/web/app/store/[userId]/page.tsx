@@ -25,7 +25,8 @@ export default function StorePage() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-  const [confirmation, setConfirmation] = useState<GuestOrderResponse | null>(null);
+  type Confirmation = { orderNumber: string; message: string };
+  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
   const [persistWarning, setPersistWarning] = useState<string | null>(null);
 
   useEffect(() => {
@@ -88,7 +89,7 @@ export default function StorePage() {
       } catch {
         setPersistWarning('Order history could not be saved on this device.');
       }
-      setConfirmation(res);
+      setConfirmation({ orderNumber: res.orderNumber, message: res.message });
       setSelection([]);
       setView('catalog');
     } catch (e) {
