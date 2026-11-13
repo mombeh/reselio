@@ -26,6 +26,7 @@ export default function StorePage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [confirmation, setConfirmation] = useState<GuestOrderResponse | null>(null);
+  const [persistWarning, setPersistWarning] = useState<string | null>(null);
 
   useEffect(() => {
     (async () => {
@@ -75,6 +76,18 @@ export default function StorePage() {
         items: selection.map((s) => ({ productId: s.product._id, quantity: s.quantity })),
         guest: { fullName, phoneNumber: phone, email: email || undefined, address: address || undefined, notes: notes || undefined },
       });
+      try {
+        const persistRes = await fetch('/api/guest-orders', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ orderNumber: res.orderNumber, guestAccessToken: res.guestAccessToken }),
+        });
+        if (!persistRes.ok) {
+          setPersistWarning('Order history could not be saved on this device.');
+        }
+      } catch {
+        setPersistWarning('Order history could not be saved on this device.');
+      }
       setConfirmation(res);
       setSelection([]);
       setView('catalog');
@@ -95,6 +108,7 @@ export default function StorePage() {
         <h1>Order Confirmed</h1>
         <p>{confirmation.message}</p>
         <p>Order reference: <strong>{confirmation.orderNumber}</strong></p>
+        {persistWarning && <p style={{ color: 'red' }}>{persistWarning}</p>}
         <p>No payment has been processed.</p>
       </main>
     );
