@@ -12,6 +12,33 @@ function isValidToken(value: unknown): value is string {
   return typeof value === 'string' && /^[a-f0-9]{64}$/i.test(value);
 }
 
+function extractOrderNumbers(req: NextRequest): string[] {
+  const orderNumbers: string[] = [];
+  for (const [name] of req.cookies) {
+    if (!name.startsWith(ORDER_PREFIX)) continue;
+    const orderNumber = name.slice(ORDER_PREFIX.length);
+    if (isValidOrderNumber(orderNumber)) {
+      orderNumbers.push(orderNumber);
+    }
+  }
+  return orderNumbers;
+}
+
+export async function GET(req: NextRequest) {
+  const origin = req.headers.get('origin');
+  const host = req.headers.get('host');
+  const expectedOrigin = host ? `${req.nextUrl.protocol}//${host}` : req.nextUrl.origin;
+  if (!origin || origin !== expectedOrigin) {
+    return NextResponse.json({ ok: false }, { status: 403 });
+  }
+
+  const orderNumbers = extractOrderNumbers(req).slice(0, MAX_SAVED_ORDERS);
+  return NextResponse.json(
+    { orders: orderNumbers.map((orderNumber) => ({ orderNumber })) },
+    { status: 200 }
+  );
+}
+
 function countExistingOrders(req: NextRequest): number {
   let count = 0;
   for (const [name] of req.cookies) {
