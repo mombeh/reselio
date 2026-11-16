@@ -22,7 +22,7 @@ export async function fetchProducts(userId: string): Promise<Product[]> {
   return res.json();
 }
 
-export type GuestOrderResponse = { orderNumber: string; message: string };
+export type GuestOrderResponse = { orderNumber: string; message: string; guestAccessToken: string };
 
 export async function submitGuestOrder(payload: {
   storeId: string;
